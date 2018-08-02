@@ -1,0 +1,1 @@
+typeof require === "function" && require("/wrapper/tests/helpers/hacks.js");

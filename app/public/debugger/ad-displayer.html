@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+<head>
+    <title>Ad Displayer</title>
+
+    <script type="text/javascript" src="/public/debugger/js/external/polyfill.js"></script>
+    <script type="text/javascript" src="/public/debugger/js/external/jquery.js"></script>
+
+    <script type="text/javascript" src="/public/debugger/js/libs/utilities.js"></script>
+    <script type="text/javascript" src="/public/debugger/js/libs/config-helpers.js"></script>
+
+    <script type="text/javascript" src="/public/debugger/js/controllers/ad-displayer.js"></script>
+    <style>
+        .title {
+            margin-top: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <button id="button-display">Display Ads</button>
+        <button id="button-refresh">Refresh Ads</button>
+    </div>
+    <div class="title">Desktop Slot 1 - SafeFrame</div>
+    <div id="div-desktop-a"></div>
+    <div class="title">Desktop Slot 2 - Not SafeFrame</div>
+    <div id="div-desktop-b"></div>
+    <div class="title">Mobile Slot 1 - SafeFrame</div>
+    <div id="div-mobile-a"></div>
+    <div class="title">Mobile Slot 2 - Not SafeFrame</div>
+    <div id="div-mobile-b"></div>
+</body>
+</html>

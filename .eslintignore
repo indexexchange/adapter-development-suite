@@ -1,0 +1,4 @@
+app/public/debugger/js/external/
+app/public/debugger/js/polyfill.js
+app/public/debugger/js/wrapper/debug-wrapper.js
+app/public/tester/assets/

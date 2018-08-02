@@ -1,0 +1,45 @@
+{
+    "extends": [
+        "eslint-config-base/4.13.1/main",
+        "eslint-config-base/4.13.1/possible-errors",
+        "eslint-config-base/4.13.1/best-practices",
+        "eslint-config-base/4.13.1/strict-mode",
+        "eslint-config-base/4.13.1/variables",
+        "eslint-config-base/4.13.1/nodejs-and-commonjs",
+        "eslint-config-base/4.13.1/stylistic-issues"
+    ],
+
+    "parserOptions": {
+        "ecmaVersion": 5,
+
+        "sourceType": "script",
+
+        "ecmaFeatures": {
+            "impliedStrict": false
+        }
+    },
+
+    "env": {
+        "browser": true,
+        "jquery": true
+    },
+
+    "rules": {
+        "multiline-comment-style": ["error", "separate-lines"],
+        "require-jsdoc": ["off"],
+        "new-cap": ["off"],
+        "capitalized-comments": ["off"],
+        "newline-per-chained-call": [
+            "error",
+            {
+                "ignoreChainWithDepth": 2
+            }
+        ],
+        "no-inner-declarations": ["off"],
+        "no-magic-numbers": ["off"]
+    },
+
+    "globals": {
+        "Promise": true
+    }
+}

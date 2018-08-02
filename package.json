@@ -1,0 +1,26 @@
+{
+  "name": "adapter-test-suite",
+  "version": "1.0.0",
+  "description": "A tool to help debug and test adapters made for Index Exchange's wrapper.",
+  "main": "./bin/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/indexexchange/adapter-test-suite.git"
+  },
+  "author": "Index Exchange",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.16.3",
+    "metascript": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.13.1",
+    "eslint-config-base": "git+https://github.com/indexexchange/eslint-config-base.git"
+  },
+  "scripts": {
+    "start": "node ./bin/index.js",
+    "win-start": "node .\\bin\\index",
+    "lint": "node ./node_modules/eslint/bin/eslint.js --ignore-path .eslintignore .",
+    "win-lint": "node .\\node_modules\\eslint\\bin\\eslint.js --ignore-path .eslintignore ."
+  }
+}
