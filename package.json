@@ -1,11 +1,11 @@
 {
-  "name": "adapter-test-suite",
+  "name": "adapter-development-suite",
   "version": "0.0.9",
   "description": "A tool to help debug and test adapters made for Index Exchange's wrapper.",
   "main": "./bin/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/indexexchange/adapter-test-suite.git"
+    "url": "git+https://github.com/indexexchange/adapter-development-suite.git"
   },
   "author": "Index Exchange",
   "license": "See license in LICENSE.md",
