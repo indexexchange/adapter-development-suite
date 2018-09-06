@@ -1,6 +1,6 @@
 {
   "name": "adapter-test-suite",
-  "version": "1.0.0",
+  "version": "0.0.9",
   "description": "A tool to help debug and test adapters made for Index Exchange's wrapper.",
   "main": "./bin/index.js",
   "repository": {
@@ -8,7 +8,8 @@
     "url": "git+https://github.com/indexexchange/adapter-test-suite.git"
   },
   "author": "Index Exchange",
-  "license": "UNLICENSED",
+  "license": "See license in LICENSE.md",
+  "private": true,
   "dependencies": {
     "express": "^4.16.3",
     "metascript": "^1.0.0"
