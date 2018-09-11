@@ -7,7 +7,7 @@
 
 .*
 
-# Ignore all files with the extention ".log" or ".logs".
+# Ignore all files with the extension ".log" or ".logs".
 # ------------------------------------------------------------------------------
 
 *.log
