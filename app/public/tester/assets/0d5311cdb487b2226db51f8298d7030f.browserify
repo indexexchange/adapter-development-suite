@@ -3243,7 +3243,7 @@ describe('System Tests: Partner', function () {
                     // Parse request URL into a manageable object.
                     var request = UrlParse(xhr.url, true);
 
-                    window.testCases.validateRequest(request);
+                    window.testCases.validateBidRequest(request);
 
                     done();
 
