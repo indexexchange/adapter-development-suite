@@ -3345,7 +3345,7 @@ describe('System Tests: Partner', function () {
 
         it('should fire render pixel correctly', function (done) {
 
-            if (window.testCases.getPixelRequests) {
+            if (window.testCases.getPixelRequestRegex) {
 
                 // Load GPT library.
                 gptPage.ready().then(function () {
@@ -3371,7 +3371,7 @@ describe('System Tests: Partner', function () {
 
                         });
 
-                    var pixelRequests = window.testCases.getPixelRequests();
+                    var pixelRequests = window.testCases.getPixelRequestRegex();
                     var promises = [];
 
                     for (var pixelRequest in pixelRequests) {
