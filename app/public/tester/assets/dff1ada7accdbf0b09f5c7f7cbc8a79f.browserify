@@ -855,7 +855,7 @@ function noop(){}function Promise(e){if("object"!=typeof this)throw new TypeErro
 },{"browser.js":"/wrapper/src/libs/browser.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/libs/network.js":[function(require,module,exports){
 "use strict";function Network(){function e(){return a}function t(e){var t="";for(var r in e)if(e.hasOwnProperty(r))if(Utilities.isObject(e[r]))for(var n in e[r])e[r].hasOwnProperty(n)&&(t+=r+"%5B"+n+"%5D="+encodeURIComponent(e[r][n])+"&");else if(Utilities.isArray(e[r]))for(var i=0;i<e[r].length;i++)t+=r+"%5B%5D="+encodeURIComponent(e[r][i])+"&";else t+=r+"="+encodeURIComponent(e[r])+"&";return t.slice(0,-1)}function r(e,r,n){return"/"!==e[e.length-1]&&r&&(e+="/"),r=r||[],Utilities.isObject(n)&&(n=t(n)),n=n?"?"+n:"",e+r.join("/")+n}function n(e){var n,i=null,o=e.scope||window;if(e.useImgTag)n=o.document.createElement("img");else{n=o.document.createElement("script"),n.type="text/javascript";var a=!0;e.hasOwnProperty("async")&&(a=e.async),n.async=a}var s=e.url;if(e.data){var u;u=Utilities.isString(e.data)?e.data:t(e.data),s=r(e.url,null,u)}var c,l=!1,d=function(){try{if(l)return;l=!0,e.onTimeout&&e.onTimeout(),e.useImgTag||e.continueAfterTimeout||n.parentNode.removeChild(n)}catch(e){}};e.globalTimeout&&SpaceCamp.services.TimerService.addTimerCallback(e.sessionId,d),e.timeout&&(c=setTimeout(d,e.timeout));var m=function(){try{if(l){if(!e.continueAfterTimeout)return}else clearTimeout(c);e.onSuccess&&e.onSuccess(null,System.now(),l),l=!0,e.useImgTag||n.parentNode.removeChild(n)}catch(e){}};null===n.onload?n.onload=m:n.onreadystatechange=function(){"loaded"!==n.readyState&&"complete"!==n.readyState||(n.onreadystatechange=null,m())};var p=function(){try{if(l){if(!e.continueAfterTimeout)return}else clearTimeout(c),l=!0;e.onFailure&&e.onFailure(),e.useImgTag||n.parentNode.removeChild(n)}catch(e){}};if(n.onerror=p,i=System.now(),n.src=s,!e.useImgTag){var f=o.document.getElementsByTagName("script")[0];f?f.parentNode.insertBefore(n,f):UserAgentMatcher.msie||UserAgentMatcher.msedge||UserAgentMatcher.mozilla?o.onload=function(){o.document.body.appendChild(n)}:o.document.body.appendChild(n)}return i}function i(i){if(!e()){if(i.jsonp&&"GET"===i.method)return n(i);throw Whoopsie("INTERNAL_ERROR","XHR is not supported in this browser.")}var o=null,a=i.scope||window,s=new a.XMLHttpRequest,u=i.url,c=null;if(i.data)if("GET"===i.method){var l;l=Utilities.isString(i.data)?i.data:t(i.data),u=r(i.url,null,l)}else"POST"===i.method&&(c=Utilities.isString(i.data)?i.data:JSON.stringify(i.data));var d=!0;i.hasOwnProperty("async")&&(d=i.async),s.open(i.method,u,d);var m="application/x-www-form-urlencoded; charset=UTF-8";if(void 0!==i.contentType&&(m=i.contentType),m&&s.setRequestHeader("Content-Type",m),i.headers){i.headers.hasOwnProperty("X-Request-With")||s.setRequestHeader("X-Request-With","XMLHttpRequest");for(var p in i.headers)i.headers.hasOwnProperty(p)&&s.setRequestHeader(p,i.headers[p])}i.withCredentials&&(s.withCredentials=!0);var f,h=!1,y=function(){try{if(h)return;h=!0,i.onTimeout&&i.onTimeout()}catch(e){}};return i.globalTimeout&&SpaceCamp.services.TimerService.addTimerCallback(i.sessionId,y),i.timeout&&(i.continueAfterTimeout?f=setTimeout(y,i.timeout):(s.timeout=i.timeout,s.ontimeout=y)),(i.onSuccess||i.onFailure)&&(s.onreadystatechange=function(){if(4===s.readyState){if(h){if(!i.continueAfterTimeout)return}else clearTimeout(f),s.ontimeout=null;if(200===s.status){if(i.onSuccess)try{i.onSuccess(s.responseText,System.now(),h)}catch(e){}}else if(i.onFailure)try{i.onFailure(s.status)}catch(e){}h=!0}}),o=System.now(),s.send(c),o}function o(e){return e.useImgTag=!0,n(e)}var a;return function(){a=window.XMLHttpRequest&&"string"==typeof(new XMLHttpRequest).responseType}(),{ajax:i,jsonp:n,img:o,buildUrl:r,objToQueryString:t,isXhrSupported:e}}var SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),UserAgentMatcher=require("user-agent-matcher.js");module.exports=Network();
 },{"space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","user-agent-matcher.js":"/wrapper/src/libs/external/user-agent-matcher.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/libs/openrtb.js":[function(require,module,exports){
-"use strict";function OpenRtb(){function e(){if(!(this instanceof e))return new e;this.__bidRequest={id:Number(System.generateUniqueId(8,"NUM")),site:{page:""},imp:[]},this.__impCount=0}function t(e){if(!(this instanceof t))return new t(e);try{this.__bidResponse=e}catch(e){throw Whoopsie("INTERNAL_ERROR","cannot parse `bidResponse`")}}return e.prototype.setPage=function(e){this.__bidRequest.site.page=e},e.prototype.setRef=function(e){this.__bidRequest.site.ref=e},e.prototype.getId=function(){return this.__bidRequest.id},e.prototype.addImp=function(e,t,s,i){var r=String(++this.__impCount);return this.__bidRequest.imp.push({banner:e,ext:t,id:r,bidfloor:s,bidfloorcur:i}),r},e.prototype.addUserEid=function(e){this.__bidRequest.user=this.__bidRequest.user||{},this.__bidRequest.user.eids=this.__bidRequest.user.eids||[],this.__bidRequest.user.eids.push(e)},e.prototype.setGdprConsent=function(e,t){this.__bidRequest.regs=this.__bidRequest.regs||{},this.__bidRequest.regs.ext=this.__bidRequest.regs.ext||{},this.__bidRequest.regs.ext.gdpr=e?1:0,this.__bidRequest.user=this.__bidRequest.user||{},this.__bidRequest.user.ext=this.__bidRequest.user.ext||{},this.__bidRequest.user.ext.consent=t||""},e.prototype.setExt=function(e){this.__bidRequest.ext=e},e.prototype.stringify=function(){return JSON.stringify(this.__bidRequest)},t.prototype.__parseBid=function(e,t){var s={};e.hasOwnProperty("impid")&&(s.impid=e.impid),e.hasOwnProperty("price")&&(s.price=e.price),e.hasOwnProperty("adm")&&(s.adm=e.adm),e.hasOwnProperty("ext")&&(s.ext=e.ext),e.hasOwnProperty("dealid")&&(s.dealid=e.dealid),e.hasOwnProperty("nurl")&&(s.nurl=e.nurl),e.hasOwnProperty("nbr")&&(s.nbr=e.nbr),e.hasOwnProperty("w")&&(s.w=e.w),e.hasOwnProperty("h")&&(s.h=e.h),t.push(s)},t.prototype.getId=function(){return this.__bidResponse.id},t.prototype.getCur=function(){return this.__bidResponse.cur||"USD"},t.prototype.getBids=function(){var e,t,s=[];if(!this.__bidResponse.hasOwnProperty("seatbid"))return s;t=this.__bidResponse.seatbid;for(var i=0;i<t.length;i++)if(t[i].hasOwnProperty("bid")){e=t[i].bid;for(var r=0;r<e.length;r++)this.__parseBid(e[r],s)}return s},{BidRequest:e,BidResponse:t}}var Constants=require("constants.js"),System=require("system.js"),Whoopsie=require("whoopsie.js");module.exports=OpenRtb();
+"use strict";function OpenRtb(){function e(){if(!(this instanceof e))return new e;this.__bidRequest={id:Number(System.generateUniqueId(8,"NUM")),site:{page:""},imp:[]},this.__impCount=0}function t(e){if(!(this instanceof t))return new t(e);try{this.__bidResponse=e}catch(e){throw Whoopsie("INTERNAL_ERROR","cannot parse `bidResponse`")}}return e.prototype.setPage=function(e){this.__bidRequest.site.page=e},e.prototype.setRef=function(e){this.__bidRequest.site.ref=e},e.prototype.getId=function(){return this.__bidRequest.id},e.prototype.addImp=function(e,t,s,i){var r=String(++this.__impCount);return this.__bidRequest.imp.push({banner:e,ext:t,id:r,bidfloor:s,bidfloorcur:i}),r},e.prototype.addUserEid=function(e){this.__bidRequest.user=this.__bidRequest.user||{},this.__bidRequest.user.eids=this.__bidRequest.user.eids||[],this.__bidRequest.user.eids.push(e)},e.prototype.setGdprConsent=function(e,t){this.__bidRequest.regs=this.__bidRequest.regs||{},this.__bidRequest.regs.ext=this.__bidRequest.regs.ext||{},this.__bidRequest.regs.ext.gdpr=e?1:0,this.__bidRequest.user=this.__bidRequest.user||{},this.__bidRequest.user.ext=this.__bidRequest.user.ext||{},this.__bidRequest.user.ext.consent=t||""},e.prototype.setExt=function(e){this.__bidRequest.ext=e},e.prototype.stringify=function(){return JSON.stringify(this.__bidRequest)},t.prototype.__parseBid=function(e,t){var s={};e.hasOwnProperty("impid")&&(s.impid=e.impid),e.hasOwnProperty("price")&&(s.price=e.price),e.hasOwnProperty("adm")&&(s.adm=e.adm),e.hasOwnProperty("ext")&&(s.ext=e.ext),e.hasOwnProperty("dealid")&&(s.dealid=e.dealid),e.hasOwnProperty("nurl")&&(s.nurl=e.nurl),e.hasOwnProperty("nbr")&&(s.nbr=e.nbr),e.hasOwnProperty("w")&&(s.w=e.w),e.hasOwnProperty("h")&&(s.h=e.h),t.push(s)},t.prototype.getId=function(){return this.__bidResponse.id},t.prototype.getCur=function(){return this.__bidResponse.cur||"USD"},t.prototype.getExt=function(){return this.__bidResponse.ext},t.prototype.getBids=function(){var e,t,s=[];if(!this.__bidResponse.hasOwnProperty("seatbid"))return s;t=this.__bidResponse.seatbid;for(var i=0;i<t.length;i++)if(t[i].hasOwnProperty("bid")){e=t[i].bid;for(var r=0;r<e.length;r++)this.__parseBid(e[r],s)}return s},{BidRequest:e,BidResponse:t}}var Constants=require("constants.js"),System=require("system.js"),Whoopsie=require("whoopsie.js");module.exports=OpenRtb();
 },{"constants.js":"/wrapper/src/libs/constants.js","system.js":"/wrapper/src/libs/system.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/libs/openrtb2_5.js":[function(require,module,exports){
 "use strict";function OpenRtb(){function e(){if(!(this instanceof e))return new e;this.__bidRequest={id:System.generateUniqueId(8,"NUM"),site:{page:""},imp:[]},this.__impCount=0}function t(e){if(!(this instanceof t))return new t(e);this.__bidResponse=e}return e.prototype.setPage=function(e){this.__bidRequest.site.page=e},e.prototype.setRef=function(e){this.__bidRequest.site.ref=e},e.prototype.setSiteId=function(e){this.__bidRequest.site.id=e},e.prototype.setPublisher=function(e){this.__bidRequest.site.publisher=e},e.prototype.setSiteExt=function(e){this.__bidRequest.site.ext=e},e.prototype.deviceTypeMapping={desktop:2,mobile:4,tablet:5},e.prototype.setDeviceType=function(e){this.__bidRequest.device=this.__bidRequest.device||{},this.__bidRequest.device.devicetype=this.deviceTypeMapping[e]?this.deviceTypeMapping[e]:e},e.prototype.setSource=function(e){this.__bidRequest.source=e},e.prototype.setTmax=function(e){this.__bidRequest.tmax=e},e.prototype.setAuctionType=function(e){this.__bidRequest.at=e},e.prototype.setExt=function(e){this.__bidRequest.ext=e},e.prototype.setTest=function(){this.__bidRequest.test=1},e.prototype.getId=function(){return this.__bidRequest.id},e.prototype.addImp=function(e){return e.id||(e.id=String(++this.__impCount)),this.__bidRequest.imp.push(e),e.id},e.prototype.setImps=function(e){this.__bidRequest.imp=e},e.prototype.setGdprConsent=function(e,t){this.__bidRequest.regs=this.__bidRequest.regs||{},this.__bidRequest.regs.ext=this.__bidRequest.regs.ext||{},this.__bidRequest.regs.ext.gdpr=e?1:0,this.__bidRequest.user=this.__bidRequest.user||{},this.__bidRequest.user.ext=this.__bidRequest.user.ext||{},this.__bidRequest.user.ext.consent=t||""},e.prototype.stringify=function(){return JSON.stringify(this.__bidRequest)},t.prototype.__parseBid=function(e,t){var i={};e.hasOwnProperty("impid")&&(i.impid=e.impid),e.hasOwnProperty("price")&&(i.price=e.price),e.hasOwnProperty("adm")&&(i.adm=e.adm),e.hasOwnProperty("ext")&&(i.ext=e.ext),e.hasOwnProperty("dealid")&&(i.dealid=e.dealid),e.hasOwnProperty("nurl")&&(i.nurl=e.nurl),e.hasOwnProperty("nbr")&&(i.nbr=e.nbr),e.hasOwnProperty("w")&&(i.w=e.w),e.hasOwnProperty("h")&&(i.h=e.h),t.push(i)},t.prototype.getId=function(){return this.__bidResponse.id},t.prototype.getCur=function(){return this.__bidResponse.cur||"USD"},t.prototype.getBids=function(){var e,t,i=[];if(!this.__bidResponse.hasOwnProperty("seatbid"))return i;t=this.__bidResponse.seatbid;for(var s=0;s<t.length;s++)if(t[s].hasOwnProperty("bid")){e=t[s].bid;for(var r=0;r<e.length;r++)this.__parseBid(e[r],i)}return i},{BidRequest:e,BidResponse:t}}var Constants=require("constants.js"),System=require("system.js"),Whoopsie=require("whoopsie.js");module.exports=OpenRtb();
 },{"constants.js":"/wrapper/src/libs/constants.js","system.js":"/wrapper/src/libs/system.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/libs/scribe.js":[function(require,module,exports){
@@ -886,7 +886,11 @@ function noop(){}function Promise(e){if("object"!=typeof this)throw new TypeErro
 "use strict";function GptRetrieveAndSetTargeting(e,r,t){function i(e){var i=s.mapHtSlots(e);if(0===i.length)return EventsService.emit("warning","no valid header tag slots found in call to retrieveDemand"),Prms.resolve();var c=TimerService.createTimer(r.globalTimeout,!0);return TimerService.addTimerCallback(c,function(){EventsService.emit("global_timeout_reached",{sessionId:c})}),EventsService.emit("hs_session_start",{sessionId:c}),t(c,i).then(function(e){n.clearTargeting(i),a.setTargeting(c,e),EventsService.emit("hs_session_end",{sessionId:c})})}var s,n,a;return function(){EventsService=SpaceCamp.services.EventsService,TimerService=SpaceCamp.services.TimerService,s=GptMapSlots(e,r),n=GptClearTargeting(e,r),a=GptSetTargeting(e,r)}(),{retrieveAndSetTargeting:i}}var GptHelper=require("gpt-helper.js"),Prms=require("prms.js"),SpaceCamp=require("space-camp.js"),Whoopsie=require("whoopsie.js"),GptMapSlots=require("gpt-map-slots.js"),GptClearTargeting=require("gpt-clear-targeting.js"),GptSetTargeting=require("gpt-set-targeting.js"),TimerService,EventsService;module.exports=GptRetrieveAndSetTargeting;
 },{"gpt-clear-targeting.js":"/wrapper/src/modules/gpt-layer/gpt-clear-targeting.js","gpt-helper.js":"/wrapper/src/libs/gpt-helper.js","gpt-map-slots.js":"/wrapper/src/modules/gpt-layer/gpt-map-slots.js","gpt-set-targeting.js":"/wrapper/src/modules/gpt-layer/gpt-set-targeting.js","prms.js":"/wrapper/src/libs/external/prms.js","space-camp.js":"/wrapper/src/space-camp.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/modules/gpt-layer/gpt-set-targeting.js":[function(require,module,exports){
 "use strict";function GptSetTargeting(e,t){function r(e,r){for(var i=0;i<r.length;i++)if(!r[i].pass&&r[i].targeting&&!Utilities.isEmpty(r[i].targeting)){"slot"===r[i].targetingType&&EventsService.emit("hs_slot_kv_pushed",{sessionId:e,statsId:r[i].partnerStatsId,htSlotId:r[i].htSlot.getId(),requestId:r[i].requestId,xSlotNames:[r[i].xSlotName]});var s,a=r[i].targeting;for(var g in a)if(a.hasOwnProperty(g))if("page"===r[i].targetingType)s=t.pageDemandHistory,s[g]=s[g]||{},s[g]=!0,window.googletag.pubads().setTargeting(g,a[g]);else{var n=r[i].ref,o=n.getSlotElementId();s=t.gSlotDemandHistory,s[o]=s[o]||{},s[o][g]=!0,n.setTargeting(g,n.getTargeting(g).concat(a[g]))}}}return function(){EventsService=SpaceCamp.services.EventsService,t.gSlotDemandHistory=t.gSlotDemandHistory||{},t.pageDemandHistory=t.pageDemandHistory||{}}(),{setTargeting:r}}var GptHelper=require("gpt-helper.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),EventsService;module.exports=GptSetTargeting;
-},{"gpt-helper.js":"/wrapper/src/libs/gpt-helper.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/modules/partners-layer/dynamic-partner-loader/dynamic-partner-loader.js":[function(require,module,exports){
+},{"gpt-helper.js":"/wrapper/src/libs/gpt-helper.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/modules/identity-layer/adserver-org-ip/adserver-org-ip-validator.js":[function(require,module,exports){
+"use strict";var Inspector=require("../../../libs/external/schema-inspector.js"),partnerValidator=function(r){var e=Inspector.validate({type:"object",strict:!0,properties:{publisherId:{type:"number"}}},r);return e.valid?null:e.format()};module.exports=partnerValidator;
+},{"../../../libs/external/schema-inspector.js":"/wrapper/src/libs/external/schema-inspector.js"}],"/wrapper/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js":[function(require,module,exports){
+"use strict";function AdserverOrgIp(e){function t(e){c={source:d,uids:[]};for(var t in e)e.hasOwnProperty(t)&&c.uids.push({id:e[t],ext:{rtiPartner:t}})}function r(){return i.statsId}function s(){return c}function a(){return new Prms(function(e){var r=Cache.getData(u);if(r){EventsService.emit("hs_identity_cached",{statsId:i.statsId});var s;return"match"===r.response?(s="hs_identity_response",t(r.data)):s="pass"===r.response?"hs_identity_pass":"hs_identity_error",EventsService.emit(s,{statsId:i.statsId}),void e()}EventsService.emit("hs_identity_request",{statsId:i.statsId}),Network.ajax({url:n,data:{ttd_pid:"casale",fmt:"json",p:o},method:"GET",withCredentials:!0,onSuccess:function(r){var s;try{s=JSON.parse(r)}catch(t){return EventsService.emit("hs_identity_error",{statsId:i.statsId}),Cache.setData(u,{response:"error"},i.features.identityDataExpiry.error),void e()}if(!s.hasOwnProperty("TDID"))return EventsService.emit("hs_identity_error",{statsId:i.statsId}),Cache.setData(u,{response:"error"},i.features.identityDataExpiry.error),void e();EventsService.emit("hs_identity_response",{statsId:i.statsId}),t(s),Cache.setData(u,{response:"match",data:s},i.features.identityDataExpiry.match),e()},onFailure:function(t){EventsService.emit("hs_identity_error",{statsId:i.statsId}),Cache.setData(u,{response:"error"},i.features.identityDataExpiry.error),e()}})})}if(!Network.isXhrSupported())return null;var i,n,o,d,c,u;return function(){EventsService=SpaceCamp.services.EventsService,i={partnerId:"AdserverOrgIp",statsId:"ADSORG",version:"1.0.0",features:{identityDataExpiry:{match:6048e5,pass:864e5,error:864e5}}},n=Browser.getProtocol()+"//match.adsrvr.org/track/rid",o=e.publisherId,d="adserver.org",u="AdserverOrgIp",c=null}(),{__profile:i,__baseUrl:n,__identityStore:c,__setIdentityData:t,getStatsId:r,getResults:s,retrieve:a}}var Browser=require("browser.js"),Cache=require("cache.js"),Network=require("network.js"),Prms=require("prms.js"),SpaceCamp=require("space-camp.js"),Whoopsie=require("whoopsie.js"),EventsService;module.exports=AdserverOrgIp;
+},{"browser.js":"/wrapper/src/libs/browser.js","cache.js":"/wrapper/src/libs/cache.js","network.js":"/wrapper/src/libs/network.js","prms.js":"/wrapper/src/libs/external/prms.js","space-camp.js":"/wrapper/src/space-camp.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/modules/partners-layer/dynamic-partner-loader/dynamic-partner-loader.js":[function(require,module,exports){
 "use strict";function DynamicPartnerLoader(e){function r(e){return-1!==e.indexOf("validator.js")?System.noOp:c[e]}function s(){var e=window.adapter.configs,s={exports:{}};window.adapter.bidder(r,s,s.exports),n=s.exports(e)}function t(e,r){return n.retrieve(e,r)}var i,a,n,c={"browser.js":require("browser.js"),"cache.js":require("cache.js"),"classify.js":require("classify.js"),"command-queue.js":require("command-queue.js"),"config-validators.js":require("config-validators.js"),"constants.js":require("constants.js"),"device-type-checker.js":require("device-type-checker.js"),"network.js":require("network.js"),"openrtb.js":require("openrtb.js"),"openrtb2_5.js":require("openrtb2_5.js"),"partner.js":require("partner.js"),"scribe.js":require("scribe.js"),"size.js":require("size.js"),"space-camp.js":require("space-camp.js"),"system.js":require("system.js"),"utilities.js":require("utilities.js"),"whoopsie.js":require("whoopsie.js")};!function(){i={partnerId:"DynamicPartnerLoader",namespace:"DynamicPartnerLoader",statsId:"DYNLDR",version:"1.0.0",targetingType:"slot",enabledAnalytics:{requestTime:!0},features:{demandExpiry:{enabled:!1,value:0},rateLimiting:{enabled:!1,value:0}},targetingKeys:{id:"ix_dyn_id",om:"ix_dyn_cpm",pm:"ix_dyn_cpm",pmid:"ix_dyn_dealid"},bidUnitInCents:1,lineItemType:Constants.LineItemTypes.ID_AND_SIZE,callbackType:Partner.CallbackTypes.ID,architecture:Partner.Architectures.SRA,requestType:Partner.RequestTypes.ANY},s();var r=n.getPartnerId();i.namespace=r,a=Partner(i,e,null,{retriever:t});var c=n.getDirectInterface();if(c.hasOwnProperty(r))for(var o in c[r])c[r].hasOwnProperty(o)&&a._addToDirectInterface(o,c[r][o])}();var o={__baseClass:a,profile:i};return Classify.derive(a,o)}var Classify=require("classify.js"),Constants=require("constants.js"),Partner=require("partner.js"),System=require("system");module.exports=DynamicPartnerLoader;
 },{"browser.js":"/wrapper/src/libs/browser.js","cache.js":"/wrapper/src/libs/cache.js","classify.js":"/wrapper/src/libs/classify.js","command-queue.js":"/wrapper/src/libs/command-queue.js","config-validators.js":"/wrapper/src/libs/config-validators.js","constants.js":"/wrapper/src/libs/constants.js","device-type-checker.js":"/wrapper/src/libs/device-type-checker.js","network.js":"/wrapper/src/libs/network.js","openrtb.js":"/wrapper/src/libs/openrtb.js","openrtb2_5.js":"/wrapper/src/libs/openrtb2_5.js","partner.js":"/wrapper/src/modules/partners-layer/partner.js","scribe.js":"/wrapper/src/libs/scribe.js","size.js":"/wrapper/src/libs/size.js","space-camp.js":"/wrapper/src/space-camp.js","system":"/wrapper/src/libs/system.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/modules/partners-layer/partner.js":[function(require,module,exports){
 "use strict";function Partner(e,t,r,n){function a(e){return function(t){C[e]=t,delete k[e]}}function i(e,t,r){for(var n in r)if(r.hasOwnProperty(n))for(var a in r[n])r[n].hasOwnProperty(a)&&r[n][a].length&&EventsService.emit(t,{sessionId:e,statsId:y.statsId,htSlotId:n,requestId:a,xSlotNames:r[n][a]})}function s(e,r){var n={};return"price"===e&&(n={outputCentsDivisor:1,outputPrecision:0,roundingType:"NONE"}),Utilities.mergeObjects(O[e],{bidUnitInCents:y.bidUnitInCents},r||{},t.bidTransformer||{},n)}function o(e){var t=[];y.architecture===Partner.Architectures.FSRA&&t.push([]);for(var r={},n=0;n<e.length;n++){var a=e[n].htSlot.getName();if(_.mapping.hasOwnProperty(a))for(var i="_"+System.generateUniqueId(),s=0;s<_.mapping[a].length;s++){var o={},u=_.mapping[a][s];o.partnerId=y.partnerId,o.partnerStatsId=y.statsId,o.htSlot=e[n].htSlot,o.ref=e[n].ref,o.xSlotRef=_.xSlots[u],o.xSlotName=u,o.requestId=i,e[n].firstPartyData&&(o.firstPartyData=e[n].firstPartyData),e[n].identityData&&(o.identityData=e[n].identityData),y.architecture===Partner.Architectures.MRA?t.push([o]):y.architecture===Partner.Architectures.FSRA?t[0].push(o):(r.hasOwnProperty(u)||(r[u]=0),t.length<r[u]+1&&t.push([]),t[r[u]].push(o),r[u]++)}}return t}function u(e,t){if(0===t.length)return Prms.resolve([]);var r=b(t,e);y.callbackType===Partner.CallbackTypes.CALLBACK_NAME&&(k[r.callbackId]=a(r.callbackId));var n={};if(y.enabledAnalytics.requestTime){for(var s=0;s<t.length;s++){var o=t[s],u=o.htSlot.getId(),p=o.requestId;n.hasOwnProperty(u)||(n[u]={}),n[u].hasOwnProperty(p)||(n[u][p]=[]),n[u][p].push(o.xSlotName)}i(e,"hs_slot_request",n)}return new Prms(function(a){EventsService.emit("partner_request_sent",{partner:y.partnerId});var s,o,u={url:r.url,data:r.data,method:"GET",timeout:_.timeout,withCredentials:!0,jsonp:!0,sessionId:e,globalTimeout:!0,continueAfterTimeout:!0,onSuccess:function(o,u,p){var c,l="success";try{y.callbackType===Partner.CallbackTypes.NONE?c=JSON.parse(o):(o&&eval.call(null,o),c=C[r.callbackId],delete C[r.callbackId]),p&&!y.parseAfterTimeout||T(e,c,t,n,s,u,p)}catch(t){EventsService.emit("internal_error",y.partnerId+" error parsing demand: "+t,t.stack),l="error",y.enabledAnalytics.requestTime&&!p&&i(e,"hs_slot_error",n)}EventsService.emit("partner_request_complete",{partner:y.partnerId,status:l}),a(t)},onTimeout:function(){EventsService.emit("partner_request_complete",{partner:y.partnerId,status:"timeout"}),y.enabledAnalytics.requestTime&&i(e,"hs_slot_timeout",n),a(t)},onFailure:function(){EventsService.emit("partner_request_complete",{partner:y.partnerId,status:"error"}),y.enabledAnalytics.requestTime&&i(e,"hs_slot_error",n),a(t)}};o=r.networkParamOverrides?Utilities.mergeObjects(u,r.networkParamOverrides):u,y.callbackType!==Partner.CallbackTypes.NONE&&y.requestType!==Partner.RequestTypes.AJAX||(o.jsonp=!1),s=y.requestType===Partner.RequestTypes.JSONP?Network.jsonp(o):Network.ajax(o)})}function p(e){q.push(e)}function c(){return h}function l(e){__directInterface={},__directInterface[y.namespace]=e}function m(e,t){__directInterface[y.namespace][e]=t}function d(){return y.partnerId}function v(){return __directInterface}function g(){return y.features.prefetchDisabled&&y.features.prefetchDisabled.enabled}function f(e,t){if(t=t.slice(),_.rateLimiting.enabled){var r=System.now();if("page"===y.targetingType){if(r<=P)return[];P=r+_.rateLimiting.value}else for(var n=t.length-1;n>=0;n--){var a=t[n].htSlot.getName();I.hasOwnProperty(a)&&r<=I[a]?t.splice(n,1):I[a]=r+_.rateLimiting.value}}if(!t.length)return[];if(S)return S(e,t);for(var i=o(t),s=[],p=0;p<i.length;p++)s.push(u(e,i[p]));return s}var y,h,P,I,__directInterface,S,b,T,O,_,q,C,A,w,k;return function(){if(EventsService=SpaceCamp.services.EventsService,RenderService=SpaceCamp.services.RenderService,O={targeting:{bidUnitInCents:1,outputCentsDivisor:1,outputPrecision:0,roundingType:"FLOOR",floor:0,buckets:[{max:2e3,step:5},{max:5e3,step:100}]},price:{bidUnitInCents:1}},y=e,P=0,I={},q=[],k={},C={},_={timeout:0,lineItemType:e.lineItemType,targetingKeys:e.targetingKeys,rateLimiting:e.features.rateLimiting},t.hasOwnProperty("timeout")&&t.timeout>0&&(_.timeout=t.timeout,EventsService.emit("hs_define_partner_timeout",{timeout:_.timeout,statsId:y.statsId})),t.hasOwnProperty("targetingKeyOverride"))for(var a in t.targetingKeyOverride)t.targetingKeyOverride.hasOwnProperty(a)&&_.targetingKeys.hasOwnProperty(a)&&(_.targetingKeys[a]=t.targetingKeyOverride[a]);if(t.hasOwnProperty("rateLimiting")&&(t.rateLimiting.hasOwnProperty("enabled")&&(_.rateLimiting.enabled=t.rateLimiting.enabled),t.rateLimiting.value&&(_.rateLimiting.value=t.rateLimiting.value)),t.hasOwnProperty("lineItemType")&&(_.lineItemType=Constants.LineItemTypes[t.lineItemType]),_.xSlots=t.xSlots,_.mapping=t.mapping,h=!1,r){Utilities.isArray(r)||(r=[r]);var i=[];r.map(function(e){var t=Prms.defer();i.push(t.promise),Network.jsonp({url:e,onSuccess:function(){t.resolve()}})}),Prms.all(i).then(function(){h=!0,EventsService.emit("partner_instantiated",{partner:y.partnerId}),q=CommandQueue(q)})}else EventsService.emit("partner_instantiated",{partner:y.partnerId}),h=!0;RenderService.registerPartner(y.partnerId,_.lineItemType,_.targetingKeys.id),A={},e.hasOwnProperty("bidUnitInCents")&&(A.targeting=BidTransformer(s("targeting")),A.price=BidTransformer(s("price"))),n.retriever?S=n.retriever:(T=n.parseResponse,b=n.generateRequestObj,w=n.adResponseCallback),__directInterface={},__directInterface.hasOwnProperty(y.namespace)||(__directInterface[y.namespace]={}),y.callbackType===Partner.CallbackTypes.ID?__directInterface[y.namespace].adResponseCallback=w:__directInterface[y.namespace].adResponseCallbacks=k}(),{_configs:_,_adResponseStore:C,_bidTransformers:A,_setDirectInterface:l,_addToDirectInterface:m,_generateReturnParcels:o,_emitStatsEvent:i,_pushToCommandQueue:p,_generateBidTransformerConfig:s,getPartnerId:d,getDirectInterface:v,getPrefetchDisabled:g,isReady:c,retrieve:f}}var BidTransformer=require("bid-transformer.js"),CommandQueue=require("command-queue.js"),Constants=require("constants.js"),Network=require("network.js"),Prms=require("prms.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),EventsService,RenderService;Partner.Architectures={MRA:0,SRA:1,FSRA:2},Partner.CallbackTypes={ID:0,CALLBACK_NAME:1,NONE:2},Partner.RequestTypes={ANY:0,AJAX:1,JSONP:2},module.exports=Partner;
@@ -3256,6 +3260,70 @@ describe('System Tests: Partner', function () {
 
     });
 
+    if (window.testCases.validateBidRequestWithPrivacy) {
+
+        it('should construct bid with privacy data correctly', function (done) {
+
+            // Load GPT library.
+            gptPage.ready().then(function () {
+
+                // Setup g-slots on the page.
+                setUpGSlots();
+
+                // Setup how the server handles the requests that are being filtered.
+                server.respondWith(XhrFilter.filters[partnerId].bidRequest.method,
+                    XhrFilter.filters[partnerId].bidRequest.urlRegex, function (xhr) {
+
+                        // Parse request URL into a manageable object.
+                        var request = UrlParse(xhr.url, true);
+
+                        window.testCases.validateBidRequestWithPrivacy(request);
+
+                        done();
+
+                    });
+
+                // Start the bidding process.
+                window.headertag.display('divIdA');
+
+            });
+
+        });
+
+    }
+
+    if (window.testCases.validateBidRequestWithAdSrvrOrg) {
+
+        it('should construct bid with adsrvr.org data correctly', function (done) {
+
+            // Load GPT library.
+            gptPage.ready().then(function () {
+
+                // Setup g-slots on the page.
+                setUpGSlots();
+
+                // Setup how the server handles the requests that are being filtered.
+                server.respondWith(XhrFilter.filters[partnerId].bidRequest.method,
+                    XhrFilter.filters[partnerId].bidRequest.urlRegex, function (xhr) {
+
+                        // Parse request URL into a manageable object.
+                        var request = UrlParse(xhr.url, true);
+
+                        window.testCases.validateBidRequestWithAdSrvrOrg(request);
+
+                        done();
+
+                    });
+
+                // Start the bidding process.
+                window.headertag.display('divIdA');
+
+            });
+
+        });
+
+    }
+
     describe('Open Market Bids', function () {
 
         it('should set targeting correctly', function (done) {
@@ -3343,9 +3411,9 @@ describe('System Tests: Partner', function () {
 
         });
 
-        it('should fire render pixel correctly', function (done) {
+        if (window.testCases.getPixelRequests) {
 
-            if (window.testCases.getPixelRequestRegex) {
+            it('should fire render pixel correctly', function (done) {
 
                 // Load GPT library.
                 gptPage.ready().then(function () {
@@ -3371,7 +3439,7 @@ describe('System Tests: Partner', function () {
 
                         });
 
-                    var pixelRequests = window.testCases.getPixelRequestRegex();
+                    var pixelRequests = window.testCases.getPixelRequests();
                     var promises = [];
 
                     for (var pixelRequest in pixelRequests) {
@@ -3417,13 +3485,9 @@ describe('System Tests: Partner', function () {
 
                 });
 
-            } else {
+            });
 
-                done();
-
-            }
-
-        });
+        }
 
         it('should log headerstats events correctly', function (done) {
 
@@ -3475,11 +3539,11 @@ describe('System Tests: Partner', function () {
 
     });
 
-    describe('Private Market Bids', function () {
+    if (window.testCases.getValidResponseWithDeal) {
 
-        it('should set targeting correctly', function (done) {
+        describe('Private Market Bids', function () {
 
-            if (window.testCases.getValidResponseWithDeal) {
+            it('should set targeting correctly', function (done) {
 
                 // Load GPT library.
                 gptPage.ready().then(function () {
@@ -3520,15 +3584,11 @@ describe('System Tests: Partner', function () {
 
                 });
 
-            } else {
-
-                done();
-
-            }
+            });
 
         });
 
-    });
+    }
 
     describe('Passes', function () {
 
