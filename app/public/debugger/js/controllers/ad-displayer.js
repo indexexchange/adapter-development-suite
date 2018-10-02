@@ -73,6 +73,35 @@
                 });
             };
 
+            var now = (new Date()).getTime();
+
+            if (configs.adsrvrOrg === 'enable') {
+                localStorage.setItem(
+                    'IXWRAPPERAdserverOrgIp',
+                    JSON.stringify({
+                        t: now,
+                        d: {
+                            response: 'match',
+                            data: {
+                                TDID: 'TEST_ADSRVR_ORG_STRING'
+                            }
+                        },
+                        e: now + 604800000
+                    })
+                );
+            } else {
+                localStorage.setItem(
+                    'IXWRAPPERAdserverOrgIp',
+                    JSON.stringify({
+                        t: now,
+                        d: {
+                            response: 'error'
+                        },
+                        e: now + 604800000
+                    })
+                );
+            }
+
             resolve();
         });
     }
