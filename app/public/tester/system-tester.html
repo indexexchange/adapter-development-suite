@@ -17,17 +17,18 @@
 </head>
 
 <body>
+    <!-- The scripts need to be at the end of body, so that some test running frameworks
+   (Angular Scenario, for example) need the body to be loaded so that it can insert its magic
+   into it. If it is before body, then it fails to find the body and crashes and burns in an epic
+   manner. -->
     <script src="/public/tester/assets/context.js"></script>
     <script src="/public/tester/assets/debug.js"></script>
     <script type="text/javascript">
-    window.__karma__.config = {
-        args: [],
-        useIframe: true,
-        runInParent: false,
-        captureConsole: false,
-        clearContext: false
-    };
+    // Configure our Karma
+    window.__karma__.config = { "args": [], "useIframe": true, "runInParent": false, "captureConsole": false, "clearContext": false };
 
+
+    // All served files with the latest timestamps
     window.__karma__.files = {
         '/base/node_modules/jasmine-core/lib/jasmine-core/jasmine.js': '0b1eaf7a13cae32191eadea482cfc96ae41fc22b',
         '/base/node_modules/karma-jasmine/lib/boot.js': '945a38bf4e45ad2770eb94868231905a04a0bd3e',
@@ -36,7 +37,7 @@
         '/base/node_modules/karma-jasmine-html-reporter/src/lib/html.jasmine.reporter.js': '4af523ab7bfaa86c4966fa332c4dc2bd2278b4cc',
         '/base/node_modules/karma-jasmine-html-reporter/src/lib/adapter.js': '9d2c71b931979c6194d209809111ee3a72cf149b',
         '/base/node_modules/sinon/pkg/sinon.js': '3466bb5639b16d4e61e2bd4a0284d156cf03783c',
-        '/absolute/var/folders/x3/bghtdvf53_b4hfgdrwy1n3mc0000gn/T/0d5311cdb487b2226db51f8298d7030f.browserify': '61d87fe045860d85067fcc950da45f765f733d3a',
+        '/absolute/var/folders/x3/bghtdvf53_b4hfgdrwy1n3mc0000gn/T/dff1ada7accdbf0b09f5c7f7cbc8a79f.browserify': 'e8b68466150bd6b2dff443f2f0c7e7b3f0111709',
         '/base/src/layers/direct-bidding-layer.js': '6a2d51d3b33d36b8ccb6830ba559fd259750e399',
         '/base/src/layers/gpt-layer.js': 'b8e0d4dbd8209c59c1fd75ec912c2c4a2cf5800c',
         '/base/src/layers/identity-layer.js': '34d4868361304b3062d298483ddd8a939e4e81d3',
@@ -79,6 +80,8 @@
         '/base/src/modules/gpt-layer/gpt-refresh.js': '0dfbb5f4117950042e209e7cb65182843f53274d',
         '/base/src/modules/gpt-layer/gpt-retrieve-and-set-targeting.js': '060f7c6412cccd74e9332d456bca99936aa0c744',
         '/base/src/modules/gpt-layer/gpt-set-targeting.js': 'efec84d8b89837bf05a2453cb1fe01494c6c5aea',
+        '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip-validator.js': 'f10d1c1a75a0e3177e494212cb5092ba88e25ff7',
+        '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js': '17b87c0e8b11a9a70c6f77da29c07c2cb658acd4',
         '/base/src/modules/partners-layer/dynamic-partner-loader/dynamic-partner-loader.js': 'aecef98fdf3eef3197fc3784bf7fe7b936f8b216',
         '/base/src/modules/partners-layer/partner.js': '91ec6f232b81371674da5ff0294c477454a61c4d',
         '/base/src/modules/partners-layer/prefetch.js': 'd6c431eeb167a9d6e371033a136087eb10813a2b',
@@ -126,15 +129,15 @@
         '/base/tests/specs/system/dfp-auto/partners/partner.spec.js': '9ae6abc6e8bff9901bec7cc32b69f9dbdbbfb3b3'
     };
     </script>
-    <link type="text/css" href="/public/tester/assets/jasmine.css" rel="stylesheet">
-
+    <!-- Dynamically replaced with <script> tags -->
     <script type="text/javascript" src="/public/tester/assets/jasmine.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/boot.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/adapter.js" crossorigin="anonymous"></script>
+    <link type="text/css" href="/public/tester/assets/jasmine.css" rel="stylesheet">
     <script type="text/javascript" src="/public/tester/assets/html.jasmine.reporter.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/adapter(1).js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/sinon.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/0d5311cdb487b2226db51f8298d7030f.browserify" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/public/tester/assets/dff1ada7accdbf0b09f5c7f7cbc8a79f.browserify" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/direct-bidding-layer.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/gpt-layer.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/identity-layer.js" crossorigin="anonymous"></script>
@@ -177,6 +180,8 @@
     <script type="text/javascript" src="/public/tester/assets/gpt-refresh.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/gpt-retrieve-and-set-targeting.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/gpt-set-targeting.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/public/tester/assets/adserver-org-ip-validator.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/public/tester/assets/adserver-org-ip.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/dynamic-partner-loader.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/partner.js" crossorigin="anonymous"></script>
     <script type="text/javascript" src="/public/tester/assets/prefetch.js" crossorigin="anonymous"></script>

@@ -7,6 +7,7 @@
         var configNameToSelector = {
             deviceType: 'input[name=radio-device-type]:checked',
             gdprApplies: 'input[name=radio-gdpr-applies]:checked',
+            adsrvrOrg: 'input[name=radio-adsrvr-org]:checked',
             singleRequest: 'input[name=radio-single-request]:checked',
             initialLoad: 'input[name=radio-initial-load]:checked',
             adapterConfig: 'textarea[name=textarea-adapter-config]',

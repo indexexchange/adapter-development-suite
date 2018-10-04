@@ -85,6 +85,20 @@ window.wrapper.configs = {
             }
         },
         {
+            layerId: 'IdentityLayer',
+            configs: {
+                timeout: 200,
+                partners: {
+                    AdserverOrgIp: {
+                        enabled: true,
+                        configs: {
+                            publisherId: 11111
+                        }
+                    }
+                }
+            }
+        },
+        {
             layerId: 'PartnersLayer',
             configs: {
                 partners: {
