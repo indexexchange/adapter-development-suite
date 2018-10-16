@@ -3242,6 +3242,7 @@ describe('System Tests: Partner', function () {
 
                     // Parse request URL into a manageable object.
                     var request = UrlParse(xhr.url, true);
+                    request.body = xhr.requestBody;
 
                     window.testCases.validateBidRequest(request);
 
@@ -3272,6 +3273,7 @@ describe('System Tests: Partner', function () {
 
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
+                        request.body = xhr.requestBody;
                         var response = window.testCases.getValidResponse(request);
 
                         xhr.respond(
@@ -3324,6 +3326,7 @@ describe('System Tests: Partner', function () {
 
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
+                        request.body = xhr.requestBody;
 
                         // Respond to the request.
                         var response = window.testCases.getValidResponse(request, checker.adm);
@@ -3359,6 +3362,7 @@ describe('System Tests: Partner', function () {
 
                             // Parse request URL into a manageable object.
                             var request = UrlParse(xhr.url, true);
+                            request.body = xhr.requestBody;
 
                             // Respond to the request.
                             var response = window.testCases.getValidResponse(request);
@@ -3393,6 +3397,7 @@ describe('System Tests: Partner', function () {
 
                                     // Parse request URL into a manageable object.
                                     var pixel = UrlParse(xhr.url, true);
+                                    request.body = xhr.requestBody;
 
                                     defer.resolve(pixel);
 
@@ -3439,6 +3444,7 @@ describe('System Tests: Partner', function () {
 
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
+                        request.body = xhr.requestBody;
                         var response = window.testCases.getValidResponse(request);
 
                         xhr.respond(
@@ -3493,6 +3499,8 @@ describe('System Tests: Partner', function () {
 
                             // Parse request URL into a manageable object.
                             var request = UrlParse(xhr.url, true);
+                            request.body = xhr.requestBody;
+
                             var response = window.testCases.getValidResponseWithDeal(request);
 
                             xhr.respond(
@@ -3584,6 +3592,8 @@ describe('System Tests: Partner', function () {
                     XhrFilter.filters[partnerId].bidRequest.urlRegex, function (xhr) {
 
                         var request = UrlParse(xhr.url, true);
+                        request.body = xhr.requestBody;
+
                         var response = window.testCases.getPassResponse(request);
 
                         xhr.respond(
