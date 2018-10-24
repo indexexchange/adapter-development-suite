@@ -1,1 +1,0 @@
-typeof require === "function" && require("/wrapper/tests/stubs/libs/size.stub.js");

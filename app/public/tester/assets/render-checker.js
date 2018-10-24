@@ -1,1 +1,0 @@
-typeof require === "function" && require("/wrapper/tests/helpers/render-checker.js");
