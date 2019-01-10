@@ -12,13 +12,23 @@ const Express = require('express');
 const MetaScript = require('metascript');
 
 const Router = Express.Router();
+const partnerName = require('../../bin/index');
 
 // =============================================================================
 // MAIN ////////////////////////////////////////////////////////////////////////
 // =============================================================================
 
 const cwd = Process.cwd();
-const fileNames = Fs.readdirSync(cwd);
+var dir = cwd;
+
+if (partnerName !== undefined) {
+    var partnerFolder = partnerName.replace(/\s/g, '').replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+
+    // We need to update this line after we know the exact name of mono repo
+    dir = Path.join(cwd.substring(0, cwd.lastIndexOf('mono-repo') + 'mono-repo'.length), partnerFolder);
+}
+
+const fileNames = Fs.readdirSync(dir);
 
 const productScopes = {
     'dfp-auto': {
@@ -118,13 +128,16 @@ const adapterFileTransforms = {
 function generateAdapterFile(productMode, fileType) {
     return new Promise((resolve, reject) => {
         const regex = adapterFileTransforms[fileType].fileNameRegex;
+        var found = false;
 
         for (const fileName of fileNames) {
             if (!regex.test(fileName)) {
                 continue;
             }
 
-            Fs.readFile(Path.join(cwd, fileName), 'utf8', (err, rawContents) => {
+            found = true;
+
+            Fs.readFile(Path.join(dir, fileName), 'utf8', (err, rawContents) => {
                 if (err) {
                     reject(err);
                 }
@@ -137,6 +150,10 @@ function generateAdapterFile(productMode, fileType) {
 
                 resolve(wrappedContents);
             });
+        }
+
+        if (found === false) {
+            console.log(fileType + ' file is missing and it\'s required');
         }
     });
 }
