@@ -1,6 +1,6 @@
 {
   "name": "adapter-development-suite",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A tool to help debug and test adapters made for Index Exchange's wrapper.",
   "main": "./bin/index.js",
   "repository": {
