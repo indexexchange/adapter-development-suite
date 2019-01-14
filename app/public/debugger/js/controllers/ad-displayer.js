@@ -19,6 +19,10 @@
                 resolve();
             };
 
+            script.onerror = function () {
+                alert(script.src.substring(script.src.lastIndexOf('/') + 1, script.src.lastIndexOf('.js')) + ' file is missing and it is required');
+            }
+
             var node = window.document.getElementsByTagName('script')[0];
             node.parentNode.insertBefore(script, node);
         });

@@ -17,7 +17,12 @@
 
     <script type="text/javascript" src="/public/debugger/js/controllers/adapter-debugger.js"></script>
 
-    <script type="text/javascript" src="/adapter/dfp-auto/validator.js"></script>
+    <script>
+        function displayErrorMessage(src) {
+            alert(src.substring(src.lastIndexOf('/') + 1, src.lastIndexOf('.js')) + ' file is missing and it is required');
+        }
+    </script>
+    <script onerror="displayErrorMessage(src)" type="text/javascript" src="/adapter/dfp-auto/validator.js"></script>
 </head>
 
 <body>
