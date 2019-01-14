@@ -16,12 +16,6 @@ const DEFAULT_SERVER_PORT = 5837;
 const DEFAULT_SECURE_SERVER_PORT = 5838;
 
 // =============================================================================
-// EXPORTS /////////////////////////////////////////////////////////////////////
-// =============================================================================
-
-module.exports = process.argv[2];
-
-// =============================================================================
 // MAIN ////////////////////////////////////////////////////////////////////////
 // =============================================================================
 
@@ -60,6 +54,10 @@ function onListeningHandler(addr, port) {
 
         debug(`Listening on ${bind}`);
     };
+}
+
+if (typeof process.argv[2] === 'undefined') {
+    console.log('Partner name is not provided, using files in the current folder');
 }
 
 const serverPort = DEFAULT_SERVER_PORT;
