@@ -1,4 +1,4 @@
-/* eslint-disable no-sync, no-magic-numbers */
+/* eslint-disable no-sync, no-magic-numbers, no-console */
 
 // =============================================================================
 // IMPORTS /////////////////////////////////////////////////////////////////////
@@ -24,10 +24,10 @@ if (typeof process.argv[2] === 'string') {
     const partnerFolder = partnerName.replace(/\s/g, '')
         .replace(/([a-z])([A-Z])/g, '$1-$2')
         .toLowerCase();
-    const monoRepoDir = cwd.substring(0, cwd.lastIndexOf('mono-repo') + 'mono-repo'.length);
+    const htWrapperAdaptersDir = cwd.substring(0, cwd.lastIndexOf('ht-wrapper-adapters') + 'ht-wrapper-adapters'.length);
 
     // We need to update this line after we know the exact name of mono repo
-    dir = Path.join(monoRepoDir, partnerFolder);
+    dir = Path.join(htWrapperAdaptersDir, partnerFolder);
 }
 
 const fileNames = Fs.readdirSync(dir);
@@ -130,11 +130,14 @@ const adapterFileTransforms = {
 function generateAdapterFile(productMode, fileType) {
     return new Promise((resolve, reject) => {
         const regex = adapterFileTransforms[fileType].fileNameRegex;
+        let found = false;
 
         for (const fileName of fileNames) {
             if (!regex.test(fileName)) {
                 continue;
             }
+
+            found = true;
 
             Fs.readFile(Path.join(dir, fileName), 'utf8', (err, rawContents) => {
                 if (err) {
@@ -149,6 +152,10 @@ function generateAdapterFile(productMode, fileType) {
 
                 resolve(wrappedContents);
             });
+        }
+
+        if (found === false) {
+            console.log(`${fileType} file is missing and it's required`);
         }
     });
 }
