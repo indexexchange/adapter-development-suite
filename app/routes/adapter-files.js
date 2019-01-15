@@ -24,9 +24,9 @@ if (typeof process.argv[2] === 'string') {
     const partnerFolder = partnerName.replace(/\s/g, '')
         .replace(/([a-z])([A-Z])/g, '$1-$2')
         .toLowerCase();
-    const htWrapperAdaptersDir = cwd.substring(0, cwd.lastIndexOf('ht-wrapper-adapters') + 'ht-wrapper-adapters'.length);
+    const htWrapperAdaptersDir = cwd.substring(0,
+        cwd.lastIndexOf('ht-wrapper-adapters') + 'ht-wrapper-adapters'.length);
 
-    // We need to update this line after we know the exact name of mono repo
     dir = Path.join(htWrapperAdaptersDir, partnerFolder);
 }
 
