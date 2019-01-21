@@ -5,7 +5,7 @@
 // =============================================================================
 
 const debug = require('debug')('app:server');
-
+const Fs = require('fs');
 const AdapterTestSuiteServer = require('../app/adapter-test-suite-server');
 
 // =============================================================================
@@ -56,7 +56,36 @@ function onListeningHandler(addr, port) {
     };
 }
 
+const cwd = process.env.INIT_CWD;
+
+if (typeof process.argv[2] === 'string') {
+    const partnerFolder = process.argv[2].replace(/\s/g, '')
+        .replace(/([a-z])([A-Z])/g, '$1-$2')
+        .toLowerCase();
+    const htWrapperAdaptersDir = cwd.substring(
+        0,
+        cwd.lastIndexOf('ht-wrapper-adapters') + 'ht-wrapper-adapters'.length
+    );
+    const folders = Fs.readdirSync(htWrapperAdaptersDir);
+
+    let found = false;
+    for (const folderName of folders) {
+        if (folderName === partnerFolder) {
+            found = true;
+
+            break;
+        }
+    }
+
+    if (found === false) {
+        throw new Error(`Parnter folder "${partnerFolder}" was not found, please make sure the partner name provided is correct`);
+    }
+}
+
 if (typeof process.argv[2] === 'undefined') {
+    if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === 'ht-wrapper-adapters'.length) {
+        throw new Error(`The tool should be run under a partner's folder if partner name is not provided`);
+    }
     console.log('Partner name is not provided');
 }
 
