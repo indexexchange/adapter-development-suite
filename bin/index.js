@@ -57,7 +57,7 @@ function onListeningHandler(addr, port) {
 }
 
 if (typeof process.argv[2] === 'undefined') {
-    console.log('Partner name is not provided, using files in the current folder');
+    console.log('Partner name is not provided');
 }
 
 const serverPort = DEFAULT_SERVER_PORT;
