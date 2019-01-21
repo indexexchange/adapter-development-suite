@@ -941,10 +941,8 @@ var baseConfigs = {
         },
         config: {
             DeviceTypeChecker: {
-                method: 'REFERENCE',
-                configs: {
-                    reference: '"desktop"'
-                }
+                method: 'USER_AGENT',
+                configs: {}
             },
             htSlots: {
                 htSlotDesktopA: {
@@ -962,6 +960,22 @@ var baseConfigs = {
                         '0x0': [[300, 250], [300, 600]]
                     },
                     deviceType: 'desktop'
+                },
+                htSlotMobileA: {
+                    id: 'htSlotMobileAId',
+                    divId: 'divIdA',
+                    sizeMapping: {
+                        '0x0': [[300, 250], [300, 600]]
+                    },
+                    deviceType: 'mobile'
+                },
+                htSlotMobileB: {
+                    id: 'htSlotMobileBId',
+                    divId: 'divIdB',
+                    sizeMapping: {
+                        '0x0': [[300, 250], [300, 600]]
+                    },
+                    deviceType: 'mobile'
                 }
             },
             Services: {
@@ -1008,14 +1022,14 @@ var baseConfigs = {
 
                 },
                 {
-                    "layerId": "IdentityLayer",
-                    "configs": {
-                        "timeout": 0,
-                        "partners": {
-                            "AdserverOrgIp": {
-                                "enabled": false,
-                                "configs": {
-                                    "publisherId": 11111
+                    layerId: 'IdentityLayer',
+                    configs: {
+                        timeout: 0,
+                        partners: {
+                            AdserverOrgIp: {
+                                enabled: false,
+                                configs: {
+                                    publisherId: 11111
                                 }
                             }
                         }
@@ -3045,7 +3059,119 @@ XhrFilter.filters = filters;
 
 module.exports = XhrFilter;
 
-},{"./utilities":"/wrapper/tests/helpers/utilities.js"}],"/wrapper/tests/specs/system/dfp-auto/partners/partner.spec.js":[function(require,module,exports){
+},{"./utilities":"/wrapper/tests/helpers/utilities.js"}],5:[function(require,module,exports){
+// Device.js
+// (c) 2014 Matthew Hudson
+// Device.js is freely distributable under the MIT license.
+// For all details and documentation:
+// http://matthewhudson.me/projects/device.js/
+
+'use strict';
+
+var device,
+    find,
+    userAgent;
+
+device = {};
+
+// The client user agent string.
+// Lowercase, so we can use the more efficient indexOf(), instead of Regex
+userAgent = window.navigator.userAgent.toLowerCase();
+
+// Main functions
+// --------------
+
+device.ios = function () {
+    return device.iphone() || device.ipod() || device.ipad();
+};
+
+device.iphone = function () {
+    return !device.windows() && find('iphone');
+};
+
+device.ipod = function () {
+    return find('ipod');
+};
+
+device.ipad = function () {
+    return find('ipad');
+};
+
+device.android = function () {
+    return !device.windows() && find('android');
+};
+
+device.androidPhone = function () {
+    return device.android() && find('mobile');
+};
+
+device.androidTablet = function () {
+    return device.android() && !find('mobile');
+};
+
+device.blackberry = function () {
+    return find('blackberry') || find('bb10') || find('rim');
+};
+
+device.blackberryPhone = function () {
+    return device.blackberry() && !find('tablet');
+};
+
+device.blackberryTablet = function () {
+    return device.blackberry() && find('tablet');
+};
+
+device.windows = function () {
+    return find('windows');
+};
+
+device.windowsPhone = function () {
+    return device.windows() && find('phone');
+};
+
+device.windowsTablet = function () {
+    return device.windows() && (find('touch') && !device.windowsPhone());
+};
+
+device.fxos = function () {
+    return (find('(mobile;') || find('(tablet;')) && find('; rv:');
+};
+
+device.fxosPhone = function () {
+    return device.fxos() && find('mobile');
+};
+
+device.fxosTablet = function () {
+    return device.fxos() && find('tablet');
+};
+
+device.meego = function () {
+    return find('meego');
+};
+
+device.mobile = function () {
+    return device.androidPhone() || device.iphone() || device.ipod() || device.windowsPhone() || device.blackberryPhone() || device.fxosPhone() || device.meego();
+};
+
+device.tablet = function () {
+    return device.ipad() || device.androidTablet() || device.blackberryTablet() || device.windowsTablet() || device.fxosTablet();
+};
+
+device.desktop = function () {
+    return !device.tablet() && !device.mobile();
+};
+
+// Private Utility Functions
+// -------------------------
+
+// Simple UA string search
+find = function (needle) {
+    return userAgent.indexOf(needle) !== -1;
+};
+
+module.exports = device;
+
+},{}],"/wrapper/tests/specs/system/dfp-auto/partners/partner.spec.js":[function(require,module,exports){
 'use strict';
 
 // =============================================================================
@@ -3055,6 +3181,7 @@ module.exports = XhrFilter;
 var UrlParse = require('url-parse');
 
 var BaseConfigs = require('../../../../helpers/base-configs');
+var Device = require('../../../../libs/external/device');
 var GptPageMaker = require('../../../../helpers/gpt-page-maker');
 var Hacks = require('../../../../helpers/hacks');
 var HeaderStatsAuditor = require('../../../../helpers/header-stats-auditor');
@@ -3075,21 +3202,78 @@ describe('System Tests: Partner', function () {
     var baseConfig = null;
     var partnerId = window.testCases.getPartnerId();
     var callbackType = window.testCases.getCallbackType();
-    var config = window.testCases.getConfig();
     var architecture = window.testCases.getArchitecture();
-    var statsId = window.testCases.getStatsId();
 
-    if (architecture === 'MRA') {
+    var partner = null;
 
-        config.mapping = {
-            htSlotDesktopA: ['1']
+    if (Device.mobile()) {
+
+        partner = {
+            getStatsId: window.testCases.getStatsIdMobile || window.testCases.getStatsId,
+            getConfig: window.testCases.getConfigMobile || window.testCases.getConfig,
+            getBidRequestRegex: window.testCases.getBidRequestRegexMobile || window.testCases.getBidRequestRegex,
+            validateBidRequest: window.testCases.validateBidRequestMobile || window.testCases.validateBidRequest,
+            getValidResponse: window.testCases.getValidResponseMobile || window.testCases.getValidResponse,
+            getPassResponse: window.testCases.getPassResponseMobile || window.testCases.getPassResponse,
+            getValidResponseWithDeal: window.testCases.getValidResponseWithDealMobile
+                || window.testCases.getValidResponseWithDeal,
+            validateBidRequestWithPrivacy: window.testCases.validateBidRequestWithPrivacyMobile
+                || window.testCases.validateBidRequestWithPrivacy,
+            validateBidRequestWithAdSrvrOrg: window.testCases.validateBidRequestWithAdSrvrOrgMobile
+                || window.testCases.validateBidRequestWithAdSrvrOrg
         };
 
     } else {
 
-        config.mapping = {
-            htSlotDesktopA: ['1', '2']
+        partner = {
+            getStatsId: window.testCases.getStatsId,
+            getConfig: window.testCases.getConfig,
+            getBidRequestRegex: window.testCases.getBidRequestRegex,
+            validateBidRequest: window.testCases.validateBidRequest,
+            getValidResponse: window.testCases.getValidResponse,
+            getPassResponse: window.testCases.getPassResponse,
+            getValidResponseWithDeal: window.testCases.getValidResponseWithDeal,
+            validateBidRequestWithPrivacy: window.testCases.validateBidRequestWithPrivacy,
+            validateBidRequestWithAdSrvrOrg: window.testCases.validateBidRequestWithAdSrvrOrg
         };
+
+    }
+
+    var statsId = partner.getStatsId();
+    var config = partner.getConfig();
+    var bidRequestRegex = partner.getBidRequestRegex();
+
+    if (architecture === 'MRA') {
+
+        if (Device.mobile()) {
+
+            config.mapping = {
+                htSlotMobileA: ['1']
+            };
+
+        } else {
+
+            config.mapping = {
+                htSlotDesktopA: ['1']
+            };
+
+        }
+
+    } else {
+
+        if (Device.mobile()) {
+
+            config.mapping = {
+                htSlotMobileA: ['1', '2']
+            };
+
+        } else {
+
+            config.mapping = {
+                htSlotDesktopA: ['1', '2']
+            };
+
+        }
 
     }
 
@@ -3114,7 +3298,7 @@ describe('System Tests: Partner', function () {
         // Add the filtering mechanism to the server's fake XHR instance so that
         // it only captures and fakes explicitly configured URLs.
         xhrFilter = XhrFilter.install(server.xhr);
-        xhrFilter.register(partnerId, 'bidRequest', window.testCases.getBidRequestRegex());
+        xhrFilter.register(partnerId, 'bidRequest', bidRequestRegex);
 
         // SpaceCamp needs to be reset on every instantiation of the wrapper
         // because it is just an object. It carries values between test
@@ -3157,23 +3341,25 @@ describe('System Tests: Partner', function () {
             var requestsToBlock = window.testCases.getRequestsToBlock();
             for (var request in requestsToBlock) {
 
-                if (requestsToBlock.hasOwnProperty(request)) {
+                if (!requestsToBlock.hasOwnProperty(request)) {
 
-                    xhrFilter.register(partnerId, request, requestsToBlock[request]);
-                    xhrFilter.capture(partnerId + '.' + request);
-
-                    server.respondWith(requestsToBlock[request].method,
-                        requestsToBlock[request].urlRegex, function (xhr) {
-
-                            xhr.respond(
-                                200,
-                                '',
-                                '{}'
-                            );
-
-                        });
+                    continue;
 
                 }
+
+                xhrFilter.register(partnerId, request, requestsToBlock[request]);
+                xhrFilter.capture(partnerId + '.' + request);
+
+                server.respondWith(requestsToBlock[request].method,
+                    requestsToBlock[request].urlRegex, function (xhr) {
+
+                        xhr.respond(
+                            200,
+                            '',
+                            '{}'
+                        );
+
+                    });
 
             }
 
@@ -3270,7 +3456,7 @@ describe('System Tests: Partner', function () {
                     var request = UrlParse(xhr.url, true);
                     request.body = xhr.requestBody;
 
-                    window.testCases.validateBidRequest(request);
+                    partner.validateBidRequest(request);
 
                     done();
 
@@ -3283,7 +3469,7 @@ describe('System Tests: Partner', function () {
 
     });
 
-    if (window.testCases.validateBidRequestWithPrivacy) {
+    if (partner.validateBidRequestWithPrivacy) {
 
         it('should construct bid with privacy data correctly', function (done) {
 
@@ -3316,7 +3502,7 @@ describe('System Tests: Partner', function () {
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
 
-                        window.testCases.validateBidRequestWithPrivacy(request);
+                        partner.validateBidRequestWithPrivacy(request);
 
                         done();
 
@@ -3331,7 +3517,7 @@ describe('System Tests: Partner', function () {
 
     }
 
-    if (window.testCases.validateBidRequestWithAdSrvrOrg) {
+    if (partner.validateBidRequestWithAdSrvrOrg) {
 
         it('should construct bid with adsrvr.org data correctly', function (done) {
 
@@ -3372,7 +3558,7 @@ describe('System Tests: Partner', function () {
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
 
-                        window.testCases.validateBidRequestWithAdSrvrOrg(request);
+                        partner.validateBidRequestWithAdSrvrOrg(request);
 
                         done();
 
@@ -3404,7 +3590,7 @@ describe('System Tests: Partner', function () {
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = window.testCases.getValidResponse(request);
+                        var response = partner.getValidResponse(request);
 
                         xhr.respond(
                             200,
@@ -3459,7 +3645,7 @@ describe('System Tests: Partner', function () {
                         request.body = xhr.requestBody;
 
                         // Respond to the request.
-                        var response = window.testCases.getValidResponse(request, checker.adm);
+                        var response = partner.getValidResponse(request, checker.adm);
 
                         xhr.respond(
                             200,
@@ -3495,7 +3681,7 @@ describe('System Tests: Partner', function () {
                             request.body = xhr.requestBody;
 
                             // Respond to the request.
-                            var response = window.testCases.getValidResponse(request);
+                            var response = partner.getValidResponse(request);
 
                             xhr.respond(
                                 200,
@@ -3570,7 +3756,7 @@ describe('System Tests: Partner', function () {
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = window.testCases.getValidResponse(request);
+                        var response = partner.getValidResponse(request);
 
                         xhr.respond(
                             200,
@@ -3588,10 +3774,22 @@ describe('System Tests: Partner', function () {
 
                         // Check to see that the correct HeaderStats events are set for this specific case.
                         var htSlotStats = HeaderStatsAuditor.parse(xhr.requestBody).htSlotStats;
-                        var count = config.mapping.htSlotDesktopA.length;
+                        var count = 0;
 
-                        expect(htSlotStats.htSlotDesktopAId[statsId].bid_requests).toBe(count);
-                        expect(htSlotStats.htSlotDesktopAId[statsId].bid_responses).toBe(count);
+                        for (var key in htSlotStats) {
+
+                            if (!htSlotStats.hasOwnProperty(key)) {
+
+                                continue;
+
+                            }
+
+                            count = config.mapping[key.slice(0, -2)].length;
+
+                            expect(htSlotStats[key][statsId].bid_requests).toBe(count);
+                            expect(htSlotStats[key][statsId].bid_responses).toBe(count);
+
+                        }
 
                         done();
 
@@ -3606,7 +3804,7 @@ describe('System Tests: Partner', function () {
 
     });
 
-    if (window.testCases.getValidResponseWithDeal) {
+    if (partner.getValidResponseWithDeal) {
 
         describe('Private Market Bids', function () {
 
@@ -3625,7 +3823,7 @@ describe('System Tests: Partner', function () {
                             // Parse request URL into a manageable object.
                             var request = UrlParse(xhr.url, true);
                             request.body = xhr.requestBody;
-                            var response = window.testCases.getValidResponseWithDeal(request);
+                            var response = partner.getValidResponseWithDeal(request);
 
                             xhr.respond(
                                 200,
@@ -3674,7 +3872,7 @@ describe('System Tests: Partner', function () {
 
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = window.testCases.getPassResponse(request);
+                        var response = partner.getPassResponse(request);
 
                         xhr.respond(
                             200,
@@ -3717,7 +3915,7 @@ describe('System Tests: Partner', function () {
 
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = window.testCases.getPassResponse(request);
+                        var response = partner.getPassResponse(request);
 
                         xhr.respond(
                             200,
@@ -3735,10 +3933,22 @@ describe('System Tests: Partner', function () {
 
                         // Check to see that the correct HeaderStats events are set for this specific case.
                         var htSlotStats = HeaderStatsAuditor.parse(xhr.requestBody).htSlotStats;
-                        var count = config.mapping.htSlotDesktopA.length;
+                        var count = 0;
 
-                        expect(htSlotStats.htSlotDesktopAId[statsId].bid_requests).toBe(count);
-                        expect(htSlotStats.htSlotDesktopAId[statsId].bid_passes).toBe(count);
+                        for (var key in htSlotStats) {
+
+                            if (!htSlotStats.hasOwnProperty(key)) {
+
+                                continue;
+
+                            }
+
+                            count = config.mapping[key.slice(0, -2)].length;
+
+                            expect(htSlotStats[key][statsId].bid_requests).toBe(count);
+                            expect(htSlotStats[key][statsId].bid_passes).toBe(count);
+
+                        }
 
                         done();
 
@@ -3755,7 +3965,7 @@ describe('System Tests: Partner', function () {
 
 });
 
-},{"../../../../helpers/base-configs":"/wrapper/tests/helpers/base-configs.js","../../../../helpers/gpt-page-maker":"/wrapper/tests/helpers/gpt-page-maker.js","../../../../helpers/hacks":"/wrapper/tests/helpers/hacks.js","../../../../helpers/header-stats-auditor":"/wrapper/tests/helpers/header-stats-auditor.js","../../../../helpers/render-checker":"/wrapper/tests/helpers/render-checker.js","../../../../helpers/utilities":"/wrapper/tests/helpers/utilities.js","../../../../helpers/xhr-filter":"/wrapper/tests/helpers/xhr-filter.js","pre-gpt-shell.js":"/wrapper/src/shells/pre-gpt-shell.js","url-parse":4}],"/wrapper/tests/stubs/libs/bid-transformer.stub.js":[function(require,module,exports){
+},{"../../../../helpers/base-configs":"/wrapper/tests/helpers/base-configs.js","../../../../helpers/gpt-page-maker":"/wrapper/tests/helpers/gpt-page-maker.js","../../../../helpers/hacks":"/wrapper/tests/helpers/hacks.js","../../../../helpers/header-stats-auditor":"/wrapper/tests/helpers/header-stats-auditor.js","../../../../helpers/render-checker":"/wrapper/tests/helpers/render-checker.js","../../../../helpers/utilities":"/wrapper/tests/helpers/utilities.js","../../../../helpers/xhr-filter":"/wrapper/tests/helpers/xhr-filter.js","../../../../libs/external/device":5,"pre-gpt-shell.js":"/wrapper/src/shells/pre-gpt-shell.js","url-parse":4}],"/wrapper/tests/stubs/libs/bid-transformer.stub.js":[function(require,module,exports){
 
 },{}],"/wrapper/tests/stubs/libs/browser.stub.js":[function(require,module,exports){
 arguments[4]["/wrapper/tests/stubs/libs/bid-transformer.stub.js"][0].apply(exports,arguments)
