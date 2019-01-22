@@ -60,9 +60,7 @@ const cwd = process.env.INIT_CWD;
 const repoNameLength = 'ht-wrapper-adapters'.length;
 
 if (typeof process.argv[2] === 'string') {
-    const partnerFolder = process.argv[2].replace(/\s/g, '')
-        .replace(/([a-z])([A-Z])/g, '$1-$2')
-        .toLowerCase();
+    const partnerFolder = process.argv[2];
     const htWrapperAdaptersDir = cwd.substring(
         0,
         cwd.lastIndexOf('ht-wrapper-adapters') + repoNameLength
@@ -79,13 +77,13 @@ if (typeof process.argv[2] === 'string') {
     }
 
     if (!found) {
-        throw new Error(`Parnter folder "${partnerFolder}" was not found, please make sure the partner name provided is correct`);
+        throw new Error(`Parnter folder "${partnerFolder}" was not found, please make sure the partner folder name provided is correct`);
     }
 }
 
 if (typeof process.argv[2] === 'undefined') {
     if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === repoNameLength) {
-        throw new Error(`The tool should be run under a partner's folder if partner name is not provided`);
+        throw new Error(`The tool should be run under a partner's folder if partner folder name is not provided`);
     }
     console.log('Partner name is not provided');
 }

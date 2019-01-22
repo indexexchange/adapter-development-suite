@@ -20,10 +20,7 @@ const cwd = process.env.INIT_CWD;
 let dir = cwd;
 
 if (typeof process.argv[2] === 'string') {
-    const partnerName = process.argv[2];
-    const partnerFolder = partnerName.replace(/\s/g, '')
-        .replace(/([a-z])([A-Z])/g, '$1-$2')
-        .toLowerCase();
+    const partnerFolder = process.argv[2];
     const htWrapperAdaptersDir = cwd.substring(
         0,
         cwd.lastIndexOf('ht-wrapper-adapters') + 'ht-wrapper-adapters'.length
