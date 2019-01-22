@@ -1,4 +1,4 @@
-/* eslint-disable no-magic-numbers, no-console, no-process-exit */
+/* eslint-disable no-sync, no-magic-numbers, no-console, no-process-exit */
 
 // =============================================================================
 // IMPORTS /////////////////////////////////////////////////////////////////////
