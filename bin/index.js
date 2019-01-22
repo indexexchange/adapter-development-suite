@@ -78,7 +78,7 @@ if (typeof process.argv[2] === 'string') {
 
     if (!found) {
         console.log(`Adapter folder "${partnerFolder}" was not found, please make sure the adapter folder name provided is correct`);
-        process.exit(0);
+        process.exit(-1);
     }
 }
 
@@ -86,7 +86,7 @@ if (typeof process.argv[2] === 'undefined') {
     if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === repoNameLength
         || cwd.length - cwd.lastIndexOf('node_modules') === 'node_modules'.length) {
         console.log(`The tool should be run under an adapter's folder if adapter folder name is not provided`);
-        process.exit(0);
+        process.exit(-1);
     }
     console.log('Adapter name is not provided');
 }
