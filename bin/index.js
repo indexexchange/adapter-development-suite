@@ -77,15 +77,18 @@ if (typeof process.argv[2] === 'string') {
     }
 
     if (!found) {
-        throw new Error(`Parnter folder "${partnerFolder}" was not found, please make sure the partner folder name provided is correct`);
+        console.log(`Adapter folder "${partnerFolder}" was not found, please make sure the adapter folder name provided is correct`);
+        process.exit(0);
     }
 }
 
 if (typeof process.argv[2] === 'undefined') {
-    if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === repoNameLength) {
-        throw new Error(`The tool should be run under a partner's folder if partner folder name is not provided`);
+    if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === repoNameLength
+        || cwd.length - cwd.lastIndexOf('node_modules') === 'node_modules'.length) {
+        console.log(`The tool should be run under an adapter's folder if adapter folder name is not provided`);
+        process.exit(0);
     }
-    console.log('Partner name is not provided');
+    console.log('Adapter name is not provided');
 }
 
 const serverPort = DEFAULT_SERVER_PORT;
