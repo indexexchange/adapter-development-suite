@@ -77,13 +77,14 @@ if (typeof process.argv[2] === 'string') {
         }
     }
 
-    if (found === false) {
+    if (!found) {
         throw new Error(`Parnter folder "${partnerFolder}" was not found, please make sure the partner name provided is correct`);
     }
 }
 
 if (typeof process.argv[2] === 'undefined') {
-    if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === 'ht-wrapper-adapters'.length) {
+    const htWrapperAdapters = 'ht-wrapper-adapters';
+    if (cwd.length - cwd.lastIndexOf(htWrapperAdapters) === htWrapperAdapters.length) {
         throw new Error(`The tool should be run under a partner's folder if partner name is not provided`);
     }
     console.log('Partner name is not provided');
