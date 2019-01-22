@@ -57,6 +57,7 @@ function onListeningHandler(addr, port) {
 }
 
 const cwd = process.env.INIT_CWD;
+const repoNameLength = 'ht-wrapper-adapters'.length;
 
 if (typeof process.argv[2] === 'string') {
     const partnerFolder = process.argv[2].replace(/\s/g, '')
@@ -64,7 +65,7 @@ if (typeof process.argv[2] === 'string') {
         .toLowerCase();
     const htWrapperAdaptersDir = cwd.substring(
         0,
-        cwd.lastIndexOf('ht-wrapper-adapters') + 'ht-wrapper-adapters'.length
+        cwd.lastIndexOf('ht-wrapper-adapters') + repoNameLength
     );
     const folders = Fs.readdirSync(htWrapperAdaptersDir);
 
@@ -83,8 +84,7 @@ if (typeof process.argv[2] === 'string') {
 }
 
 if (typeof process.argv[2] === 'undefined') {
-    const htWrapperAdapters = 'ht-wrapper-adapters';
-    if (cwd.length - cwd.lastIndexOf(htWrapperAdapters) === htWrapperAdapters.length) {
+    if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === repoNameLength) {
         throw new Error(`The tool should be run under a partner's folder if partner name is not provided`);
     }
     console.log('Partner name is not provided');
