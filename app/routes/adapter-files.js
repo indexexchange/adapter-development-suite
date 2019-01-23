@@ -1,4 +1,4 @@
-/* eslint-disable no-sync, no-magic-numbers */
+/* eslint-disable no-sync, no-magic-numbers, no-console */
 
 // =============================================================================
 // IMPORTS /////////////////////////////////////////////////////////////////////
@@ -6,7 +6,6 @@
 
 const Fs = require('fs');
 const Path = require('path');
-const Process = require('process');
 
 const Express = require('express');
 const MetaScript = require('metascript');
@@ -17,8 +16,22 @@ const Router = Express.Router();
 // MAIN ////////////////////////////////////////////////////////////////////////
 // =============================================================================
 
-const cwd = Process.cwd();
-const fileNames = Fs.readdirSync(cwd);
+const cwd = process.env.INIT_CWD;
+let dir = cwd;
+
+if (typeof process.argv[2] === 'string') {
+    const partnerFolder = process.argv[2];
+    const htWrapperAdaptersDir = cwd.substring(
+        0,
+        cwd.lastIndexOf('ht-wrapper-adapters') + 'ht-wrapper-adapters'.length
+    );
+
+    dir = Path.join(htWrapperAdaptersDir, partnerFolder);
+}
+
+console.log(`Using files in directory ${dir}`);
+
+const fileNames = Fs.readdirSync(dir);
 
 const productScopes = {
     'dfp-auto': {
@@ -118,13 +131,16 @@ const adapterFileTransforms = {
 function generateAdapterFile(productMode, fileType) {
     return new Promise((resolve, reject) => {
         const regex = adapterFileTransforms[fileType].fileNameRegex;
+        let found = false;
 
         for (const fileName of fileNames) {
             if (!regex.test(fileName)) {
                 continue;
             }
 
-            Fs.readFile(Path.join(cwd, fileName), 'utf8', (err, rawContents) => {
+            found = true;
+
+            Fs.readFile(Path.join(dir, fileName), 'utf8', (err, rawContents) => {
                 if (err) {
                     reject(err);
                 }
@@ -137,6 +153,10 @@ function generateAdapterFile(productMode, fileType) {
 
                 resolve(wrappedContents);
             });
+        }
+
+        if (found === false) {
+            console.log(`${fileType} file is missing and is required`);
         }
     });
 }

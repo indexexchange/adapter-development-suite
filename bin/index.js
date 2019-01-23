@@ -1,11 +1,11 @@
-/* eslint-disable no-magic-numbers, no-console, no-process-exit */
+/* eslint-disable no-sync, no-magic-numbers, no-console, no-process-exit */
 
 // =============================================================================
 // IMPORTS /////////////////////////////////////////////////////////////////////
 // =============================================================================
 
 const debug = require('debug')('app:server');
-
+const Fs = require('fs');
 const AdapterTestSuiteServer = require('../app/adapter-test-suite-server');
 
 // =============================================================================
@@ -54,6 +54,41 @@ function onListeningHandler(addr, port) {
 
         debug(`Listening on ${bind}`);
     };
+}
+
+const cwd = process.env.INIT_CWD;
+const repoNameLength = 'ht-wrapper-adapters'.length;
+
+if (typeof process.argv[2] === 'string') {
+    const partnerFolder = process.argv[2];
+    const htWrapperAdaptersDir = cwd.substring(
+        0,
+        cwd.lastIndexOf('ht-wrapper-adapters') + repoNameLength
+    );
+    const folders = Fs.readdirSync(htWrapperAdaptersDir);
+
+    let found = false;
+    for (const folderName of folders) {
+        if (folderName === partnerFolder) {
+            found = true;
+
+            break;
+        }
+    }
+
+    if (!found) {
+        console.log(`Adapter folder "${partnerFolder}" was not found, please make sure the adapter folder name provided is correct`);
+        process.exit(-1);
+    }
+}
+
+if (typeof process.argv[2] === 'undefined') {
+    if (cwd.length - cwd.lastIndexOf('ht-wrapper-adapters') === repoNameLength
+        || cwd.length - cwd.lastIndexOf('node_modules') === 'node_modules'.length) {
+        console.log(`The tool should be run under an adapter's folder if adapter folder name is not provided`);
+        process.exit(-1);
+    }
+    console.log('Adapter name is not provided');
 }
 
 const serverPort = DEFAULT_SERVER_PORT;
