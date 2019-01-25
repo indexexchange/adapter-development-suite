@@ -3215,6 +3215,7 @@ describe('System Tests: Partner', function () {
     var partnerId = window.testCases.getPartnerId();
     var callbackType = window.testCases.getCallbackType();
     var architecture = window.testCases.getArchitecture();
+    var defaultCreative = '<div id="default-creative"></div>';
 
     var partner = null;
 
@@ -3602,7 +3603,7 @@ describe('System Tests: Partner', function () {
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = partner.getValidResponse(request);
+                        var response = partner.getValidResponse(request, defaultCreative);
 
                         xhr.respond(
                             200,
@@ -3693,7 +3694,7 @@ describe('System Tests: Partner', function () {
                             request.body = xhr.requestBody;
 
                             // Respond to the request.
-                            var response = partner.getValidResponse(request);
+                            var response = partner.getValidResponse(request, defaultCreative);
 
                             xhr.respond(
                                 200,
@@ -3768,7 +3769,7 @@ describe('System Tests: Partner', function () {
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = partner.getValidResponse(request);
+                        var response = partner.getValidResponse(request, defaultCreative);
 
                         xhr.respond(
                             200,
@@ -3835,7 +3836,7 @@ describe('System Tests: Partner', function () {
                             // Parse request URL into a manageable object.
                             var request = UrlParse(xhr.url, true);
                             request.body = xhr.requestBody;
-                            var response = partner.getValidResponseWithDeal(request);
+                            var response = partner.getValidResponseWithDeal(request, defaultCreative);
 
                             xhr.respond(
                                 200,
