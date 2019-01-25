@@ -901,7 +901,7 @@ function noop(){}function Promise(e){if("object"!=typeof this)throw new TypeErro
 },{"browser.js":"/wrapper/src/libs/browser.js","command-queue.js":"/wrapper/src/libs/command-queue.js","prms.js":"/wrapper/src/libs/external/prms.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/services/events-service.js":[function(require,module,exports){
 "use strict";function EventsService(){function e(e,r,n){i.hasOwnProperty(e)||(i[e]=[]);var t=System.generateUniqueId();return i[e].push({id:t,fn:n,once:r}),t}function r(r,n){return e(r,!1,n)}function n(r,n){return e(r,!0,n)}function t(e){for(var r in i)if(i.hasOwnProperty(r))for(var n=i[r].length-1;n>=0;n--)if(i[r][n].id===e)return void i[r].splice(n,1)}function o(){var e=Array.prototype.slice.call(arguments),r=e.shift();if(r&&i.hasOwnProperty(r))for(var n=i[r].length-1;n>=0;n--){try{i[r][n].fn.apply(null,e)}catch(e){}i[r][n].once&&i[r].splice(n,1)}}var i;return function(){i={}}(),{__eventsMap:i,__on:e,on:r,once:n,off:t,emit:o}}var System=require("system.js"),Whoopsie=require("whoopsie.js");module.exports=EventsService;
 },{"system.js":"/wrapper/src/libs/system.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/services/header-stats-service.js":[function(require,module,exports){
-"use strict";function HeaderStats(e){function t(){if(Utilities.isEmpty(w))return[];var e={s:"identity",t:O,e:[]};for(var t in w)if(w.hasOwnProperty(t)){for(var s=0;s<w[t].length;s++){var i=w[t][s];"bid_requests"!==i.n&&"res_latency"!==i.n||(i.v=String(i.v)),e.e.push(i)}E.hasOwnProperty(t)&&!1!==E[t]||(e.e.push({n:"partner_timeout",b:t,v:b,x:"before"}),E[t]=!0)}return w={},[e]}function s(e,t){Utilities.isEmpty(w)&&(O=System.now());var s=t.statsId;w[s]=w[s]||[];var i={b:s,x:g?"after":"before"};"hs_identity_request"===e?(i.n="bid_requests",i.v=1,P[s]=System.now()):"hs_identity_cached"===e?(i.n="bid_requests",i.v=0):"hs_identity_response"===e?(i.n="bid_responses",i.v=1):"hs_identity_error"===e?(i.n="bid_errors",i.v=1):"hs_identity_pass"===e?(i.n="bid_passes",i.v=1):"hs_identity_timeout"===e?(i.n="bid_timeouts",i.v=1):"hs_identity_bid_latency"===e&&(i.n="res_latency",i.v=System.now()-P[s]),w[s].push(i)}function i(e,t){var s=[];for(var i in t)if(t.hasOwnProperty(i)){var n=t[i],r={s:n.s,t:n.t,e:[]};for(var o in n.events)if(n.events.hasOwnProperty(o)){var _={},a={};for(var v in n.events[o])if(n.events[o].hasOwnProperty(v))for(var u in n.events[o][v])if(n.events[o][v].hasOwnProperty(u)){_[u]={n:"auction_cycle",b:o,x:u,v:y[e]},m[o]&&!a.hasOwnProperty(u)&&(a[u]={n:"partner_timeout",b:o,x:u,v:m[o]});var h=n.events[o][v][u];"res_latency"===h.n&&(h.v=String(h.v)),r.e.push(h)}if(d.auctionCycle)for(var c in _)_.hasOwnProperty(c)&&r.e.push(_[c]);for(var p in a)a.hasOwnProperty(p)&&r.e.push(a[p])}s.push(r)}return s}function n(e){if(l.hasOwnProperty(e)&&l[e]!==q.IPR&&l[e]!==q.SENT){p[e].push({n:"global_timeout",v:String(SpaceCamp.globalTimeout)});var s={p:"display",d:SpaceCamp.DeviceTypeChecker.getDeviceType(),c:a,s:e,w:v,t:System.now(),pg:{t:u,e:p[e]}};s.sl=Utilities.mergeArrays(i(e,f[e]),t()),delete p[e],delete f[e];var n=Network.buildUrl(o,null,{s:_,u:Browser.getPageUrl(),v:2});Network.ajax({method:"POST",url:n,data:s}),l[e]=q.SENT}}function r(e,t){var s=t.sessionId,i=t.htSlotId,n=t.statsId,r=t.xSlotNames,o=t.requestId||"";if(l.hasOwnProperty(s)&&l[s]!==q.DONE&&l[s]!==q.SENT){f[s].hasOwnProperty(i)||(f[s][i]={s:i,t:System.now(),events:{}}),f[s][i].events.hasOwnProperty(n)||(f[s][i].events[n]={}),f[s][i].events[n].hasOwnProperty(e)||(f[s][i].events[n][e]={});for(var _=f[s][i].events[n][e],a=0;a<r.length;a++){var d=r[a],v=s+n+i+d+o;if(!S[v]){"bid_timeouts"===e&&(S[v]=!0),_.hasOwnProperty(d)||(_[d]={n:e,v:0,b:n,x:d});var u=_[d];if("res_latency"===e){var c=System.now()-h[v];delete h[v],(!u.v||u.v>c)&&(u.v=c)}else"prefetch"===e?u.v=1:u.v++;"bid_requests"===e?h[v]=System.now():"bid_responses"===e&&EventsService.emit("hs_slot_valid_bid_latency",t)}}}}if(!Network.isXhrSupported())return null;var o,_,a,d,v,u,h,c,y,p,f,l,m,S,w,b,P,O,g,E,q={IPR:0,DONE:1,SENT:2},I={hs_session_start:function(e){var t=e.sessionId;l.hasOwnProperty(t)||(l[t]=q.IPR,c[t]=System.now(),p[t]=[],f[t]={})},hs_session_end:function(e){var t=e.sessionId;l.hasOwnProperty(t)&&l[t]!==q.DONE&&(y[t]=String(System.now()-c[t]),delete c[t],setTimeout(function(){l[t]=q.DONE,n(t)},0))},hs_slot_request:function(e){r("bid_requests",e)},hs_slot_bid:function(e){r("bid_responses",e)},hs_slot_pass:function(e){r("bid_passes",e)},hs_slot_timeout:function(e){r("bid_timeouts",e)},hs_slot_error:function(e){r("bid_errors",e)},hs_slot_highest_bid:function(e){r("top_bid",e)},hs_slot_valid_bid_latency:function(e){r("res_latency",e)},hs_slot_kv_pushed:function(e){r("dfp_kv_pushed",e)},hs_slot_prefetch:function(e){r("prefetch",e)},hs_define_partner_timeout:function(e){m[e.statsId]=String(e.timeout)},hs_identity_request:function(e){s("hs_identity_request",e)},hs_identity_cached:function(e){s("hs_identity_cached",e)},hs_identity_response:function(e){s("hs_identity_response",e),EventsService.emit("hs_identity_bid_latency",e)},hs_identity_error:function(e){s("hs_identity_error",e),EventsService.emit("hs_identity_bid_latency",e)},hs_identity_pass:function(e){s("hs_identity_pass",e),EventsService.emit("hs_identity_bid_latency",e)},hs_identity_bid_latency:function(e){Utilities.isNumber(P[e.statsId])&&s("hs_identity_bid_latency",e)},hs_identity_timeout:function(e){s("hs_identity_timeout",e),g=!0},hs_define_identity_timeout:function(e){b=String(e.timeout)}};return function(){EventsService=SpaceCamp.services.EventsService,u=System.now(),o=Browser.getProtocol("http://as","https://as-sec")+".casalemedia.com/headerstats",_=e.siteId,a=e.configId,d=e.options,v=_+System.now(),v+=System.generateUniqueId(32-v.length),SpaceCamp.instanceId=v,l={},p={},f={},h={},c={},y={},m={},S={},w={},P={},g=!1,E={};for(var t in I)I.hasOwnProperty(t)&&SpaceCamp.services.EventsService.on(t,I[t])}(),{__pageEvents:p,__slotStats:f,__requestStartTimes:h,__sessionStates:l,__identityEvents:w,__recordIdentityEvent:s,__transformIdentityStats:t}}var Browser=require("browser.js"),Network=require("network.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),EventsService;module.exports=HeaderStats;
+"use strict";function HeaderStats(e){function t(e){var t={auction_cycle:"ac",global_timeout:"gt",bid_requests:"brq",bid_responses:"brs",bid_errors:"be",bid_passes:"bp",bid_timeouts:"bt",dfp_kv_pushed:"kv",top_bid:"tb",prefetch:"p",res_latency:"rl",partner_timeout:"pt"};return t.hasOwnProperty(e)?t[e]:e}function s(){if(Utilities.isEmpty(P))return[];var e={s:"identity",t:x,xslots:{}};for(var s in P)if(P.hasOwnProperty(s)){e.xslots.hasOwnProperty(s)||(e.xslots[s]={});for(var i=0;i<P[s].length;i++){var n=P[s][i];"bid_requests"!==n.n&&"res_latency"!==n.n||(n.v=String(n.v)),e.xslots[s].hasOwnProperty(n.x)||(e.xslots[s][n.x]={});var r=t(n.n);e.xslots[s][n.x][r]=n.v}E.hasOwnProperty(s)&&!1!==E[s]||(e.xslots[s].before[t("partner_timeout")]=O,E[s]=!0)}return P={},[e]}function i(e,t){Utilities.isEmpty(P)&&(x=System.now());var s=t.statsId;P[s]=P[s]||[];var i={b:s,x:q?"after":"before"};"hs_identity_request"===e?(i.n="bid_requests",i.v=1,g[s]=System.now()):"hs_identity_cached"===e?(i.n="bid_requests",i.v=0):"hs_identity_response"===e?(i.n="bid_responses",i.v=1):"hs_identity_error"===e?(i.n="bid_errors",i.v=1):"hs_identity_pass"===e?(i.n="bid_passes",i.v=1):"hs_identity_timeout"===e?(i.n="bid_timeouts",i.v=1):"hs_identity_bid_latency"===e&&(i.n="res_latency",i.v=System.now()-g[s]),P[s].push(i)}function n(e,s){var i=[],n="",r="";for(var o in s)if(s.hasOwnProperty(o)){var a=s[o],_={s:a.s,t:a.t,xslots:{}};for(r in a.events)if(a.events.hasOwnProperty(r)){for(var d in a.events[r])if(a.events[r].hasOwnProperty(d))for(n in a.events[r][d])if(a.events[r][d].hasOwnProperty(n)){var u=a.events[r][d][n],c=u.v,h=t(d);"res_latency"===u.n&&(u.v=String(u.v)),_.xslots.hasOwnProperty(r)||(_.xslots[r]={}),_.xslots[r].hasOwnProperty(n)||(_.xslots[r][n]={}),_.xslots[r][n][h]=c}for(n in _.xslots[r])_.xslots[r].hasOwnProperty(n)&&S.hasOwnProperty(r)&&(_.xslots[r][n][t("partner_timeout")]=S[r])}i.push(_)}return i}function r(e){if(b.hasOwnProperty(e)&&b[e]!==I.IPR&&b[e]!==I.SENT){var i={p:"display",d:SpaceCamp.DeviceTypeChecker.getDeviceType(),c:d,s:e,w:c,t:System.now(),pg:{t:h,e:l[e]}};i[t("global_timeout")]=String(SpaceCamp.globalTimeout),u.auctionCycle&&(i.ac=v[e]),i.sl=Utilities.mergeArrays(n(e,f[e]),s()),i.akamaiDebugInfo=m[e],delete m[e],delete l[e],delete f[e];var r=Network.buildUrl(a,null,{s:_,u:Browser.getPageUrl(),v:3});Network.ajax({method:"POST",url:r,data:i}),b[e]=I.SENT}}function o(e,t){var s=t.sessionId,i=t.htSlotId,n=t.statsId,r=t.xSlotNames,o=t.requestId||"";if(b.hasOwnProperty(s)&&b[s]!==I.DONE&&b[s]!==I.SENT){f[s].hasOwnProperty(i)||(f[s][i]={s:i,t:System.now(),events:{}}),f[s][i].events.hasOwnProperty(n)||(f[s][i].events[n]={}),f[s][i].events[n].hasOwnProperty(e)||(f[s][i].events[n][e]={});for(var a=f[s][i].events[n][e],_=0;_<r.length;_++){var d=r[_],u=s+n+i+d+o;if(!w[u]){"bid_timeouts"===e&&(w[u]=!0),a.hasOwnProperty(d)||(a[d]={n:e,v:0,b:n,x:d});var c=a[d];if("res_latency"===e){var h=System.now()-y[u];delete y[u],(!c.v||c.v>h)&&(c.v=h)}else"prefetch"===e?c.v=1:c.v++;"bid_requests"===e?y[u]=System.now():"bid_responses"===e&&EventsService.emit("hs_slot_valid_bid_latency",t)}}}}if(!Network.isXhrSupported())return null;var a,_,d,u,c,h,y,p,v,l,f,m,b,S,w,P,O,g,x,q,E,I={IPR:0,DONE:1,SENT:2},k={hs_session_start:function(e){var t=e.sessionId;b.hasOwnProperty(t)||(b[t]=I.IPR,p[t]=System.now(),l[t]=[],f[t]={})},hs_session_end:function(e){var t=e.sessionId;b.hasOwnProperty(t)&&b[t]!==I.DONE&&(v[t]=String(System.now()-p[t]),delete p[t],setTimeout(function(){b[t]=I.DONE,r(t)},0))},hs_akamai_debug:function(e){var t=e.sessionId;m[t]={},m[t].hostname=e.hostname,e.hasOwnProperty("requestHost")&&(m[t].requestHost=e.requestHost),e.hasOwnProperty("akamaiPresent")&&(m[t].akamaiPresent=e.akamaiPresent)},hs_slot_request:function(e){o("bid_requests",e)},hs_slot_bid:function(e){o("bid_responses",e)},hs_slot_pass:function(e){o("bid_passes",e)},hs_slot_timeout:function(e){o("bid_timeouts",e)},hs_slot_error:function(e){o("bid_errors",e)},hs_slot_highest_bid:function(e){o("top_bid",e)},hs_slot_valid_bid_latency:function(e){o("res_latency",e)},hs_slot_kv_pushed:function(e){o("dfp_kv_pushed",e)},hs_slot_prefetch:function(e){o("prefetch",e)},hs_define_partner_timeout:function(e){S[e.statsId]=String(e.timeout)},hs_identity_request:function(e){i("hs_identity_request",e)},hs_identity_cached:function(e){i("hs_identity_cached",e)},hs_identity_response:function(e){i("hs_identity_response",e),EventsService.emit("hs_identity_bid_latency",e)},hs_identity_error:function(e){i("hs_identity_error",e),EventsService.emit("hs_identity_bid_latency",e)},hs_identity_pass:function(e){i("hs_identity_pass",e),EventsService.emit("hs_identity_bid_latency",e)},hs_identity_bid_latency:function(e){Utilities.isNumber(g[e.statsId])&&i("hs_identity_bid_latency",e)},hs_identity_timeout:function(e){i("hs_identity_timeout",e),q=!0},hs_define_identity_timeout:function(e){O=String(e.timeout)}};return function(){EventsService=SpaceCamp.services.EventsService,h=System.now(),a=Browser.getProtocol("http://as","https://as-sec")+".casalemedia.com/headerstats",_=e.siteId,d=e.configId,u=e.options,c=_+System.now(),c+=System.generateUniqueId(32-c.length),SpaceCamp.instanceId=c,b={},l={},f={},m={},y={},p={},v={},S={},w={},P={},g={},q=!1,E={};for(var t in k)k.hasOwnProperty(t)&&SpaceCamp.services.EventsService.on(t,k[t])}(),{__pageEvents:l,__slotStats:f,__requestStartTimes:y,__sessionStates:b,__identityEvents:P,__akamaiDebugInfo:m,__recordIdentityEvent:i,__transformIdentityStats:s}}var Browser=require("browser.js"),Network=require("network.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),EventsService;module.exports=HeaderStats;
 },{"browser.js":"/wrapper/src/libs/browser.js","network.js":"/wrapper/src/libs/network.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/services/render-service.js":[function(require,module,exports){
 "use strict";function RenderService(e){function r(e,r,i,t){if(e.hasOwnProperty(r)&&e[r].hasOwnProperty(i)){for(var n=null,a=0;a<t.length;a++){var s=t[a];e[r][i].hasOwnProperty(s)&&(n=e[r][i][s])}return n}}function i(e){return!!p.hasOwnProperty(e)&&(l[e]=!0,delete p[e],!0)}function t(){var e=System.now();for(var r in p)p.hasOwnProperty(r)&&p[r].timeOfExpiry&&e>p[r].timeOfExpiry&&i(r)}function n(e){var r;do{r=System.generateUniqueId(Constants.PUBKIT_AD_ID_LENGTH,"ALPHANUM")}while(p.hasOwnProperty[r]);return p[r]=e,r}function a(e){if(p.hasOwnProperty(e)&&p[e].timeOfExpiry&&System.now()>p[e].timeOfExpiry&&i(e),l[e])return EventsService.emit("internal_info","Attempted to render expired ad "+e),null;if(!p.hasOwnProperty(e))throw Whoopsie("INVALID_VALUE","`pubKitAdId` does not match any registered ad");var r=p[e];return i(e),r}function s(e){if(e.auxFn)try{e.auxFn.apply(null,e.auxArgs)}catch(e){EventsService.emit("internal_error","Error occurred running ad aux function.",e.stack)}}function o(e,r){var i=a(r);if(!i)return!1;s(i);try{System.documentWrite(e,i.adm)}catch(e){return EventsService.emit("internal_error",'Error occurred while rendering ad "'+r+'".',e.stack),!1}return!0}function d(e){var r=n(e);if(e.price||e.dealId){var i=e.partnerId,t=e.requestId;if(h.hasOwnProperty(i)){var a;a=Utilities.isString(e.size)?e.size:Size.arrayToString(e.size),Size.isSpecialSize(a)&&(_[t]=a),y[i]||(y[i]={}),y[i][a]||(y[i][a]={}),y[i][a][t]||(y[i][a][t]=[]),y[i][a][t].push(r);var s=e.price;s&&(g[i]||(g[i]={}),g[i][s]||(g[i][s]={}),g[i][s][t]||(g[i][s][t]=[]),g[i][s][t].push(r));var o=e.dealId;return o&&(S[i]||(S[i]={}),S[i][o]||(S[i][o]={}),S[i][o][t]||(S[i][o][t]=[]),S[i][o][t].push(r)),r}}}function v(e,r,i,t,n){try{if(!y.hasOwnProperty(e))return void EventsService.emit("internal_error","Partner "+e+" missing from ad ID map.");if(!Utilities.isObject(i))return void EventsService.emit("internal_error","invalid targeting map");if(!i.hasOwnProperty(h[e].idKey))return void EventsService.emit("internal_error","targeting map missing key "+h[e].idKey);var a=i[h[e].idKey];if(!Utilities.isArray(a))return void EventsService.emit("internal_error","invalid targeting map");if(!Utilities.isNumeric(t))return void EventsService.emit("internal_error","invalid width");if(!Utilities.isNumeric(n))return void EventsService.emit("internal_error","invalid height");var s=t+"x"+n;if(m&&m.hasOwnProperty(s)){var d=m[s];s=d[0]+"x"+d[1]}for(var v=0;v<a.length;v++){var c=a[v],u=_[c]||s;if(!y[e].hasOwnProperty(u))return void EventsService.emit("internal_error","Size key "+u+" missing from ad ID map for partner "+e);if(y[e][u].hasOwnProperty(c)){var p=y[e][u][c];if(p.length){o(r,Utilities.randomSplice(p));break}}}}catch(r){EventsService.emit("internal_error",'Error occurred while rendering ad for "'+e+'".',r.stack)}}function c(e,i){if(void 0!==e.partner&&void 0!==e.id&&void 0!==e.targeting&&(void 0!==e.size||void 0!==e.price)){var t=e.partner,n=e.price,o=e.id,d=e.targeting,v=e.size;if(h[t]){if(!d.hasOwnProperty(h[t].idKey))return void EventsService.emit("internal_error","targeting map missing key "+h[t].idKey);var c=d[h[t].idKey],u=null;if(void 0!==n)for(var p=[S,g],l=0;l<p.length&&!(u=r(p[l],t,n,c));l++);else{if(!Size.isSize(v))return;var f=Size.arrayToString(v);if(m&&m.hasOwnProperty(f)){var _=m[f];f=Size.arrayToString(_)}u=r(y,t,f,c)}if(u){var E=Utilities.randomSplice(u),w=a(E);if(!w)return void EventsService.emit("internal_error","No ad found for ad ID "+E);s(w);for(var O,P=w.size,x=w.adm,I=document.getElementsByTagName("iframe"),z=0;z<I.length;z++)if(I[z].contentWindow===i){O=I[z];break}O&&(O.width=String(P[0]),O.height=String(P[1]),O.parentElement.style.width=P[0]+"px",O.parentElement.style.height=P[1]+"px"),i.postMessage("ix_ht_render_adm:"+JSON.stringify({adm:x,id:o,size:P}),"*")}}}}function u(e,r,i){h.hasOwnProperty(e)||(h[e]={}),h[e].lineItemType=r,h[e].idKey=i}var p,l,f,m,h={},y={},g={},S={},_={};return function(){p={},l={},m=e.sizeRetargeting||null,f=setInterval(t,Constants.RENDER_SERVICE_EXPIRY_SWEEP_TIMER),EventsService=SpaceCamp.services.EventsService,window.addEventListener("message",function(e){try{if(!Utilities.isString(e.data)||"ix_ht_render:"!==e.data.substr(0,"ix_ht_render:".length))return;c(JSON.parse(e.data.substr("ix_ht_render:".length)),e.source,e.origin)}catch(e){EventsService.emit("internal_error","Error occurred while rendering ad.",e.stack)}},!1)}(),{__adStorage:p,__expiredAdStorage:l,__expirySweepIntervalId:f,__findAdIdsFromMap:r,registerAd:d,render:o,registerPartner:u,renderDfpAd:v,__expireAd:i,__removeExpiredAds:t}}var Constants=require("constants.js"),Size=require("size.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),EventsService;module.exports=RenderService;
 },{"constants.js":"/wrapper/src/libs/constants.js","size.js":"/wrapper/src/libs/size.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/services/stubs/compliance-service.stub.js":[function(require,module,exports){
@@ -1319,22 +1319,33 @@ function parse(rawData) {
             parsedData.htSlotStats[htSlotStats.s] = {};
         }
 
-        for (var j = 0; j < htSlotStats.e.length; j++) {
-            var htSlotEvent = htSlotStats.e[j];
+        for (var partnerName in htSlotStats.xslots) {
+            if (!htSlotStats.xslots.hasOwnProperty(partnerName)) {
+                continue;
+            }
 
-            if (!parsedData.htSlotStats[htSlotStats.s].hasOwnProperty(htSlotEvent.b)) {
-                parsedData.htSlotStats[htSlotStats.s][htSlotEvent.b] = {
-                    bid_requests: 0,
-                    bid_responses: 0,
-                    bid_passes: 0,
-                    bid_timeouts: 0,
-                    bid_errors: 0
+            if (!parsedData.htSlotStats[htSlotStats.s].hasOwnProperty(partnerName)) {
+                parsedData.htSlotStats[htSlotStats.s][partnerName] = {
+                    brq: 0,
+                    brs: 0,
+                    bp: 0,
+                    bt: 0,
+                    be: 0
                 };
             }
 
-            if (parsedData.htSlotStats[htSlotStats.s][htSlotEvent.b]
-                .hasOwnProperty(htSlotEvent.n)) {
-                parsedData.htSlotStats[htSlotStats.s][htSlotEvent.b][htSlotEvent.n]++;
+            for (var eventName in htSlotStats.xslots[partnerName]) {
+                if (!htSlotStats.xslots[partnerName].hasOwnProperty(eventName)) {
+                    continue;
+                }
+
+                for (var eventType in htSlotStats.xslots[partnerName][eventName]) {
+                    if (htSlotStats.xslots[partnerName][eventName].hasOwnProperty(eventType)
+                    && parsedData.htSlotStats[htSlotStats.s][partnerName]
+                        .hasOwnProperty(eventType)) {
+                        parsedData.htSlotStats[htSlotStats.s][partnerName][eventType]++;
+                    }
+                }
             }
         }
     }
@@ -1356,11 +1367,11 @@ function isBalanced(rawData) {
             }
 
             var stat = htSlotStats[htSlotId][partnerStatsId];
-            var balance = stat.bid_requests
-                - stat.bid_responses
-                - stat.bid_passes
-                - stat.bid_timeouts
-                - stat.bid_errors;
+            var balance = stat.brq
+                - stat.brs
+                - stat.bp
+                - stat.bt
+                - stat.be;
 
             if (balance !== 0) {
                 return false;
@@ -1379,6 +1390,7 @@ module.exports = {
     parse: parse,
     isBalanced: isBalanced
 };
+
 
 },{}],"/wrapper/tests/helpers/polyfills/promise.js":[function(require,module,exports){
 (function (process,global){
@@ -3203,6 +3215,7 @@ describe('System Tests: Partner', function () {
     var partnerId = window.testCases.getPartnerId();
     var callbackType = window.testCases.getCallbackType();
     var architecture = window.testCases.getArchitecture();
+    var defaultCreative = '<div id="default-creative"></div>';
 
     var partner = null;
 
@@ -3590,7 +3603,7 @@ describe('System Tests: Partner', function () {
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = partner.getValidResponse(request);
+                        var response = partner.getValidResponse(request, defaultCreative);
 
                         xhr.respond(
                             200,
@@ -3681,7 +3694,7 @@ describe('System Tests: Partner', function () {
                             request.body = xhr.requestBody;
 
                             // Respond to the request.
-                            var response = partner.getValidResponse(request);
+                            var response = partner.getValidResponse(request, defaultCreative);
 
                             xhr.respond(
                                 200,
@@ -3756,7 +3769,7 @@ describe('System Tests: Partner', function () {
                         // Parse request URL into a manageable object.
                         var request = UrlParse(xhr.url, true);
                         request.body = xhr.requestBody;
-                        var response = partner.getValidResponse(request);
+                        var response = partner.getValidResponse(request, defaultCreative);
 
                         xhr.respond(
                             200,
@@ -3786,8 +3799,8 @@ describe('System Tests: Partner', function () {
 
                             count = config.mapping[key.slice(0, -2)].length;
 
-                            expect(htSlotStats[key][statsId].bid_requests).toBe(count);
-                            expect(htSlotStats[key][statsId].bid_responses).toBe(count);
+                            expect(htSlotStats[key][statsId].brq).toBe(count);
+                            expect(htSlotStats[key][statsId].brs).toBe(count);
 
                         }
 
@@ -3823,7 +3836,7 @@ describe('System Tests: Partner', function () {
                             // Parse request URL into a manageable object.
                             var request = UrlParse(xhr.url, true);
                             request.body = xhr.requestBody;
-                            var response = partner.getValidResponseWithDeal(request);
+                            var response = partner.getValidResponseWithDeal(request, defaultCreative);
 
                             xhr.respond(
                                 200,
@@ -3945,8 +3958,8 @@ describe('System Tests: Partner', function () {
 
                             count = config.mapping[key.slice(0, -2)].length;
 
-                            expect(htSlotStats[key][statsId].bid_requests).toBe(count);
-                            expect(htSlotStats[key][statsId].bid_passes).toBe(count);
+                            expect(htSlotStats[key][statsId].brq).toBe(count);
+                            expect(htSlotStats[key][statsId].bp).toBe(count);
 
                         }
 
