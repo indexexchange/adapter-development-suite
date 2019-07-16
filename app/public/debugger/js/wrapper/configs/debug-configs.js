@@ -56,7 +56,8 @@ window.wrapper.configs = {
         ComplianceService: {
             gdprAppliesDefault: false,
             timeout: 1000
-        }
+        },
+        KeyValueService: {}
     },
     Layers: [
         {
