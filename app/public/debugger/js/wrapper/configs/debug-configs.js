@@ -63,7 +63,8 @@ window.wrapper.configs = {
         {
             layerId: 'GptLayer',
             configs: {
-                globalTimeout: 5000,
+                mobileGlobalTimeout: 5000,
+                desktopGlobalTimeout: 5000,
                 enableSingleRequest: true,
                 disableInitialLoad: false,
                 override: {
