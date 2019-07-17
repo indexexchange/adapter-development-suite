@@ -56,13 +56,15 @@ window.wrapper.configs = {
         ComplianceService: {
             gdprAppliesDefault: false,
             timeout: 1000
-        }
+        },
+        KeyValueService: {}
     },
     Layers: [
         {
             layerId: 'GptLayer',
             configs: {
-                globalTimeout: 5000,
+                mobileGlobalTimeout: 5000,
+                desktopGlobalTimeout: 5000,
                 enableSingleRequest: true,
                 disableInitialLoad: false,
                 override: {
