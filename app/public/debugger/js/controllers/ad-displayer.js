@@ -206,6 +206,19 @@
         window.headertag.pubads().refresh();
     }
 
+    function loadCmdQueue() {
+        // Save a reference to the command queue. Used to iterate over the array after the top
+        // reference is overwritten
+        var cmdQueue = window.top.headertag.cmd;
+        // Gives access to headertag object on the top level window element
+        window.top.headertag = window.headertag;
+
+        // Transfer commands from the temporary top level queue to the headertag queue
+        for (var i = 0; i < cmdQueue.length; i++) {
+            window.headertag.cmd.push(cmdQueue[i]);
+        }
+    }
+
     $(window).on('load', function () {
         $('#button-display').click(display);
         $('#button-refresh').click(refresh);
@@ -225,6 +238,9 @@
             })
             .then(function () {
                 return loadWrapper();
+            })
+            .then(function () {
+                loadCmdQueue();
             });
     });
 })();
