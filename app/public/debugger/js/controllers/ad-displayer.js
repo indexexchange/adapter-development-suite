@@ -210,6 +210,7 @@
         // Save a reference to the command queue. Used to iterate over the array after the top
         // reference is overwritten
         var cmdQueue = window.top.headertag.cmd;
+
         // Gives access to headertag object on the top level window element
         window.top.headertag = window.headertag;
 
