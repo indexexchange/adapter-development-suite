@@ -3,6 +3,9 @@
 (function () {
     var ConfigHelpers = window.ConfigHelpers;
 
+    // Create a command queue available before gpt loads
+    window.headertag = window.headertag || { cmd: [] };
+
     function getConfigs() {
         var configNameToSelector = {
             deviceType: 'input[name=radio-device-type]:checked',
