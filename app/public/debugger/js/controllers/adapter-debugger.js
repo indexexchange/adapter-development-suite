@@ -143,6 +143,15 @@
     }, false);
 
     $(window).on('load', function () {
+        // Access the ad displayer iframe
+        var iframeDOM = $('#ad-displayer')[0].contentDocument;
+
+        // Inject a script into the iframe that creates a headertag command queue
+        var script = window.document.createElement('script');
+        script.type = 'text/javascript';
+        script.innerHTML = 'window.headertag = window.top.headertag';
+        iframeDOM.getElementsByTagName('head')[0].appendChild(script);
+
         $('#form-configurations').restoreForm();
         toggleXSlot();
 
