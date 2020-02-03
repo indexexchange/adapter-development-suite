@@ -1,233 +1,281 @@
 <!DOCTYPE html>
 <!-- saved from url=(0032)http://localhost:9876/debug.html -->
-<html>
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link href="http://localhost:9876/favicon.ico" rel="icon" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>System Test Runner (Karma)</title>
-    <script type="text/javascript" src="/public/debugger/js/external/jquery.js"></script>
-    <script type="text/javascript" src="/adapter/dfp-auto/bidder.js"></script>
-    <script type="text/javascript" src="/adapter/dfp-auto/exports.js"></script>
-    <script type="text/javascript" src="/adapter/dfp-auto/system-tests.js"></script>
-    <script type="text/javascript" src="/public/tester/js/controllers/system-tester.js"></script>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link href="http://localhost:9876/favicon.ico" rel="icon" type="image/x-icon">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>System Test Runner (Karma)</title>
+  <script type="text/javascript" src="/public/debugger/js/external/jquery.js"></script>
+  <script type="text/javascript" src="/adapter/dfp-auto/bidder.js"></script>
+  <script type="text/javascript" src="/adapter/dfp-auto/exports.js"></script>
+  <script type="text/javascript" src="/adapter/dfp-auto/system-tests.js"></script>
+  <script type="text/javascript" src="/public/tester/js/controllers/system-tester.js"></script>
 </head>
-
 <body>
-    <!-- The scripts need to be at the end of body, so that some test running frameworks
+  <!-- The scripts need to be at the end of body, so that some test running frameworks
    (Angular Scenario, for example) need the body to be loaded so that it can insert its magic
    into it. If it is before body, then it fails to find the body and crashes and burns in an epic
    manner. -->
-    <script src="/public/tester/assets/context.js"></script>
-    <script src="/public/tester/assets/debug.js"></script>
-    <script type="text/javascript">
+  <script src="/public/tester/assets/context.js"></script>
+  <script src="/public/tester/assets/debug.js"></script>
+  <script type="text/javascript">
     // Configure our Karma
-    window.__karma__.config = { "args": [], "useIframe": true, "runInParent": false, "captureConsole": false, "clearContext": false };
+    window.__karma__.config = {"args":[],"useIframe":true,"runInParent":false,"captureConsole":false,"clearContext":false};
 
 
     // All served files with the latest timestamps
     window.__karma__.files = {
-        '/base/node_modules/jasmine-core/lib/jasmine-core/jasmine.js': '0b1eaf7a13cae32191eadea482cfc96ae41fc22b',
-        '/base/node_modules/karma-jasmine/lib/boot.js': '945a38bf4e45ad2770eb94868231905a04a0bd3e',
-        '/base/node_modules/karma-jasmine/lib/adapter.js': '6cf71867f538f40db053c1775b2c56a83696375c',
-        '/base/node_modules/karma-jasmine-html-reporter/src/css/jasmine.css': 'c9871b8538297ee2479a3223e4b1c8afaa94e162',
-        '/base/node_modules/karma-jasmine-html-reporter/src/lib/html.jasmine.reporter.js': '4af523ab7bfaa86c4966fa332c4dc2bd2278b4cc',
-        '/base/node_modules/karma-jasmine-html-reporter/src/lib/adapter.js': '9d2c71b931979c6194d209809111ee3a72cf149b',
-        '/base/node_modules/sinon/pkg/sinon.js': '3466bb5639b16d4e61e2bd4a0284d156cf03783c',
-        '/absolute/var/folders/x3/bghtdvf53_b4hfgdrwy1n3mc0000gn/T/1b21c88997a91c292f72f3c7f43da6d5.browserify': '7ed9662f13fb2d525867b7136fb0569f3216a0c3',
-        '/base/src/layers/direct-bidding-layer.js': '6a2d51d3b33d36b8ccb6830ba559fd259750e399',
-        '/base/src/layers/gpt-layer.js': 'b8e0d4dbd8209c59c1fd75ec912c2c4a2cf5800c',
-        '/base/src/layers/identity-layer.js': '34d4868361304b3062d298483ddd8a939e4e81d3',
-        '/base/src/layers/layer.js': '9a52d26feb863581af67da79db0bd8f14ec0ee15',
-        '/base/src/layers/mediation-layer.js': '622770733cdfe69417a1e408edd57720352e1d6c',
-        '/base/src/layers/partners-layer.js': '04fbbb043ebf291e3f6c5e1addac28b76edf3a25',
-        '/base/src/layers/post-gpt-layer.js': '44e24a67270badf78a49fcc9000d3a6290f78852',
-        '/base/src/libs/bid-transformer.js': 'bdf4f3e2c00ce294760a0b7207dbea6e898cc854',
-        '/base/src/libs/browser.js': 'ef717c8a04826e6be18e942cddce3d16ee4d1684',
-        '/base/src/libs/cache.js': 'c85fa7582f298e86b796d083a063c47478c01efb',
-        '/base/src/libs/classify.js': '66f6801c3ce25e7b445c3a2d90a632f534f5fc9c',
-        '/base/src/libs/command-queue.js': '4f887414e32b0059d161afe09bd81df410d021fa',
-        '/base/src/libs/config-validators.js': 'eee7a633ad788f6990d490526f0d75a0bbdf5da6',
-        '/base/src/libs/constants.js': 'd28adb762f13e944f95b63829e2550590acdde42',
-        '/base/src/libs/device-type-checker.js': 'fef0c2a44b5162ca50fd633aaf907597ad9a14cb',
-        '/base/src/libs/external/async.js': 'a575c9d33f34a6889ed5b664e98ec30fd4d9bff7',
-        '/base/src/libs/external/base64.js': 'f2b2bf6274ab23e8e0dc62384608eb9733d45c21',
-        '/base/src/libs/external/device.js': '62db973cb929f2d06dd78fb56af6fdfb3b575a4a',
-        '/base/src/libs/external/jsonpatch-reduced.js': '583acd0366ae1210d01c5d42206263533a02098e',
-        '/base/src/libs/external/prms.js': 'ff9311d5591e14f9681f84a44a3480cad4cef7d1',
-        '/base/src/libs/external/schema-inspector.js': 'a32cb549d33e4a5e593937c1d48393bd2e6f9731',
-        '/base/src/libs/external/user-agent-matcher.js': '1cceafa0c30f3464881d03a1609c79991fef71cc',
-        '/base/src/libs/gpt-helper.js': '124e0ded623186c2df324f94143153c64f26a892',
-        '/base/src/libs/header-tag-slot.js': 'df255f5512001735eaf503b6b0421211ddb11207',
-        '/base/src/libs/ht-slot-mapper.js': '2fa678496f6ac8dc4dedda3b56074bc173f579d7',
-        '/base/src/libs/network.js': '0f6aa5d711e73d4c7a7ed3e1729eae2cfbd9debd',
-        '/base/src/libs/openrtb.js': 'bbda8e249f480e36416c328d29e5c2781c35ff50',
-        '/base/src/libs/openrtb2_5.js': '4d7eb02840b0a6b04cfd4dbd33b22bbdeee818da',
-        '/base/src/libs/scribe.js': '368eabf40a29c9faf42f44aba1313c77311f64a9',
-        '/base/src/libs/size.js': '9ea4e104f42f88bd9cf345283aa608e802fbb41b',
-        '/base/src/libs/system.js': '083217e9d90525c6b8efb05c824433064318bc68',
-        '/base/src/libs/utilities.js': '91966a462ce21a71462e30b08ebd27cce4dd8c1a',
-        '/base/src/libs/whoopsie.js': '235692ebe083fcbaf6a168481f2d6fec9e624922',
-        '/base/src/loader.js': '0f50bca1ff3f6a37d05384dbccebdee3cb8659aa',
-        '/base/src/modules/gpt-layer/gpt-clear-targeting.js': '561630f0b0993204cda9a72af2190f78642fb8f5',
-        '/base/src/modules/gpt-layer/gpt-destroy-slots.js': 'c54b2ae235a136f12043884f12b165ae18e22451',
-        '/base/src/modules/gpt-layer/gpt-display.js': 'f56319e4d8d25d4548a0d6494cb131661b727549',
-        '/base/src/modules/gpt-layer/gpt-map-slots.js': 'b78d748547c648bf34ac5846428bc8920708df11',
-        '/base/src/modules/gpt-layer/gpt-options.js': 'c96b0177d8fda5fe480f94420cd27e6c239cc865',
-        '/base/src/modules/gpt-layer/gpt-refresh.js': '0dfbb5f4117950042e209e7cb65182843f53274d',
-        '/base/src/modules/gpt-layer/gpt-retrieve-and-set-targeting.js': '060f7c6412cccd74e9332d456bca99936aa0c744',
-        '/base/src/modules/gpt-layer/gpt-set-targeting.js': 'efec84d8b89837bf05a2453cb1fe01494c6c5aea',
-        '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip-validator.js': 'f10d1c1a75a0e3177e494212cb5092ba88e25ff7',
-        '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js': '17b87c0e8b11a9a70c6f77da29c07c2cb658acd4',
-        '/base/src/modules/partners-layer/dynamic-partner-loader/dynamic-partner-loader.js': 'aecef98fdf3eef3197fc3784bf7fe7b936f8b216',
-        '/base/src/modules/partners-layer/partner.js': '91ec6f232b81371674da5ff0294c477454a61c4d',
-        '/base/src/modules/partners-layer/prefetch.js': 'd6c431eeb167a9d6e371033a136087eb10813a2b',
-        '/base/src/services/compliance-service.js': '74e727920455a748c5f6dfbaa5c9e2862f9c1d72',
-        '/base/src/services/events-service.js': '061ff9556c5154d2cba0ce9ff590d7190329bcf9',
-        '/base/src/services/header-stats-service.js': 'c0a9eab54c251449ad243517230955894103ebcf',
-        '/base/src/services/render-service.js': 'b203591609c319d982b858a2d95f4232c1c282af',
-        '/base/src/services/stubs/compliance-service.stub.js': 'ba7f79b1d1fdcf2103e92905899f64592b43973c',
-        '/base/src/services/stubs/events-service.stub.js': 'd8b419164f8daadf4c629d7acf502ea0091fa612',
-        '/base/src/services/timer-service.js': '86a21be10073a12d166b1b0cf3edd81bd2351679',
-        '/base/src/shells/cassandra-shell.js': '0cd69e9b6078a3b23a634e60355db3da54b9d569',
-        '/base/src/shells/direct-bidding-shell.js': 'b7ebff723901f83d5f534fe202bc944f608f81b0',
-        '/base/src/shells/post-gpt-shell.js': '9580a05ea578ac18d8792c2fc65e7566d5edb7fd',
-        '/base/src/shells/pre-gpt-shell.js': 'e60c34fc3bd1b36c2c6f5e076856cdd668e35ded',
-        '/base/src/space-camp.js': '649b747036a582a6284ef682b47191ce5e3d446a',
-        '/base/tests/stubs/libs/bid-transformer.stub.js': 'ddae788d4e83cf622d58a7ac0be975687958021f',
-        '/base/tests/stubs/libs/browser.stub.js': 'fbd4484f75cc283500319c329b8e45d142da30c2',
-        '/base/tests/stubs/libs/cache.stub.js': '117497cce728b32a751dcf6cbaec8a5df5ef8e95',
-        '/base/tests/stubs/libs/classify.stub.js': '52a70079089fac805cbb6d3ed1077c3e96b248cf',
-        '/base/tests/stubs/libs/command-queue.stub.js': 'c74f00b11499e4d29a276de8493aa9d1f8b5e525',
-        '/base/tests/stubs/libs/config-validators.stub.js': 'cb63d4ded6852ebf042e2bf4ed0b908486502dea',
-        '/base/tests/stubs/libs/constants.stub.js': '89f92465b25884be233f963ddea280403e15b306',
-        '/base/tests/stubs/libs/device-type-checker.stub.js': 'c9051ff2a13f5991f60d02dea30dfb52115499ae',
-        '/base/tests/stubs/libs/gpt-helper.stub.js': 'e66f47c916003d437b60a2b7acb14cd05b48fc4b',
-        '/base/tests/stubs/libs/header-tag-slot.stub.js': '29066ff095f7cfb113a4ef622bca5e5a024b345b',
-        '/base/tests/stubs/libs/ht-slot-mapper.stub.js': '4d1850ac47691430546c67e479ad65bdef47ffb0',
-        '/base/tests/stubs/libs/network.stub.js': '82310b80a73f133dbd244e7f52fe01510a362097',
-        '/base/tests/stubs/libs/openrtb.stub.js': '07492c8532628859c4f7431e0c583fa4535e0db0',
-        '/base/tests/stubs/libs/openrtb2_5.stub.js': '18313415ea954fa865db33f9b03d394a691ccca7',
-        '/base/tests/stubs/libs/scribe.stub.js': '36f7b146433a9a1c61ccd2bd063fe6ae5f87e7d9',
-        '/base/tests/stubs/libs/size.stub.js': '839186c07a7aa30a9d356bb0d385e4b04a3d3f2f',
-        '/base/tests/stubs/libs/system.stub.js': 'c27a57ae060b6ab71920654c2f5510c5b95adbc0',
-        '/base/tests/stubs/libs/utilities.stub.js': 'e62efb50010d2f912fe41363c6bcad8aeaadf826',
-        '/base/tests/stubs/libs/whoopsie.stub.js': '8faca290890045cd4b40ef8478ab4e59e172c1c3',
-        '/base/tests/stubs/space-camp.stub.js': '5ea002051c205a195cd7882b30fcf18dafaca727',
-        '/base/tests/helpers/base-configs.js': 'fcceda038bbc45d8ff24d6d674249e40eb69c4df',
-        '/base/tests/helpers/gpt-page-maker.js': '91a5e63f0d0ba0f8bf7085085480f476c12ca3fe',
-        '/base/tests/helpers/hacks.js': 'bb489b1a12cd28b96a0896b90becd75afdd88125',
-        '/base/tests/helpers/header-stats-auditor.js': '473c1db0b31685d3cd6b7746d4d4ac707223dba8',
-        '/base/tests/helpers/polyfills/promise.js': '71609d2f5ed04b526f6536bd25cc18ff481cef85',
-        '/base/tests/helpers/render-checker.js': 'fda8de5950135f1c973b733c6af2ddaf8ad473db',
-        '/base/tests/helpers/stub-loader.js': '5c7213ccbd42379e0ed2d53b77a937dc63eb882b',
-        '/base/tests/helpers/utilities.js': '0c2882fc409374c4bc2b164b52b9a6763f4ca7fb',
-        '/base/tests/helpers/xhr-filter.js': '132e8d42dcd289c8f638c574972ca47d92dcbdad',
-        '/base/tests/specs/system/dfp-auto/partners/partner.spec.js': '9ae6abc6e8bff9901bec7cc32b69f9dbdbbfb3b3'
-    };
-    </script>
-    <!-- Dynamically replaced with <script> tags -->
-    <script type="text/javascript" src="/public/tester/assets/jasmine.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/boot.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/adapter.js" crossorigin="anonymous"></script>
-    <link type="text/css" href="/public/tester/assets/jasmine.css" rel="stylesheet">
-    <script type="text/javascript" src="/public/tester/assets/html.jasmine.reporter.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/adapter(1).js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/sinon.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/1b21c88997a91c292f72f3c7f43da6d5.browserify" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/direct-bidding-layer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-layer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/identity-layer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/layer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/mediation-layer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/partners-layer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/post-gpt-layer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/bid-transformer.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/browser.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/cache.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/classify.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/command-queue.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/config-validators.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/constants.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/device-type-checker.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/async.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/base64.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/device.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/jsonpatch-reduced.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/prms.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/schema-inspector.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/user-agent-matcher.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-helper.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/header-tag-slot.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/ht-slot-mapper.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/network.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/openrtb.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/openrtb2_5.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/scribe.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/size.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/system.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/utilities.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/whoopsie.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/loader.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-clear-targeting.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-destroy-slots.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-display.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-map-slots.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-options.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-refresh.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-retrieve-and-set-targeting.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-set-targeting.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/adserver-org-ip-validator.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/adserver-org-ip.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/dynamic-partner-loader.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/partner.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/prefetch.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/compliance-service.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/events-service.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/header-stats-service.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/render-service.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/compliance-service.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/events-service.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/timer-service.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/cassandra-shell.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/direct-bidding-shell.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/post-gpt-shell.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/pre-gpt-shell.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/space-camp.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/bid-transformer.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/browser.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/cache.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/classify.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/command-queue.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/config-validators.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/constants.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/device-type-checker.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-helper.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/header-tag-slot.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/ht-slot-mapper.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/network.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/openrtb.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/openrtb2_5.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/scribe.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/size.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/system.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/utilities.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/whoopsie.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/space-camp.stub.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/base-configs.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/gpt-page-maker.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/hacks.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/header-stats-auditor.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/promise.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/render-checker.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/stub-loader.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/utilities(1).js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/xhr-filter.js" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="/public/tester/assets/partner.spec.js" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-    window.__karma__.loaded();
-    </script>
-</body>
+  '/base/node_modules/karma-fixture/lib/fixture.js': 'bfac450a65e0a58b396442a83ba6140f8ba03b16',
+  '/base/node_modules/karma-fixture/lib/adapter.js': 'dcd9404314e7e0a4fe1e51f845a1c382e25c3b0b',
+  '/base/node_modules/jasmine-core/lib/jasmine-core/jasmine.js': '0b1eaf7a13cae32191eadea482cfc96ae41fc22b',
+  '/base/node_modules/karma-jasmine/lib/boot.js': '945a38bf4e45ad2770eb94868231905a04a0bd3e',
+  '/base/node_modules/karma-jasmine/lib/adapter.js': '6cf71867f538f40db053c1775b2c56a83696375c',
+  '/base/node_modules/karma-jasmine-html-reporter/src/css/jasmine.css': 'c9871b8538297ee2479a3223e4b1c8afaa94e162',
+  '/base/node_modules/karma-jasmine-html-reporter/src/lib/html.jasmine.reporter.js': '4af523ab7bfaa86c4966fa332c4dc2bd2278b4cc',
+  '/base/node_modules/karma-jasmine-html-reporter/src/lib/adapter.js': '9d2c71b931979c6194d209809111ee3a72cf149b',
+  '/base/node_modules/sinon/pkg/sinon.js': '5d8d33a48bfc9383ac9681b6147f0374b2e4ab42',
+  '/absolute/tmp/1b21c88997a91c292f72f3c7f43da6d5.browserify': '5492773c4ce32f5b8862745a3bfd0426995e779a',
+  '/base/src/layers/direct-bidding-layer.js': '6a2d51d3b33d36b8ccb6830ba559fd259750e399',
+  '/base/src/layers/gpt-layer.js': 'b8e0d4dbd8209c59c1fd75ec912c2c4a2cf5800c',
+  '/base/src/layers/identity-layer.js': '34d4868361304b3062d298483ddd8a939e4e81d3',
+  '/base/src/layers/layer.js': '9a52d26feb863581af67da79db0bd8f14ec0ee15',
+  '/base/src/layers/mediation-layer.js': '622770733cdfe69417a1e408edd57720352e1d6c',
+  '/base/src/layers/partners-layer.js': '04fbbb043ebf291e3f6c5e1addac28b76edf3a25',
+  '/base/src/layers/post-gpt-layer.js': '44e24a67270badf78a49fcc9000d3a6290f78852',
+  '/base/src/layers/video-interface-layer.js': '21ae7bfa1af47ed3e6c0b33dafe149ec5a17127d',
+  '/base/src/libs/bid-transformer.js': 'bdf4f3e2c00ce294760a0b7207dbea6e898cc854',
+  '/base/src/libs/browser.js': 'ef717c8a04826e6be18e942cddce3d16ee4d1684',
+  '/base/src/libs/cache.js': 'c85fa7582f298e86b796d083a063c47478c01efb',
+  '/base/src/libs/classify.js': '66f6801c3ce25e7b445c3a2d90a632f534f5fc9c',
+  '/base/src/libs/command-queue.js': '4f887414e32b0059d161afe09bd81df410d021fa',
+  '/base/src/libs/config-validators.js': 'eee7a633ad788f6990d490526f0d75a0bbdf5da6',
+  '/base/src/libs/constants.js': 'd28adb762f13e944f95b63829e2550590acdde42',
+  '/base/src/libs/device-type-checker.js': 'fef0c2a44b5162ca50fd633aaf907597ad9a14cb',
+  '/base/src/libs/external/async.js': 'a575c9d33f34a6889ed5b664e98ec30fd4d9bff7',
+  '/base/src/libs/external/base64.js': 'f2b2bf6274ab23e8e0dc62384608eb9733d45c21',
+  '/base/src/libs/external/device.js': '62db973cb929f2d06dd78fb56af6fdfb3b575a4a',
+  '/base/src/libs/external/jsonpatch-reduced.js': '583acd0366ae1210d01c5d42206263533a02098e',
+  '/base/src/libs/external/prms.js': 'ff9311d5591e14f9681f84a44a3480cad4cef7d1',
+  '/base/src/libs/external/schema-inspector.js': 'a32cb549d33e4a5e593937c1d48393bd2e6f9731',
+  '/base/src/libs/external/user-agent-matcher.js': '1cceafa0c30f3464881d03a1609c79991fef71cc',
+  '/base/src/libs/gpt-helper.js': '124e0ded623186c2df324f94143153c64f26a892',
+  '/base/src/libs/header-tag-slot.js': 'df255f5512001735eaf503b6b0421211ddb11207',
+  '/base/src/libs/ht-slot-mapper.js': '2fa678496f6ac8dc4dedda3b56074bc173f579d7',
+  '/base/src/libs/mvt.js': '7adf03651b1847306f3b7cba67808356f056a337',
+  '/base/src/libs/network.js': '0f6aa5d711e73d4c7a7ed3e1729eae2cfbd9debd',
+  '/base/src/libs/openrtb.js': 'bbda8e249f480e36416c328d29e5c2781c35ff50',
+  '/base/src/libs/openrtb2_5.js': '4d7eb02840b0a6b04cfd4dbd33b22bbdeee818da',
+  '/base/src/libs/scribe.js': '368eabf40a29c9faf42f44aba1313c77311f64a9',
+  '/base/src/libs/size.js': '9ea4e104f42f88bd9cf345283aa608e802fbb41b',
+  '/base/src/libs/system.js': '083217e9d90525c6b8efb05c824433064318bc68',
+  '/base/src/libs/utilities.js': '91966a462ce21a71462e30b08ebd27cce4dd8c1a',
+  '/base/src/libs/whoopsie.js': '235692ebe083fcbaf6a168481f2d6fec9e624922',
+  '/base/src/loader.js': '0f50bca1ff3f6a37d05384dbccebdee3cb8659aa',
+  '/base/src/modules/adaptive-timeout-service/normal-distribution-timeout-module.js': 'a6a216422a753c500133d978d1c04756163bc321',
+  '/base/src/modules/gpt-layer/gpt-clear-targeting.js': '561630f0b0993204cda9a72af2190f78642fb8f5',
+  '/base/src/modules/gpt-layer/gpt-destroy-slots.js': 'c54b2ae235a136f12043884f12b165ae18e22451',
+  '/base/src/modules/gpt-layer/gpt-display.js': 'f56319e4d8d25d4548a0d6494cb131661b727549',
+  '/base/src/modules/gpt-layer/gpt-map-slots.js': 'b78d748547c648bf34ac5846428bc8920708df11',
+  '/base/src/modules/gpt-layer/gpt-options.js': 'c96b0177d8fda5fe480f94420cd27e6c239cc865',
+  '/base/src/modules/gpt-layer/gpt-refresh.js': '0dfbb5f4117950042e209e7cb65182843f53274d',
+  '/base/src/modules/gpt-layer/gpt-retrieve-and-set-targeting.js': '060f7c6412cccd74e9332d456bca99936aa0c744',
+  '/base/src/modules/gpt-layer/gpt-set-targeting.js': 'efec84d8b89837bf05a2453cb1fe01494c6c5aea',
+  '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip-validator.js': 'f10d1c1a75a0e3177e494212cb5092ba88e25ff7',
+  '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js': '17b87c0e8b11a9a70c6f77da29c07c2cb658acd4',
+  '/base/src/modules/identity-layer/identity-partner-factory.js': '280162791240244c91d9dfa073797d690b9b493c',
+  '/base/src/modules/identity-layer/live-intent-ip/live-intent-ip-validator.js': '2411a08eca7404f5276fed7e6a1d74881a65f939',
+  '/base/src/modules/identity-layer/live-intent-ip/live-intent-ip.js': '9874ca88f140941b1883d701381269b032e02956',
+  '/base/src/modules/identity-layer/live-ramp-ip/live-ramp-ip-validator.js': '7cc60f72a247e6b11bf7fd0544b19e1187e67d80',
+  '/base/src/modules/identity-layer/live-ramp-ip/live-ramp-ip.js': '8714a6042af48a8e3ed4ad515cc92a6b6bbb926f',
+  '/base/src/modules/identity-layer/merkle-ip/merkle-ip-validator.js': 'b2fe78167e0164462e672d78c9792ad6a85f18e1',
+  '/base/src/modules/identity-layer/merkle-ip/merkle-ip.js': '1135b36f30b82f17f02fafcbf6cff0328a811477',
+  '/base/src/modules/partners-layer/dynamic-partner-loader/dynamic-partner-loader.js': 'aecef98fdf3eef3197fc3784bf7fe7b936f8b216',
+  '/base/src/modules/partners-layer/partner.js': '91ec6f232b81371674da5ff0294c477454a61c4d',
+  '/base/src/modules/partners-layer/prefetch.js': 'd6c431eeb167a9d6e371033a136087eb10813a2b',
+  '/base/src/services/adaptive-timeout-service.js': 'aef7f98997ecb7271e4f9980d05a51cf2e5be9b4',
+  '/base/src/services/compliance-service.js': '74e727920455a748c5f6dfbaa5c9e2862f9c1d72',
+  '/base/src/services/events-service.js': '061ff9556c5154d2cba0ce9ff590d7190329bcf9',
+  '/base/src/services/gpt-service.js': '5494bcaf3e74420c14c2ba2130adc902e33be552',
+  '/base/src/services/header-stats-service.js': 'c0a9eab54c251449ad243517230955894103ebcf',
+  '/base/src/services/key-value-service.js': 'bebb34eb68b65f68fa7270e5948bc2326d159066',
+  '/base/src/services/publisher-sonar-service.js': 'bab7cdbee35de4e28e6c034012d62ff7db922994',
+  '/base/src/services/render-service.js': 'b203591609c319d982b858a2d95f4232c1c282af',
+  '/base/src/services/stubs/compliance-service.stub.js': 'ba7f79b1d1fdcf2103e92905899f64592b43973c',
+  '/base/src/services/stubs/events-service.stub.js': 'd8b419164f8daadf4c629d7acf502ea0091fa612',
+  '/base/src/services/stubs/gpt-service.stub.js': '59b13ce8cba57c0f1320484d4a4259cb0fb64695',
+  '/base/src/services/stubs/publisher-sonar-service.stub.js': '00e5c6890a89899751f7e1584f5af5db605af95c',
+  '/base/src/services/timer-service.js': '86a21be10073a12d166b1b0cf3edd81bd2351679',
+  '/base/src/shells/cassandra-shell.js': '0cd69e9b6078a3b23a634e60355db3da54b9d569',
+  '/base/src/shells/direct-bidding-shell.js': 'b7ebff723901f83d5f534fe202bc944f608f81b0',
+  '/base/src/shells/identity-shell.js': '60fe4a70631f34ca383250e33e656ceccc27646e',
+  '/base/src/shells/post-gpt-shell.js': '9580a05ea578ac18d8792c2fc65e7566d5edb7fd',
+  '/base/src/shells/pre-gpt-shell.js': 'e60c34fc3bd1b36c2c6f5e076856cdd668e35ded',
+  '/base/src/space-camp.js': '649b747036a582a6284ef682b47191ce5e3d446a',
+  '/base/pktf1/stubs/libs/bid-transformer.stub.js': '554b3c45ee9d2aa30297d75ecf8bf1feb7e15aac',
+  '/base/pktf1/stubs/libs/browser.stub.js': 'aae6e7983c476dc8e144b05d4f350336d55c826f',
+  '/base/pktf1/stubs/libs/cache.stub.js': 'dded490440bef956dafc9478334b25fae0c98c9f',
+  '/base/pktf1/stubs/libs/classify.stub.js': '2c73a646f3a55efb8bd361240cf8dfcbf05189dc',
+  '/base/pktf1/stubs/libs/command-queue.stub.js': '6e3c40322bd08d4df70c29111669ccb158d058bb',
+  '/base/pktf1/stubs/libs/config-validators.stub.js': 'd13d3a0be3a590f1402ac42e3f892a8901ca35c4',
+  '/base/pktf1/stubs/libs/constants.stub.js': '5a461c39dac5506a4c374385d8034b40eb509fef',
+  '/base/pktf1/stubs/libs/device-type-checker.stub.js': '8d01fdc6fb55b15209e77f5039c852b7a956bdc4',
+  '/base/pktf1/stubs/libs/gpt-helper.stub.js': '75636a28f5b08ec300710a44b19004878d0c6c4f',
+  '/base/pktf1/stubs/libs/header-tag-slot.stub.js': 'bdadaac3085c8765534b5b96435f6460b5340e53',
+  '/base/pktf1/stubs/libs/ht-slot-mapper.stub.js': '71958749ff95078fb8937490d2e5c5bc37e291f4',
+  '/base/pktf1/stubs/libs/network.stub.js': '13d84bfc9cba25327dcc27043f10f9a5873e77f5',
+  '/base/pktf1/stubs/libs/openrtb.stub.js': '90b9cdc98f4c860728d4fa5279d7915222cc6c43',
+  '/base/pktf1/stubs/libs/openrtb2_5.stub.js': '74103e1f9c00e601a2d7cfe2c5e698595cc5a08d',
+  '/base/pktf1/stubs/libs/scribe.stub.js': 'd386ebf1e4418ec94e7cbc3e317d19a960b81091',
+  '/base/pktf1/stubs/libs/size.stub.js': '2beb73e4c95991529c39524258f7421c279bfa6e',
+  '/base/pktf1/stubs/libs/system.stub.js': '692476571f79c644e2452ccc2f719c4fd1155315',
+  '/base/pktf1/stubs/libs/utilities.stub.js': '949449f8611465493f110b72fc86b14abe8fba80',
+  '/base/pktf1/stubs/libs/whoopsie.stub.js': '809e823ee2b99ddc1014ffbcbdfa92b56bce8713',
+  '/base/pktf1/stubs/space-camp.stub.js': 'b13e37e8fa8da08edf42a212e65fc7ecc5622d0b',
+  '/base/pktf1/helpers/base-configs.js': 'f2695f6fb22fd1dd51a3a588b8ca37f531a31450',
+  '/base/pktf1/helpers/gpt-page-maker.js': 'c384ed799085ed5b9dd04ce398a2eaabd7ed4d23',
+  '/base/pktf1/helpers/hacks.js': 'aa5df6fdb8c206ef82d81613ab03be61c6a38276',
+  '/base/pktf1/helpers/header-stats-auditor.js': '99107eda9219565af2da80269dd77e8a8910b408',
+  '/base/pktf1/helpers/identity-partner-factory-loader.js': '686ff660d3d9c5c276aa63c5ff3dc0d5c71a095f',
+  '/base/pktf1/helpers/mock-data.js': '3450c0895a63ef98141c3ddcb1ace02d8c9a6bf5',
+  '/base/pktf1/helpers/polyfills/promise.js': 'c42f9818ac61931a09101de34c990ff9ba16e539',
+  '/base/pktf1/helpers/render-checker.js': '7ecf2d5f39a92a855f5c1800a36bde682ea8578c',
+  '/base/pktf1/helpers/stub-loader.js': 'f156dc08c228b6ea3977dcf9185d3b4f67ad4cd6',
+  '/base/pktf1/helpers/utilities.js': '75cff70ca3b9fef2d5814b8304c7a5eb013cc587',
+  '/base/pktf1/helpers/xhr-filter.js': '3dcdc406649cc043c30f3e9cdc060a117860888f',
+  '/base/pktf1/specs/wrapper-config/dfp-manual-v2-config.js': '50499253b4182f51af21d6297ecbf6b3130fb104',
+  '/base/pktf1/specs/wrapper-config/identity-library-config.js': '7f889b578f922cf58f08d8bdd30a5c3e40061af1',
+  '/base/pktf1/specs/wrapper-config/post-bid-v2-config.js': '28f5b07a3df909baf0e0ff2254bdd3529e33464c',
+  '/base/pktf1/specs/wrapper-config/universal-v2-config.js': '8074a226184b6201716c0aa3d7f559c24bbd760c',
+  '/base/pktf1/specs/system/dfp-auto/partners/partner.spec.js': '9ef850430806c6387d5550c515e938cae460fc10'
+};
 
-</html>
+  </script>
+  <!-- Dynamically replaced with <script> tags -->
+  <script type="text/javascript" src="/public/tester/assets/fixture.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adapter.js" crossorigin="anonymous"></script><div id="fixture_container"></div>
+<script type="text/javascript" src="/public/tester/assets/jasmine.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/boot.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adapter.js(1)" crossorigin="anonymous"></script>
+<link type="text/css" href="/public/tester/assets/jasmine.css" rel="stylesheet">
+<script type="text/javascript" src="/public/tester/assets/html.jasmine.reporter.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adapter.js(2)" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/sinon.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/1b21c88997a91c292f72f3c7f43da6d5.browserify" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/direct-bidding-layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/identity-layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/mediation-layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/partners-layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/post-gpt-layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/video-interface-layer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/bid-transformer.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/browser.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/cache.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/classify.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/command-queue.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/config-validators.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/constants.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/device-type-checker.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/async.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/base64.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/device.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/jsonpatch-reduced.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/prms.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/schema-inspector.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/user-agent-matcher.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-helper.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/header-tag-slot.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/ht-slot-mapper.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/mvt.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/network.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/openrtb.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/openrtb2_5.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/scribe.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/size.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/system.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/utilities.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/whoopsie.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/loader.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/normal-distribution-timeout-module.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-clear-targeting.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-destroy-slots.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-display.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-map-slots.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-options.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-refresh.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-retrieve-and-set-targeting.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-set-targeting.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adserver-org-ip-validator.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adserver-org-ip.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/identity-partner-factory.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/live-intent-ip-validator.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/live-intent-ip.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/live-ramp-ip-validator.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/live-ramp-ip.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/merkle-ip-validator.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/merkle-ip.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/dynamic-partner-loader.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/partner.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/prefetch.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adaptive-timeout-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/compliance-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/events-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/header-stats-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/key-value-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/publisher-sonar-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/render-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/compliance-service.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/events-service.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-service.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/publisher-sonar-service.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/timer-service.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/cassandra-shell.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/direct-bidding-shell.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/identity-shell.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/post-gpt-shell.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/pre-gpt-shell.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/space-camp.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/bid-transformer.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/browser.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/cache.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/classify.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/command-queue.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/config-validators.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/constants.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/device-type-checker.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-helper.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/header-tag-slot.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/ht-slot-mapper.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/network.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/openrtb.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/openrtb2_5.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/scribe.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/size.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/system.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/utilities.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/whoopsie.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/space-camp.stub.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/base-configs.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/gpt-page-maker.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/hacks.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/header-stats-auditor.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/identity-partner-factory-loader.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/mock-data.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/promise.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/render-checker.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/stub-loader.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/utilities.js(1)" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/xhr-filter.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/dfp-manual-v2-config.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/identity-library-config.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/post-bid-v2-config.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/universal-v2-config.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/partner.spec.js" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    window.__karma__.loaded();
+  </script>
+
+
+</body></html>

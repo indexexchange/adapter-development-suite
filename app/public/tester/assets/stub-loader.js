@@ -1,1 +1,1 @@
-typeof require === "function" && require("/wrapper/tests/helpers/stub-loader.js");
+typeof require === "function" && require("/wrapper/pktf1/helpers/stub-loader.js");

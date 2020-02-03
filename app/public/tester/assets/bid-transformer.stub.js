@@ -1,1 +1,1 @@
-typeof require === "function" && require("/wrapper/tests/stubs/libs/bid-transformer.stub.js");
+typeof require === "function" && require("/wrapper/pktf1/stubs/libs/bid-transformer.stub.js");
