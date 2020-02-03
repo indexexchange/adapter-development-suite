@@ -68,13 +68,8 @@
                 window.__uspapi = function (cmd, ver, cb) {
                     cb({
                         version: 1,
-<<<<<<< HEAD
                         uspString: 'TEST_USPAPI_CONSENT_STRING'
                     }, true);
-=======
-                        uspString: '1YNN'
-                    });
->>>>>>> 00fa28aebcbfe5c243e0c279928eb73339f3c48a
                 };
             }
 
