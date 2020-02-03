@@ -68,8 +68,8 @@
                 window.__uspapi = function (cmd, ver, cb) {
                     cb({
                         version: 1,
-                        uspString: '1YNN'
-                    });
+                        uspString: 'TEST_USPAPI_CONSENT_STRING'
+                    }, true);
                 };
             }
 
@@ -112,16 +112,24 @@
             window.googletag.cmd = window.googletag.cmd || [];
 
             window.googletag.cmd.push(function () {
-                window.googletag.defineSlot('/77475840/pktf/sf-price', [[1, 1]], 'div-desktop-a')
+                window.googletag.defineSlot('/77475840/pktf/sf-price', [
+                        [1, 1]
+                    ], 'div-desktop-a')
                     .addService(window.googletag.pubads());
 
-                window.googletag.defineSlot('/77475840/pktf/ff-price', [[1, 1]], 'div-desktop-b')
+                window.googletag.defineSlot('/77475840/pktf/ff-price', [
+                        [1, 1]
+                    ], 'div-desktop-b')
                     .addService(window.googletag.pubads());
 
-                window.googletag.defineSlot('/77475840/pktf/sf-price', [[1, 1]], 'div-mobile-a')
+                window.googletag.defineSlot('/77475840/pktf/sf-price', [
+                        [1, 1]
+                    ], 'div-mobile-a')
                     .addService(window.googletag.pubads());
 
-                window.googletag.defineSlot('/77475840/pktf/ff-price', [[1, 1]], 'div-mobile-b')
+                window.googletag.defineSlot('/77475840/pktf/ff-price', [
+                        [1, 1]
+                    ], 'div-mobile-b')
                     .addService(window.googletag.pubads());
 
                 if (configs.singleRequest === 'enable') {
@@ -145,8 +153,8 @@
 
     function loadWrapperConfigs() {
         return new Promise(function (resolve) {
-            var url = protocol
-                + '//localhost:' + port + '/public/debugger/js/wrapper/configs/debug-configs.js';
+            var url = protocol +
+                '//localhost:' + port + '/public/debugger/js/wrapper/configs/debug-configs.js';
 
             loadScript(url).then(function () {
                 resolve();
@@ -185,8 +193,8 @@
 
             window.googletag.pubads().setTargeting('EXPECTED_PRICE', configs.expectedBid);
 
-            var url = protocol
-                + '//localhost:' + port + '/public/debugger/js/wrapper/debug-wrapper.js';
+            var url = protocol +
+                '//localhost:' + port + '/public/debugger/js/wrapper/debug-wrapper.js';
 
             loadScript(url).then(function () {
                 resolve();
