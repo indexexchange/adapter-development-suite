@@ -68,13 +68,8 @@
                 window.__uspapi = function (cmd, ver, cb) {
                     cb({
                         version: 1,
-<<<<<<< HEAD
                         uspString: 'TEST_USPAPI_CONSENT_STRING'
                     }, true);
-=======
-                        uspString: '1YNN'
-                    });
->>>>>>> Addition of CCPA in debugger
                 };
             }
 
