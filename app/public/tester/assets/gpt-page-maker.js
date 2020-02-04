@@ -1,1 +1,1 @@
-typeof require === "function" && require("/wrapper/tests/helpers/gpt-page-maker.js");
+typeof require === "function" && require("/wrapper/pktf1/helpers/gpt-page-maker.js");

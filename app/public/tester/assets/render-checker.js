@@ -1,1 +1,1 @@
-typeof require === "function" && require("/wrapper/tests/helpers/render-checker.js");
+typeof require === "function" && require("/wrapper/pktf1/helpers/render-checker.js");
