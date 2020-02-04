@@ -1,1 +1,1 @@
-typeof require === "function" && require("/wrapper/tests/helpers/xhr-filter.js");
+typeof require === "function" && require("/wrapper/pktf1/helpers/xhr-filter.js");
