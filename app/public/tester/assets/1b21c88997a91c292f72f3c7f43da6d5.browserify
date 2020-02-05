@@ -1192,10 +1192,8 @@ var baseConfigs = {
         },
         config: {
             DeviceTypeChecker: {
-                method: 'REFERENCE',
-                configs: {
-                    reference: '"desktop"'
-                }
+                method: 'USER_AGENT',
+                configs: {}
             },
             htSlots: {
                 htSlotDesktopA: {
