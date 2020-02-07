@@ -26,3 +26,4 @@ window.__karma__.result = window.console ? function (result) {
 window.__karma__.loaded = function () {
   this.start()
 }
+
