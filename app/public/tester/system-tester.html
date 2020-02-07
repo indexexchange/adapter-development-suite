@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <!-- saved from url=(0032)http://localhost:9876/debug.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
   <link href="http://localhost:9876/favicon.ico" rel="icon" type="image/x-icon">
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>System Test Runner (Karma)</title>
-  <script type="text/javascript" src="/public/debugger/js/external/jquery.js"></script>
-  <script type="text/javascript" src="/adapter/dfp-auto/bidder.js"></script>
-  <script type="text/javascript" src="/adapter/dfp-auto/exports.js"></script>
-  <script type="text/javascript" src="/adapter/dfp-auto/system-tests.js"></script>
-  <script type="text/javascript" src="/public/tester/js/controllers/system-tester.js"></script>
+<title>System Test Runner (Karma)</title>
+<script type="text/javascript" src="/public/debugger/js/external/jquery.js"></script>
+<script type="text/javascript" src="/adapter/dfp-auto/bidder.js"></script>
+<script type="text/javascript" src="/adapter/dfp-auto/exports.js"></script>
+<script type="text/javascript" src="/adapter/dfp-auto/system-tests.js"></script>
+<script type="text/javascript" src="/public/tester/js/controllers/system-tester.js"></script>
 </head>
 <body>
   <!-- The scripts need to be at the end of body, so that some test running frameworks
@@ -34,115 +35,119 @@
   '/base/node_modules/karma-jasmine-html-reporter/src/lib/html.jasmine.reporter.js': '4af523ab7bfaa86c4966fa332c4dc2bd2278b4cc',
   '/base/node_modules/karma-jasmine-html-reporter/src/lib/adapter.js': '9d2c71b931979c6194d209809111ee3a72cf149b',
   '/base/node_modules/sinon/pkg/sinon.js': '5d8d33a48bfc9383ac9681b6147f0374b2e4ab42',
-  '/absolute/tmp/1b21c88997a91c292f72f3c7f43da6d5.browserify': '5492773c4ce32f5b8862745a3bfd0426995e779a',
-  '/base/src/layers/direct-bidding-layer.js': '6a2d51d3b33d36b8ccb6830ba559fd259750e399',
-  '/base/src/layers/gpt-layer.js': 'b8e0d4dbd8209c59c1fd75ec912c2c4a2cf5800c',
-  '/base/src/layers/identity-layer.js': '34d4868361304b3062d298483ddd8a939e4e81d3',
-  '/base/src/layers/layer.js': '9a52d26feb863581af67da79db0bd8f14ec0ee15',
-  '/base/src/layers/mediation-layer.js': '622770733cdfe69417a1e408edd57720352e1d6c',
-  '/base/src/layers/partners-layer.js': '04fbbb043ebf291e3f6c5e1addac28b76edf3a25',
-  '/base/src/layers/post-gpt-layer.js': '44e24a67270badf78a49fcc9000d3a6290f78852',
-  '/base/src/layers/video-interface-layer.js': '21ae7bfa1af47ed3e6c0b33dafe149ec5a17127d',
-  '/base/src/libs/bid-transformer.js': 'bdf4f3e2c00ce294760a0b7207dbea6e898cc854',
-  '/base/src/libs/browser.js': 'ef717c8a04826e6be18e942cddce3d16ee4d1684',
-  '/base/src/libs/cache.js': 'c85fa7582f298e86b796d083a063c47478c01efb',
-  '/base/src/libs/classify.js': '66f6801c3ce25e7b445c3a2d90a632f534f5fc9c',
-  '/base/src/libs/command-queue.js': '4f887414e32b0059d161afe09bd81df410d021fa',
-  '/base/src/libs/config-validators.js': 'eee7a633ad788f6990d490526f0d75a0bbdf5da6',
-  '/base/src/libs/constants.js': 'd28adb762f13e944f95b63829e2550590acdde42',
-  '/base/src/libs/device-type-checker.js': 'fef0c2a44b5162ca50fd633aaf907597ad9a14cb',
-  '/base/src/libs/external/async.js': 'a575c9d33f34a6889ed5b664e98ec30fd4d9bff7',
-  '/base/src/libs/external/base64.js': 'f2b2bf6274ab23e8e0dc62384608eb9733d45c21',
-  '/base/src/libs/external/device.js': '62db973cb929f2d06dd78fb56af6fdfb3b575a4a',
-  '/base/src/libs/external/jsonpatch-reduced.js': '583acd0366ae1210d01c5d42206263533a02098e',
-  '/base/src/libs/external/prms.js': 'ff9311d5591e14f9681f84a44a3480cad4cef7d1',
-  '/base/src/libs/external/schema-inspector.js': 'a32cb549d33e4a5e593937c1d48393bd2e6f9731',
-  '/base/src/libs/external/user-agent-matcher.js': '1cceafa0c30f3464881d03a1609c79991fef71cc',
-  '/base/src/libs/gpt-helper.js': '124e0ded623186c2df324f94143153c64f26a892',
-  '/base/src/libs/header-tag-slot.js': 'df255f5512001735eaf503b6b0421211ddb11207',
-  '/base/src/libs/ht-slot-mapper.js': '2fa678496f6ac8dc4dedda3b56074bc173f579d7',
-  '/base/src/libs/mvt.js': '7adf03651b1847306f3b7cba67808356f056a337',
-  '/base/src/libs/network.js': '0f6aa5d711e73d4c7a7ed3e1729eae2cfbd9debd',
-  '/base/src/libs/openrtb.js': 'bbda8e249f480e36416c328d29e5c2781c35ff50',
-  '/base/src/libs/openrtb2_5.js': '4d7eb02840b0a6b04cfd4dbd33b22bbdeee818da',
-  '/base/src/libs/scribe.js': '368eabf40a29c9faf42f44aba1313c77311f64a9',
-  '/base/src/libs/size.js': '9ea4e104f42f88bd9cf345283aa608e802fbb41b',
-  '/base/src/libs/system.js': '083217e9d90525c6b8efb05c824433064318bc68',
-  '/base/src/libs/utilities.js': '91966a462ce21a71462e30b08ebd27cce4dd8c1a',
-  '/base/src/libs/whoopsie.js': '235692ebe083fcbaf6a168481f2d6fec9e624922',
-  '/base/src/loader.js': '0f50bca1ff3f6a37d05384dbccebdee3cb8659aa',
-  '/base/src/modules/adaptive-timeout-service/normal-distribution-timeout-module.js': 'a6a216422a753c500133d978d1c04756163bc321',
-  '/base/src/modules/gpt-layer/gpt-clear-targeting.js': '561630f0b0993204cda9a72af2190f78642fb8f5',
-  '/base/src/modules/gpt-layer/gpt-destroy-slots.js': 'c54b2ae235a136f12043884f12b165ae18e22451',
-  '/base/src/modules/gpt-layer/gpt-display.js': 'f56319e4d8d25d4548a0d6494cb131661b727549',
-  '/base/src/modules/gpt-layer/gpt-map-slots.js': 'b78d748547c648bf34ac5846428bc8920708df11',
-  '/base/src/modules/gpt-layer/gpt-options.js': 'c96b0177d8fda5fe480f94420cd27e6c239cc865',
-  '/base/src/modules/gpt-layer/gpt-refresh.js': '0dfbb5f4117950042e209e7cb65182843f53274d',
-  '/base/src/modules/gpt-layer/gpt-retrieve-and-set-targeting.js': '060f7c6412cccd74e9332d456bca99936aa0c744',
-  '/base/src/modules/gpt-layer/gpt-set-targeting.js': 'efec84d8b89837bf05a2453cb1fe01494c6c5aea',
-  '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip-validator.js': 'f10d1c1a75a0e3177e494212cb5092ba88e25ff7',
-  '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js': '17b87c0e8b11a9a70c6f77da29c07c2cb658acd4',
-  '/base/src/modules/identity-layer/identity-partner-factory.js': '280162791240244c91d9dfa073797d690b9b493c',
-  '/base/src/modules/identity-layer/live-intent-ip/live-intent-ip-validator.js': '2411a08eca7404f5276fed7e6a1d74881a65f939',
-  '/base/src/modules/identity-layer/live-intent-ip/live-intent-ip.js': '9874ca88f140941b1883d701381269b032e02956',
-  '/base/src/modules/identity-layer/live-ramp-ip/live-ramp-ip-validator.js': '7cc60f72a247e6b11bf7fd0544b19e1187e67d80',
-  '/base/src/modules/identity-layer/live-ramp-ip/live-ramp-ip.js': '8714a6042af48a8e3ed4ad515cc92a6b6bbb926f',
-  '/base/src/modules/identity-layer/merkle-ip/merkle-ip-validator.js': 'b2fe78167e0164462e672d78c9792ad6a85f18e1',
-  '/base/src/modules/identity-layer/merkle-ip/merkle-ip.js': '1135b36f30b82f17f02fafcbf6cff0328a811477',
-  '/base/src/modules/partners-layer/dynamic-partner-loader/dynamic-partner-loader.js': 'aecef98fdf3eef3197fc3784bf7fe7b936f8b216',
-  '/base/src/modules/partners-layer/partner.js': '91ec6f232b81371674da5ff0294c477454a61c4d',
-  '/base/src/modules/partners-layer/prefetch.js': 'd6c431eeb167a9d6e371033a136087eb10813a2b',
-  '/base/src/services/adaptive-timeout-service.js': 'aef7f98997ecb7271e4f9980d05a51cf2e5be9b4',
-  '/base/src/services/compliance-service.js': '74e727920455a748c5f6dfbaa5c9e2862f9c1d72',
-  '/base/src/services/events-service.js': '061ff9556c5154d2cba0ce9ff590d7190329bcf9',
-  '/base/src/services/gpt-service.js': '5494bcaf3e74420c14c2ba2130adc902e33be552',
-  '/base/src/services/header-stats-service.js': 'c0a9eab54c251449ad243517230955894103ebcf',
-  '/base/src/services/key-value-service.js': 'bebb34eb68b65f68fa7270e5948bc2326d159066',
-  '/base/src/services/publisher-sonar-service.js': 'bab7cdbee35de4e28e6c034012d62ff7db922994',
-  '/base/src/services/render-service.js': 'b203591609c319d982b858a2d95f4232c1c282af',
-  '/base/src/services/stubs/compliance-service.stub.js': 'ba7f79b1d1fdcf2103e92905899f64592b43973c',
-  '/base/src/services/stubs/events-service.stub.js': 'd8b419164f8daadf4c629d7acf502ea0091fa612',
-  '/base/src/services/stubs/gpt-service.stub.js': '59b13ce8cba57c0f1320484d4a4259cb0fb64695',
-  '/base/src/services/stubs/publisher-sonar-service.stub.js': '00e5c6890a89899751f7e1584f5af5db605af95c',
-  '/base/src/services/timer-service.js': '86a21be10073a12d166b1b0cf3edd81bd2351679',
-  '/base/src/shells/cassandra-shell.js': '0cd69e9b6078a3b23a634e60355db3da54b9d569',
-  '/base/src/shells/direct-bidding-shell.js': 'b7ebff723901f83d5f534fe202bc944f608f81b0',
-  '/base/src/shells/identity-shell.js': '60fe4a70631f34ca383250e33e656ceccc27646e',
-  '/base/src/shells/post-gpt-shell.js': '9580a05ea578ac18d8792c2fc65e7566d5edb7fd',
-  '/base/src/shells/pre-gpt-shell.js': 'e60c34fc3bd1b36c2c6f5e076856cdd668e35ded',
-  '/base/src/space-camp.js': '649b747036a582a6284ef682b47191ce5e3d446a',
-  '/base/pktf1/stubs/libs/bid-transformer.stub.js': '554b3c45ee9d2aa30297d75ecf8bf1feb7e15aac',
-  '/base/pktf1/stubs/libs/browser.stub.js': 'aae6e7983c476dc8e144b05d4f350336d55c826f',
-  '/base/pktf1/stubs/libs/cache.stub.js': 'dded490440bef956dafc9478334b25fae0c98c9f',
-  '/base/pktf1/stubs/libs/classify.stub.js': '2c73a646f3a55efb8bd361240cf8dfcbf05189dc',
-  '/base/pktf1/stubs/libs/command-queue.stub.js': '6e3c40322bd08d4df70c29111669ccb158d058bb',
-  '/base/pktf1/stubs/libs/config-validators.stub.js': 'd13d3a0be3a590f1402ac42e3f892a8901ca35c4',
-  '/base/pktf1/stubs/libs/constants.stub.js': '5a461c39dac5506a4c374385d8034b40eb509fef',
-  '/base/pktf1/stubs/libs/device-type-checker.stub.js': '8d01fdc6fb55b15209e77f5039c852b7a956bdc4',
-  '/base/pktf1/stubs/libs/gpt-helper.stub.js': '75636a28f5b08ec300710a44b19004878d0c6c4f',
-  '/base/pktf1/stubs/libs/header-tag-slot.stub.js': 'bdadaac3085c8765534b5b96435f6460b5340e53',
-  '/base/pktf1/stubs/libs/ht-slot-mapper.stub.js': '71958749ff95078fb8937490d2e5c5bc37e291f4',
-  '/base/pktf1/stubs/libs/network.stub.js': '13d84bfc9cba25327dcc27043f10f9a5873e77f5',
-  '/base/pktf1/stubs/libs/openrtb.stub.js': '90b9cdc98f4c860728d4fa5279d7915222cc6c43',
-  '/base/pktf1/stubs/libs/openrtb2_5.stub.js': '74103e1f9c00e601a2d7cfe2c5e698595cc5a08d',
-  '/base/pktf1/stubs/libs/scribe.stub.js': 'd386ebf1e4418ec94e7cbc3e317d19a960b81091',
-  '/base/pktf1/stubs/libs/size.stub.js': '2beb73e4c95991529c39524258f7421c279bfa6e',
-  '/base/pktf1/stubs/libs/system.stub.js': '692476571f79c644e2452ccc2f719c4fd1155315',
-  '/base/pktf1/stubs/libs/utilities.stub.js': '949449f8611465493f110b72fc86b14abe8fba80',
-  '/base/pktf1/stubs/libs/whoopsie.stub.js': '809e823ee2b99ddc1014ffbcbdfa92b56bce8713',
-  '/base/pktf1/stubs/space-camp.stub.js': 'b13e37e8fa8da08edf42a212e65fc7ecc5622d0b',
-  '/base/pktf1/helpers/base-configs.js': 'f2695f6fb22fd1dd51a3a588b8ca37f531a31450',
-  '/base/pktf1/helpers/gpt-page-maker.js': 'c384ed799085ed5b9dd04ce398a2eaabd7ed4d23',
-  '/base/pktf1/helpers/hacks.js': 'aa5df6fdb8c206ef82d81613ab03be61c6a38276',
-  '/base/pktf1/helpers/header-stats-auditor.js': '99107eda9219565af2da80269dd77e8a8910b408',
-  '/base/pktf1/helpers/identity-partner-factory-loader.js': '686ff660d3d9c5c276aa63c5ff3dc0d5c71a095f',
-  '/base/pktf1/helpers/mock-data.js': '3450c0895a63ef98141c3ddcb1ace02d8c9a6bf5',
-  '/base/pktf1/helpers/polyfills/promise.js': 'c42f9818ac61931a09101de34c990ff9ba16e539',
-  '/base/pktf1/helpers/render-checker.js': '7ecf2d5f39a92a855f5c1800a36bde682ea8578c',
-  '/base/pktf1/helpers/stub-loader.js': 'f156dc08c228b6ea3977dcf9185d3b4f67ad4cd6',
-  '/base/pktf1/helpers/utilities.js': '75cff70ca3b9fef2d5814b8304c7a5eb013cc587',
-  '/base/pktf1/helpers/xhr-filter.js': '3dcdc406649cc043c30f3e9cdc060a117860888f',
-  '/base/pktf1/specs/system/dfp-auto/partners/partner.spec.js': '9ef850430806c6387d5550c515e938cae460fc10'
+  '/absolute/var/folders/bw/mb_wk1zj0xx7kc_6ysdx9_yr0000gp/T/5c60c23b49a558d804eefeaf155dbb05.browserify': 'f6c084a9a4c52c12f5134e72b1c6bfced7ba266e',
+  '/base/src/layers/direct-bidding-layer.js': '03fd3aa9316018ee0a660177edadaa757d6a2224',
+  '/base/src/layers/gpt-layer.js': 'f0530c7388b3cf8dba012b3800a01f6442f00e89',
+  '/base/src/layers/identity-layer.js': '71017d0840c3925668b351edcd58a1d4786dc7eb',
+  '/base/src/layers/layer.js': '4ebaac2fbd95ff817fb174e7b4266c52122a3870',
+  '/base/src/layers/mediation-layer.js': '1acb3d48e14f291096651feb61cb4cc365ed2038',
+  '/base/src/layers/partners-layer.js': 'cc6c81aca35ffc9b5caff137662a1e74aa3f1979',
+  '/base/src/layers/post-gpt-layer.js': 'dffdb867f2a76cd8fd02d3ddbc9bb5834216e014',
+  '/base/src/layers/video-interface-layer.js': '5bce32d02183b5e712749268feb1570873a3e0ab',
+  '/base/src/libs/bid-transformer.js': '4a512abff45364c21a1f413d14469ab2f6bd3237',
+  '/base/src/libs/browser.js': '376717b6bf627160a5d6947d09392a9840ba78ba',
+  '/base/src/libs/cache.js': '8693e796232ec86ef6fe5c080153d628ee5b35c5',
+  '/base/src/libs/classify.js': 'c035870ecdcc13b8226767d9205152672b69418c',
+  '/base/src/libs/command-queue.js': '455a0f4db2053b2797e988c663e3a064885818f9',
+  '/base/src/libs/config-validators.js': '5a52ea7a7d319b17a09ca2e338887f076d68a694',
+  '/base/src/libs/constants.js': '14f70a5621195f7081d7c970b8514d9b4c50f2d7',
+  '/base/src/libs/device-type-checker.js': '20961c580989ec8514e1c857a0858643728af958',
+  '/base/src/libs/external/async.js': 'b16769673cbb79d2a70de082ee3cb852f235ebf7',
+  '/base/src/libs/external/base64.js': 'ad114c9f0ce12d3a0114849e0c087e9a40e5eb8d',
+  '/base/src/libs/external/device.js': 'e327484f99dfe82c02d8a67dd11bc051b28fa378',
+  '/base/src/libs/external/jsonpatch-reduced.js': 'da9af4ce7e58a5721cc02bbf942ef77aec632d3f',
+  '/base/src/libs/external/prms.js': '38826035853f13f5bfc2c8994d30a99067b0bbd9',
+  '/base/src/libs/external/schema-inspector.js': '59fb23030acd625a19709610ee54b6e3774854d5',
+  '/base/src/libs/external/user-agent-matcher.js': '6e64f6753c1f6834d0585ff533c4d139f2eb9bad',
+  '/base/src/libs/gpt-helper.js': 'fab5689b6a678f672ca8d2a58547ec28f88647b1',
+  '/base/src/libs/header-tag-slot.js': 'ff96e0ad3908fa5a446734f69378ce04cdcc0803',
+  '/base/src/libs/ht-slot-mapper.js': '5cec64ee5143c64d5b4d989db017ae1f70c87065',
+  '/base/src/libs/mvt.js': 'fc19333af64792ed7e60c3e0c4b90a33fb531acb',
+  '/base/src/libs/network.js': '1ec6613b80adadfe8f6ccac38f7e9d3d3e50f20b',
+  '/base/src/libs/openrtb.js': 'ed3e62fb53c1ae8305ed003c8ab4b778b04eb4a4',
+  '/base/src/libs/openrtb2_5.js': 'a77e34e891f240a1ac2d4e32ae81fd5571224573',
+  '/base/src/libs/scribe.js': '595278af12bd512d1746f28fc1cd25e9e555537b',
+  '/base/src/libs/size.js': '17e2913d5620787521885829542ccf57866ea66d',
+  '/base/src/libs/system.js': '724463986ac7f52841f5d65b71be1e837ca3f9bc',
+  '/base/src/libs/utilities.js': '36c36e21f067a8c25a18eab12f5f2801708aa997',
+  '/base/src/libs/whoopsie.js': '0831ca804dce08bd15bcdfac3c3b17e3fc5dfb9d',
+  '/base/src/loader.js': '57438dfbc5b528f43cbc4f9d202182ad7fe9e53b',
+  '/base/src/modules/adaptive-timeout-service/normal-distribution-timeout-module.js': '566431ffbf69c3555869939d03586545e5ef1bbd',
+  '/base/src/modules/gpt-layer/gpt-clear-targeting.js': 'b9d556cb49fd8e9ce35eaf2886b5ee9e7b837238',
+  '/base/src/modules/gpt-layer/gpt-destroy-slots.js': '53920429e7b5f1a15fad46dd80459a996c3eecc8',
+  '/base/src/modules/gpt-layer/gpt-display.js': '6be0ff05e73d93ddbe5d49b79f9e2340b0e35ce9',
+  '/base/src/modules/gpt-layer/gpt-map-slots.js': 'e29eea438cb7185c79de35b652331fb5cf45f2ca',
+  '/base/src/modules/gpt-layer/gpt-options.js': 'c65badaf4b5f50ac8e64f45457ff4259a29c6e14',
+  '/base/src/modules/gpt-layer/gpt-refresh.js': '1cee13bd3e3544949db66bd16d0eb35c24296761',
+  '/base/src/modules/gpt-layer/gpt-retrieve-and-set-targeting.js': '27fa89024ce2a0d92427f02e6f3797cb0298bab7',
+  '/base/src/modules/gpt-layer/gpt-set-targeting.js': '3cc71439ae98ef82b82907ce877cdc304cacf107',
+  '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip-validator.js': 'f5ef1a0d40100216fdec6d5183ac13b32e64ce70',
+  '/base/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js': 'b7ddd780c60d8b8ea22d4f9c2d2e5ad21208f4fa',
+  '/base/src/modules/identity-layer/identity-partner-factory.js': '03515a4d53204ec129f6530fc5781eb3b385366e',
+  '/base/src/modules/identity-layer/live-intent-ip/live-intent-ip-validator.js': 'd22a1f6b2c2a3b0d44a629ced6d67e7ada3346ee',
+  '/base/src/modules/identity-layer/live-intent-ip/live-intent-ip.js': '00ec29905478021bcae73ea22793df18b06583a7',
+  '/base/src/modules/identity-layer/live-ramp-ip/live-ramp-ip-validator.js': '9e4ce6a85c6b29c0b5d1e9e680ab2196635e4659',
+  '/base/src/modules/identity-layer/live-ramp-ip/live-ramp-ip.js': '507e0e33bb06148d0e7b5e1703730601e215a49a',
+  '/base/src/modules/identity-layer/merkle-ip/merkle-ip-validator.js': '3d7b69db5cbe83bd8c3c1a0cd78b0c331155768c',
+  '/base/src/modules/identity-layer/merkle-ip/merkle-ip.js': '27070eb0cc42e9d20a7c625e41bca774c753ff8f',
+  '/base/src/modules/partners-layer/dynamic-partner-loader/dynamic-partner-loader.js': 'afb0897224f0643548d37c83368126b8a141d309',
+  '/base/src/modules/partners-layer/partner.js': '6abde9dc7037b691e539afa4bed7fda0178a3d9e',
+  '/base/src/modules/partners-layer/prefetch.js': '8670cf630e29cc1ea002072fda22f6ca8cef1194',
+  '/base/src/services/adaptive-timeout-service.js': 'df840415a47c5c3ee52abb67737636b4eea782bd',
+  '/base/src/services/compliance-service.js': 'f027c1ec52e93e305af55f44dfed43fae2dec39b',
+  '/base/src/services/events-service.js': '3050d0ab6147ccb9abea4040b424f80127a9bce0',
+  '/base/src/services/gpt-service.js': '432700b42ad62db86308ff6863daee5596ce5963',
+  '/base/src/services/header-stats-service.js': '54027a57ae2af5458be123782165708d879df1ea',
+  '/base/src/services/key-value-service.js': '867ecc0fa2d392a9e2325c1c61cb3e833f4524c9',
+  '/base/src/services/publisher-sonar-service.js': '7a62ba006b7637b8808ece3c70fc41c2fe524e5b',
+  '/base/src/services/render-service.js': '5b129bdd38379627a99f49afff1f63a2ba168a36',
+  '/base/src/services/stubs/compliance-service.stub.js': '027ff495e83b54b7a2a0515f2fff3b758be9302f',
+  '/base/src/services/stubs/events-service.stub.js': '614063153691ec6ef2be2d2202c81389294669a5',
+  '/base/src/services/stubs/gpt-service.stub.js': '5d4ecce41c6b992e2b6b7889e29b8264233c0f70',
+  '/base/src/services/stubs/publisher-sonar-service.stub.js': '7a1f595eef6bb15c3822cc48846ef5105a25fec2',
+  '/base/src/services/timer-service.js': '1a9df17c32add2b4b09e85a5ea6248a08b300309',
+  '/base/src/shells/cassandra-shell.js': 'f91fe46729f674303fe29c3781e0ae4aebc41d75',
+  '/base/src/shells/direct-bidding-shell.js': '9b607f4957391e5db8e78f5916527dfe5f5e1275',
+  '/base/src/shells/identity-shell.js': 'd7dda6e073a5954f8393e1a8dbf8bb1f859735ff',
+  '/base/src/shells/post-gpt-shell.js': '0ea5461fa8dc9d332117d025c6f894a97bbb3e5d',
+  '/base/src/shells/pre-gpt-shell.js': '4bcb183499dbdaf288b6efebc0b686d273c6a267',
+  '/base/src/space-camp.js': '7ae58a3de820a18c0fea0a53470df36156ae27d8',
+  '/base/pktf1/stubs/libs/bid-transformer.stub.js': '441dd21da8e7c0a1fbdd3325686118b7297c886f',
+  '/base/pktf1/stubs/libs/browser.stub.js': '9a022e6bc80766bb48c056220c363b6c8673ff38',
+  '/base/pktf1/stubs/libs/cache.stub.js': '9ba58e82a959a0e6df4f04ef16afe1b607083354',
+  '/base/pktf1/stubs/libs/classify.stub.js': '56aebe593243992a7edea7e2ac569a5a119ac7f6',
+  '/base/pktf1/stubs/libs/command-queue.stub.js': 'd43f9fe73053f78553e3983a7a4f4281e65f4e42',
+  '/base/pktf1/stubs/libs/config-validators.stub.js': 'd444ad886661161c04251c69ba59fcd44ed3696e',
+  '/base/pktf1/stubs/libs/constants.stub.js': 'bf68ed89020d7ea63c1eb34a1b39d8777df3f7e4',
+  '/base/pktf1/stubs/libs/device-type-checker.stub.js': 'ea6ffdb32f2d56a1011bf662825348792cf53f25',
+  '/base/pktf1/stubs/libs/gpt-helper.stub.js': '732c9c7f9ffa4427a6563037f8a1a4d81b90192a',
+  '/base/pktf1/stubs/libs/header-tag-slot.stub.js': '738975da9b1aa24e814526b4a01239a5ed7a27f5',
+  '/base/pktf1/stubs/libs/ht-slot-mapper.stub.js': 'b8fac9d9f1e427e5da30eec0218d6d90a531586b',
+  '/base/pktf1/stubs/libs/network.stub.js': '1a5dbe56092241d7aecd254a36786a16ff5c5717',
+  '/base/pktf1/stubs/libs/openrtb.stub.js': 'f37394b600e16cc1ff8d5fd94ca20fa98884e7a2',
+  '/base/pktf1/stubs/libs/openrtb2_5.stub.js': 'ca14c3ce3aa002f6e1cffcba0dcd642991fdd87a',
+  '/base/pktf1/stubs/libs/scribe.stub.js': 'c2253275f36d46cdcd2a2402392e76620c675788',
+  '/base/pktf1/stubs/libs/size.stub.js': '9719d2c263392a106e5e195640f7a0aacf85decd',
+  '/base/pktf1/stubs/libs/system.stub.js': '7f29276c67daa0b921e14be9fc3e2086a4bcc53b',
+  '/base/pktf1/stubs/libs/utilities.stub.js': '3f8549dced3dbbd67c13c5e4cf609fe90b1196ba',
+  '/base/pktf1/stubs/libs/whoopsie.stub.js': 'f3e62e41f26edc7b4c845a7042f84e2940cfa377',
+  '/base/pktf1/stubs/space-camp.stub.js': 'fdb1626bf36d7dc0f77a8fec7a810efeac3153a9',
+  '/base/pktf1/helpers/base-configs.js': '408be78cc54832b60fa6e5874dc234563ec85a24',
+  '/base/pktf1/helpers/gpt-page-maker.js': 'd42a4b2f680ff5693a88a8bf7b7d4bbe42a22a31',
+  '/base/pktf1/helpers/hacks.js': '6ed7a2614b164382bf3eb705f7b78e5a9527da97',
+  '/base/pktf1/helpers/header-stats-auditor.js': '171a45863ff55c1db8f0b0fd98951ef5f8769d58',
+  '/base/pktf1/helpers/identity-partner-factory-loader.js': '3ff99ea7daeced42070f8adddc96a7eee1325e7a',
+  '/base/pktf1/helpers/mock-data.js': '5a04f5e4af1a88e50fc4ea8847deadb44ae6f698',
+  '/base/pktf1/helpers/polyfills/promise.js': '59b226a6a6944288259bf572a096fd3c9e745a59',
+  '/base/pktf1/helpers/render-checker.js': '0e25e7ff794288fa5da77be52ad075a62cb2f5d9',
+  '/base/pktf1/helpers/stub-loader.js': '67796616868e79757b8ac82fab90bce7bd7bb192',
+  '/base/pktf1/helpers/utilities.js': '39f86a216994745f7e4b2425a04d30dff71a0bd7',
+  '/base/pktf1/helpers/xhr-filter.js': 'f2b9304c9e23b0d7d7d97b1e4d2e6e12da9ba906',
+  '/base/pktf1/specs/wrapper-config/dfp-manual-v2-config.js': '50499253b4182f51af21d6297ecbf6b3130fb104',
+  '/base/pktf1/specs/wrapper-config/identity-library-config.js': '7f889b578f922cf58f08d8bdd30a5c3e40061af1',
+  '/base/pktf1/specs/wrapper-config/post-bid-v2-config.js': '28f5b07a3df909baf0e0ff2254bdd3529e33464c',
+  '/base/pktf1/specs/wrapper-config/universal-v2-config.js': '8074a226184b6201716c0aa3d7f559c24bbd760c',
+  '/base/pktf1/specs/system/dfp-auto/partners/partner.spec.js': 'f91c1e0fa83bd5f14b8c09ea496eec29f9b77b82'
 };
 
   </script>
@@ -151,12 +156,12 @@
 <script type="text/javascript" src="/public/tester/assets/adapter.js" crossorigin="anonymous"></script><div id="fixture_container"></div>
 <script type="text/javascript" src="/public/tester/assets/jasmine.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/boot.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/public/tester/assets/adapter.js(1)" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adapter(1).js" crossorigin="anonymous"></script>
 <link type="text/css" href="/public/tester/assets/jasmine.css" rel="stylesheet">
 <script type="text/javascript" src="/public/tester/assets/html.jasmine.reporter.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/public/tester/assets/adapter.js(2)" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/adapter(2).js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/sinon.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/public/tester/assets/1b21c88997a91c292f72f3c7f43da6d5.browserify" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/5c60c23b49a558d804eefeaf155dbb05.browserify" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/direct-bidding-layer.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/gpt-layer.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/identity-layer.js" crossorigin="anonymous"></script>
@@ -262,8 +267,12 @@
 <script type="text/javascript" src="/public/tester/assets/promise.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/render-checker.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/stub-loader.js" crossorigin="anonymous"></script>
-<script type="text/javascript" src="/public/tester/assets/utilities.js(1)" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/utilities(1).js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/xhr-filter.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/dfp-manual-v2-config.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/identity-library-config.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/post-bid-v2-config.js" crossorigin="anonymous"></script>
+<script type="text/javascript" src="/public/tester/assets/universal-v2-config.js" crossorigin="anonymous"></script>
 <script type="text/javascript" src="/public/tester/assets/partner.spec.js" crossorigin="anonymous"></script>
   <script type="text/javascript">
     window.__karma__.loaded();
