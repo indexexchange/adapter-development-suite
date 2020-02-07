@@ -1192,10 +1192,8 @@ var baseConfigs = {
         },
         config: {
             DeviceTypeChecker: {
-                method: 'REFERENCE',
-                configs: {
-                    reference: '"desktop"'
-                }
+                method: 'USER_AGENT',
+                configs: {}
             },
             htSlots: {
                 htSlotDesktopA: {
@@ -3966,6 +3964,10 @@ describe('System Tests: Partner', function () {
                 || window.testCases.getValidResponseWithDeal,
             validateBidRequestWithPrivacy: window.testCases.validateBidRequestWithPrivacyMobile
                 || window.testCases.validateBidRequestWithPrivacy,
+            validateBidRequestWithGdpr: window.testCases.validateBidRequestWithGdprMobile
+                || window.testCases.validateBidRequestWithGdpr,
+            validateBidRequestWithUspapi: window.testCases.validateBidRequestWithUspapiMobile
+                || window.testCases.validateBidRequestWithUspapi,
             validateBidRequestWithAdSrvrOrg: window.testCases.validateBidRequestWithAdSrvrOrgMobile
                 || window.testCases.validateBidRequestWithAdSrvrOrg
         };
@@ -3981,6 +3983,8 @@ describe('System Tests: Partner', function () {
             getPassResponse: window.testCases.getPassResponse,
             getValidResponseWithDeal: window.testCases.getValidResponseWithDeal,
             validateBidRequestWithPrivacy: window.testCases.validateBidRequestWithPrivacy,
+            validateBidRequestWithGdpr: window.testCases.validateBidRequestWithGdpr,
+            validateBidRequestWithUspapi: window.testCases.validateBidRequestWithUspapi,
             validateBidRequestWithAdSrvrOrg: window.testCases.validateBidRequestWithAdSrvrOrg
         };
 
@@ -3989,6 +3993,20 @@ describe('System Tests: Partner', function () {
     var statsId = partner.getStatsId();
     var config = partner.getConfig();
     var bidRequestRegex = partner.getBidRequestRegex();
+
+    function checkPrivacyTestExists() {
+
+        if (partner.validateBidRequestWithPrivacy
+             || partner.validateBidRequestWithGdpr
+              || partner.validateBidRequestWithUspapi) {
+
+            return true;
+
+        }
+
+        return false;
+
+    }
 
     if (architecture === 'MRA') {
 
@@ -4216,49 +4234,117 @@ describe('System Tests: Partner', function () {
 
     });
 
-    if (partner.validateBidRequestWithPrivacy) {
+    if (checkPrivacyTestExists()) {
 
-        it('should construct bid with privacy data correctly', function (done) {
+        describe('Privacy APIs JS', function () {
 
-            window.__cmp = function (a, b, cb) {
+            // Before the update, partners have been using validateBidRequestWithPrivacy for their tests
+            // Going forward, We do not expect partners to implement both test and
+            // validateBidRequestWithGdpr should be implemented instead.
+            // Added this check is in place for Partners that have not migrated to the new function
+            if (partner.validateBidRequestWithPrivacy || partner.validateBidRequestWithGdpr) {
 
-                cb({
-                    gdprApplies: true,
-                    consentData: 'TEST_GDPR_CONSENT_STRING'
-                });
+                it('should construct bid with GDPR privacy data correctly', function (done) {
 
-            };
+                    window.__cmp = function (a, b, cb) {
 
-            // CMP data is only read on load. Since the wrapper is loaded in the
-            // `beforeEach`, it misses the `__cmp` that is set in this section,
-            // so the wrapper needs to be re-instantiated.
-            Hacks.resetSpaceCamp();
-            window.headertag = PreGptShell();
+                        cb({
+                            gdprApplies: true,
+                            consentData: 'TEST_GDPR_CONSENT_STRING'
+                        });
 
-            // Load GPT library.
-            gptPage.ready().then(function () {
+                    };
 
-                // Setup g-slots on the page.
-                setUpGSlots();
+                    // CMP data is only read on load. Since the wrapper is loaded in the
+                    // `beforeEach`, it misses the `__cmp` that is set in this section,
+                    // so the wrapper needs to be re-instantiated.
+                    Hacks.resetSpaceCamp();
+                    window.headertag = PreGptShell();
 
-                // Setup how the server handles the requests that are being filtered.
-                server.respondWith(XhrFilter.filters[partnerId].bidRequest.method,
-                    XhrFilter.filters[partnerId].bidRequest.urlRegex, function (xhr) {
+                    // Load GPT library.
+                    gptPage.ready().then(function () {
 
-                        // Parse request URL into a manageable object.
-                        var request = UrlParse(xhr.url, true);
-                        request.body = xhr.requestBody;
+                        // Setup g-slots on the page.
+                        setUpGSlots();
 
-                        partner.validateBidRequestWithPrivacy(request);
+                        // Setup how the server handles the requests that are being filtered.
+                        server.respondWith(XhrFilter.filters[partnerId].bidRequest.method,
+                            XhrFilter.filters[partnerId].bidRequest.urlRegex, function (xhr) {
 
-                        done();
+                                // Parse request URL into a manageable object.
+                                var request = UrlParse(xhr.url, true);
+                                request.body = xhr.requestBody;
+
+                                if (partner.validateBidRequestWithPrivacy) {
+
+                                    partner.validateBidRequestWithPrivacy(request);
+
+                                } else if (partner.validateBidRequestWithGdpr) {
+
+                                    partner.validateBidRequestWithGdpr(request);
+
+                                }
+
+                                done();
+
+                            });
+
+                        // Start the bidding process.
+                        window.headertag.display('divIdA');
 
                     });
 
-                // Start the bidding process.
-                window.headertag.display('divIdA');
+                });
 
-            });
+            }
+
+            if (partner.validateBidRequestWithUspapi) {
+
+                it('should construct bid with USPAPI privacy data correctly', function (done) {
+
+                    window.__uspapi = function (cmd, ver, cb) {
+
+                        cb({
+                            version: 1,
+                            uspString: 'TEST_USPAPI_CONSENT_STRING'
+                        }, true);
+
+                    };
+
+                    // CMP data is only read on load. Since the wrapper is loaded in the
+                    // `beforeEach`, it misses the `__cmp` that is set in this section,
+                    // so the wrapper needs to be re-instantiated.
+                    Hacks.resetSpaceCamp();
+                    window.headertag = PreGptShell();
+
+                    // Load GPT library.
+                    gptPage.ready().then(function () {
+
+                        // Setup g-slots on the page.
+                        setUpGSlots();
+
+                        // Setup how the server handles the requests that are being filtered.
+                        server.respondWith(XhrFilter.filters[partnerId].bidRequest.method,
+                            XhrFilter.filters[partnerId].bidRequest.urlRegex, function (xhr) {
+
+                                // Parse request URL into a manageable object.
+                                var request = UrlParse(xhr.url, true);
+                                request.body = xhr.requestBody;
+
+                                partner.validateBidRequestWithUspapi(request);
+
+                                done();
+
+                            });
+
+                        // Start the bidding process.
+                        window.headertag.display('divIdA');
+
+                    });
+
+                });
+
+            }
 
         });
 
