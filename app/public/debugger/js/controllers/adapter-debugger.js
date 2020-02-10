@@ -9,7 +9,7 @@
     function getConfigs() {
         var configNameToSelector = {
             deviceType: 'input[name=radio-device-type]:checked',
-            gdprApplies: 'input[name=radio-gdpr-applies]:checked',
+            privacyJsApi: 'input[name=radio-privacy-applies]:checked',
             adsrvrOrg: 'input[name=radio-adsrvr-org]:checked',
             singleRequest: 'input[name=radio-single-request]:checked',
             initialLoad: 'input[name=radio-initial-load]:checked',
