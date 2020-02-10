@@ -57,21 +57,21 @@
                 return 'desktop';
             };
 
-            window.__cmp = function (a, b, cb) {
-                if (configs.gdprApplies === 'enable') {
+            if (configs.privacyJsApi === 'enable') {
+                window.__cmp = function (a, b, cb) {
                     cb({
                         gdprApplies: true,
                         consentData: 'TEST_GDPR_CONSENT_STRING'
                     });
+                };
 
-                    return;
-                }
-
-                cb({
-                    gdprApplies: false,
-                    consentData: ''
-                });
-            };
+                window.__uspapi = function (cmd, ver, cb) {
+                    cb({
+                        version: 1,
+                        uspString: 'TEST_USPAPI_CONSENT_STRING'
+                    }, true);
+                };
+            }
 
             var now = (new Date()).getTime();
 
