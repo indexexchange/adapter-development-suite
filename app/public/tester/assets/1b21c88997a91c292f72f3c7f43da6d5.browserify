@@ -82,6 +82,1883 @@ require=// modules are defined as an array
     return newRequire;
 })
 ({1:[function(require,module,exports){
+;(function (root, factory) {
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory();
+	}
+	else if (typeof define === "function" && define.amd) {
+		// AMD
+		define([], factory);
+	}
+	else {
+		// Global (browser)
+		root.CryptoJS = factory();
+	}
+}(this, function () {
+
+	/**
+	 * CryptoJS core components.
+	 */
+	var CryptoJS = CryptoJS || (function (Math, undefined) {
+	    /*
+	     * Local polyfil of Object.create
+	     */
+	    var create = Object.create || (function () {
+	        function F() {};
+
+	        return function (obj) {
+	            var subtype;
+
+	            F.prototype = obj;
+
+	            subtype = new F();
+
+	            F.prototype = null;
+
+	            return subtype;
+	        };
+	    }())
+
+	    /**
+	     * CryptoJS namespace.
+	     */
+	    var C = {};
+
+	    /**
+	     * Library namespace.
+	     */
+	    var C_lib = C.lib = {};
+
+	    /**
+	     * Base object for prototypal inheritance.
+	     */
+	    var Base = C_lib.Base = (function () {
+
+
+	        return {
+	            /**
+	             * Creates a new object that inherits from this object.
+	             *
+	             * @param {Object} overrides Properties to copy into the new object.
+	             *
+	             * @return {Object} The new object.
+	             *
+	             * @static
+	             *
+	             * @example
+	             *
+	             *     var MyType = CryptoJS.lib.Base.extend({
+	             *         field: 'value',
+	             *
+	             *         method: function () {
+	             *         }
+	             *     });
+	             */
+	            extend: function (overrides) {
+	                // Spawn
+	                var subtype = create(this);
+
+	                // Augment
+	                if (overrides) {
+	                    subtype.mixIn(overrides);
+	                }
+
+	                // Create default initializer
+	                if (!subtype.hasOwnProperty('init') || this.init === subtype.init) {
+	                    subtype.init = function () {
+	                        subtype.$super.init.apply(this, arguments);
+	                    };
+	                }
+
+	                // Initializer's prototype is the subtype object
+	                subtype.init.prototype = subtype;
+
+	                // Reference supertype
+	                subtype.$super = this;
+
+	                return subtype;
+	            },
+
+	            /**
+	             * Extends this object and runs the init method.
+	             * Arguments to create() will be passed to init().
+	             *
+	             * @return {Object} The new object.
+	             *
+	             * @static
+	             *
+	             * @example
+	             *
+	             *     var instance = MyType.create();
+	             */
+	            create: function () {
+	                var instance = this.extend();
+	                instance.init.apply(instance, arguments);
+
+	                return instance;
+	            },
+
+	            /**
+	             * Initializes a newly created object.
+	             * Override this method to add some logic when your objects are created.
+	             *
+	             * @example
+	             *
+	             *     var MyType = CryptoJS.lib.Base.extend({
+	             *         init: function () {
+	             *             // ...
+	             *         }
+	             *     });
+	             */
+	            init: function () {
+	            },
+
+	            /**
+	             * Copies properties into this object.
+	             *
+	             * @param {Object} properties The properties to mix in.
+	             *
+	             * @example
+	             *
+	             *     MyType.mixIn({
+	             *         field: 'value'
+	             *     });
+	             */
+	            mixIn: function (properties) {
+	                for (var propertyName in properties) {
+	                    if (properties.hasOwnProperty(propertyName)) {
+	                        this[propertyName] = properties[propertyName];
+	                    }
+	                }
+
+	                // IE won't copy toString using the loop above
+	                if (properties.hasOwnProperty('toString')) {
+	                    this.toString = properties.toString;
+	                }
+	            },
+
+	            /**
+	             * Creates a copy of this object.
+	             *
+	             * @return {Object} The clone.
+	             *
+	             * @example
+	             *
+	             *     var clone = instance.clone();
+	             */
+	            clone: function () {
+	                return this.init.prototype.extend(this);
+	            }
+	        };
+	    }());
+
+	    /**
+	     * An array of 32-bit words.
+	     *
+	     * @property {Array} words The array of 32-bit words.
+	     * @property {number} sigBytes The number of significant bytes in this word array.
+	     */
+	    var WordArray = C_lib.WordArray = Base.extend({
+	        /**
+	         * Initializes a newly created word array.
+	         *
+	         * @param {Array} words (Optional) An array of 32-bit words.
+	         * @param {number} sigBytes (Optional) The number of significant bytes in the words.
+	         *
+	         * @example
+	         *
+	         *     var wordArray = CryptoJS.lib.WordArray.create();
+	         *     var wordArray = CryptoJS.lib.WordArray.create([0x00010203, 0x04050607]);
+	         *     var wordArray = CryptoJS.lib.WordArray.create([0x00010203, 0x04050607], 6);
+	         */
+	        init: function (words, sigBytes) {
+	            words = this.words = words || [];
+
+	            if (sigBytes != undefined) {
+	                this.sigBytes = sigBytes;
+	            } else {
+	                this.sigBytes = words.length * 4;
+	            }
+	        },
+
+	        /**
+	         * Converts this word array to a string.
+	         *
+	         * @param {Encoder} encoder (Optional) The encoding strategy to use. Default: CryptoJS.enc.Hex
+	         *
+	         * @return {string} The stringified word array.
+	         *
+	         * @example
+	         *
+	         *     var string = wordArray + '';
+	         *     var string = wordArray.toString();
+	         *     var string = wordArray.toString(CryptoJS.enc.Utf8);
+	         */
+	        toString: function (encoder) {
+	            return (encoder || Hex).stringify(this);
+	        },
+
+	        /**
+	         * Concatenates a word array to this word array.
+	         *
+	         * @param {WordArray} wordArray The word array to append.
+	         *
+	         * @return {WordArray} This word array.
+	         *
+	         * @example
+	         *
+	         *     wordArray1.concat(wordArray2);
+	         */
+	        concat: function (wordArray) {
+	            // Shortcuts
+	            var thisWords = this.words;
+	            var thatWords = wordArray.words;
+	            var thisSigBytes = this.sigBytes;
+	            var thatSigBytes = wordArray.sigBytes;
+
+	            // Clamp excess bits
+	            this.clamp();
+
+	            // Concat
+	            if (thisSigBytes % 4) {
+	                // Copy one byte at a time
+	                for (var i = 0; i < thatSigBytes; i++) {
+	                    var thatByte = (thatWords[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+	                    thisWords[(thisSigBytes + i) >>> 2] |= thatByte << (24 - ((thisSigBytes + i) % 4) * 8);
+	                }
+	            } else {
+	                // Copy one word at a time
+	                for (var i = 0; i < thatSigBytes; i += 4) {
+	                    thisWords[(thisSigBytes + i) >>> 2] = thatWords[i >>> 2];
+	                }
+	            }
+	            this.sigBytes += thatSigBytes;
+
+	            // Chainable
+	            return this;
+	        },
+
+	        /**
+	         * Removes insignificant bits.
+	         *
+	         * @example
+	         *
+	         *     wordArray.clamp();
+	         */
+	        clamp: function () {
+	            // Shortcuts
+	            var words = this.words;
+	            var sigBytes = this.sigBytes;
+
+	            // Clamp
+	            words[sigBytes >>> 2] &= 0xffffffff << (32 - (sigBytes % 4) * 8);
+	            words.length = Math.ceil(sigBytes / 4);
+	        },
+
+	        /**
+	         * Creates a copy of this word array.
+	         *
+	         * @return {WordArray} The clone.
+	         *
+	         * @example
+	         *
+	         *     var clone = wordArray.clone();
+	         */
+	        clone: function () {
+	            var clone = Base.clone.call(this);
+	            clone.words = this.words.slice(0);
+
+	            return clone;
+	        },
+
+	        /**
+	         * Creates a word array filled with random bytes.
+	         *
+	         * @param {number} nBytes The number of random bytes to generate.
+	         *
+	         * @return {WordArray} The random word array.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var wordArray = CryptoJS.lib.WordArray.random(16);
+	         */
+	        random: function (nBytes) {
+	            var words = [];
+
+	            var r = (function (m_w) {
+	                var m_w = m_w;
+	                var m_z = 0x3ade68b1;
+	                var mask = 0xffffffff;
+
+	                return function () {
+	                    m_z = (0x9069 * (m_z & 0xFFFF) + (m_z >> 0x10)) & mask;
+	                    m_w = (0x4650 * (m_w & 0xFFFF) + (m_w >> 0x10)) & mask;
+	                    var result = ((m_z << 0x10) + m_w) & mask;
+	                    result /= 0x100000000;
+	                    result += 0.5;
+	                    return result * (Math.random() > .5 ? 1 : -1);
+	                }
+	            });
+
+	            for (var i = 0, rcache; i < nBytes; i += 4) {
+	                var _r = r((rcache || Math.random()) * 0x100000000);
+
+	                rcache = _r() * 0x3ade67b7;
+	                words.push((_r() * 0x100000000) | 0);
+	            }
+
+	            return new WordArray.init(words, nBytes);
+	        }
+	    });
+
+	    /**
+	     * Encoder namespace.
+	     */
+	    var C_enc = C.enc = {};
+
+	    /**
+	     * Hex encoding strategy.
+	     */
+	    var Hex = C_enc.Hex = {
+	        /**
+	         * Converts a word array to a hex string.
+	         *
+	         * @param {WordArray} wordArray The word array.
+	         *
+	         * @return {string} The hex string.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var hexString = CryptoJS.enc.Hex.stringify(wordArray);
+	         */
+	        stringify: function (wordArray) {
+	            // Shortcuts
+	            var words = wordArray.words;
+	            var sigBytes = wordArray.sigBytes;
+
+	            // Convert
+	            var hexChars = [];
+	            for (var i = 0; i < sigBytes; i++) {
+	                var bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+	                hexChars.push((bite >>> 4).toString(16));
+	                hexChars.push((bite & 0x0f).toString(16));
+	            }
+
+	            return hexChars.join('');
+	        },
+
+	        /**
+	         * Converts a hex string to a word array.
+	         *
+	         * @param {string} hexStr The hex string.
+	         *
+	         * @return {WordArray} The word array.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var wordArray = CryptoJS.enc.Hex.parse(hexString);
+	         */
+	        parse: function (hexStr) {
+	            // Shortcut
+	            var hexStrLength = hexStr.length;
+
+	            // Convert
+	            var words = [];
+	            for (var i = 0; i < hexStrLength; i += 2) {
+	                words[i >>> 3] |= parseInt(hexStr.substr(i, 2), 16) << (24 - (i % 8) * 4);
+	            }
+
+	            return new WordArray.init(words, hexStrLength / 2);
+	        }
+	    };
+
+	    /**
+	     * Latin1 encoding strategy.
+	     */
+	    var Latin1 = C_enc.Latin1 = {
+	        /**
+	         * Converts a word array to a Latin1 string.
+	         *
+	         * @param {WordArray} wordArray The word array.
+	         *
+	         * @return {string} The Latin1 string.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var latin1String = CryptoJS.enc.Latin1.stringify(wordArray);
+	         */
+	        stringify: function (wordArray) {
+	            // Shortcuts
+	            var words = wordArray.words;
+	            var sigBytes = wordArray.sigBytes;
+
+	            // Convert
+	            var latin1Chars = [];
+	            for (var i = 0; i < sigBytes; i++) {
+	                var bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+	                latin1Chars.push(String.fromCharCode(bite));
+	            }
+
+	            return latin1Chars.join('');
+	        },
+
+	        /**
+	         * Converts a Latin1 string to a word array.
+	         *
+	         * @param {string} latin1Str The Latin1 string.
+	         *
+	         * @return {WordArray} The word array.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var wordArray = CryptoJS.enc.Latin1.parse(latin1String);
+	         */
+	        parse: function (latin1Str) {
+	            // Shortcut
+	            var latin1StrLength = latin1Str.length;
+
+	            // Convert
+	            var words = [];
+	            for (var i = 0; i < latin1StrLength; i++) {
+	                words[i >>> 2] |= (latin1Str.charCodeAt(i) & 0xff) << (24 - (i % 4) * 8);
+	            }
+
+	            return new WordArray.init(words, latin1StrLength);
+	        }
+	    };
+
+	    /**
+	     * UTF-8 encoding strategy.
+	     */
+	    var Utf8 = C_enc.Utf8 = {
+	        /**
+	         * Converts a word array to a UTF-8 string.
+	         *
+	         * @param {WordArray} wordArray The word array.
+	         *
+	         * @return {string} The UTF-8 string.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var utf8String = CryptoJS.enc.Utf8.stringify(wordArray);
+	         */
+	        stringify: function (wordArray) {
+	            try {
+	                return decodeURIComponent(escape(Latin1.stringify(wordArray)));
+	            } catch (e) {
+	                throw new Error('Malformed UTF-8 data');
+	            }
+	        },
+
+	        /**
+	         * Converts a UTF-8 string to a word array.
+	         *
+	         * @param {string} utf8Str The UTF-8 string.
+	         *
+	         * @return {WordArray} The word array.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var wordArray = CryptoJS.enc.Utf8.parse(utf8String);
+	         */
+	        parse: function (utf8Str) {
+	            return Latin1.parse(unescape(encodeURIComponent(utf8Str)));
+	        }
+	    };
+
+	    /**
+	     * Abstract buffered block algorithm template.
+	     *
+	     * The property blockSize must be implemented in a concrete subtype.
+	     *
+	     * @property {number} _minBufferSize The number of blocks that should be kept unprocessed in the buffer. Default: 0
+	     */
+	    var BufferedBlockAlgorithm = C_lib.BufferedBlockAlgorithm = Base.extend({
+	        /**
+	         * Resets this block algorithm's data buffer to its initial state.
+	         *
+	         * @example
+	         *
+	         *     bufferedBlockAlgorithm.reset();
+	         */
+	        reset: function () {
+	            // Initial values
+	            this._data = new WordArray.init();
+	            this._nDataBytes = 0;
+	        },
+
+	        /**
+	         * Adds new data to this block algorithm's buffer.
+	         *
+	         * @param {WordArray|string} data The data to append. Strings are converted to a WordArray using UTF-8.
+	         *
+	         * @example
+	         *
+	         *     bufferedBlockAlgorithm._append('data');
+	         *     bufferedBlockAlgorithm._append(wordArray);
+	         */
+	        _append: function (data) {
+	            // Convert string to WordArray, else assume WordArray already
+	            if (typeof data == 'string') {
+	                data = Utf8.parse(data);
+	            }
+
+	            // Append
+	            this._data.concat(data);
+	            this._nDataBytes += data.sigBytes;
+	        },
+
+	        /**
+	         * Processes available data blocks.
+	         *
+	         * This method invokes _doProcessBlock(offset), which must be implemented by a concrete subtype.
+	         *
+	         * @param {boolean} doFlush Whether all blocks and partial blocks should be processed.
+	         *
+	         * @return {WordArray} The processed data.
+	         *
+	         * @example
+	         *
+	         *     var processedData = bufferedBlockAlgorithm._process();
+	         *     var processedData = bufferedBlockAlgorithm._process(!!'flush');
+	         */
+	        _process: function (doFlush) {
+	            // Shortcuts
+	            var data = this._data;
+	            var dataWords = data.words;
+	            var dataSigBytes = data.sigBytes;
+	            var blockSize = this.blockSize;
+	            var blockSizeBytes = blockSize * 4;
+
+	            // Count blocks ready
+	            var nBlocksReady = dataSigBytes / blockSizeBytes;
+	            if (doFlush) {
+	                // Round up to include partial blocks
+	                nBlocksReady = Math.ceil(nBlocksReady);
+	            } else {
+	                // Round down to include only full blocks,
+	                // less the number of blocks that must remain in the buffer
+	                nBlocksReady = Math.max((nBlocksReady | 0) - this._minBufferSize, 0);
+	            }
+
+	            // Count words ready
+	            var nWordsReady = nBlocksReady * blockSize;
+
+	            // Count bytes ready
+	            var nBytesReady = Math.min(nWordsReady * 4, dataSigBytes);
+
+	            // Process blocks
+	            if (nWordsReady) {
+	                for (var offset = 0; offset < nWordsReady; offset += blockSize) {
+	                    // Perform concrete-algorithm logic
+	                    this._doProcessBlock(dataWords, offset);
+	                }
+
+	                // Remove processed words
+	                var processedWords = dataWords.splice(0, nWordsReady);
+	                data.sigBytes -= nBytesReady;
+	            }
+
+	            // Return processed words
+	            return new WordArray.init(processedWords, nBytesReady);
+	        },
+
+	        /**
+	         * Creates a copy of this object.
+	         *
+	         * @return {Object} The clone.
+	         *
+	         * @example
+	         *
+	         *     var clone = bufferedBlockAlgorithm.clone();
+	         */
+	        clone: function () {
+	            var clone = Base.clone.call(this);
+	            clone._data = this._data.clone();
+
+	            return clone;
+	        },
+
+	        _minBufferSize: 0
+	    });
+
+	    /**
+	     * Abstract hasher template.
+	     *
+	     * @property {number} blockSize The number of 32-bit words this hasher operates on. Default: 16 (512 bits)
+	     */
+	    var Hasher = C_lib.Hasher = BufferedBlockAlgorithm.extend({
+	        /**
+	         * Configuration options.
+	         */
+	        cfg: Base.extend(),
+
+	        /**
+	         * Initializes a newly created hasher.
+	         *
+	         * @param {Object} cfg (Optional) The configuration options to use for this hash computation.
+	         *
+	         * @example
+	         *
+	         *     var hasher = CryptoJS.algo.SHA256.create();
+	         */
+	        init: function (cfg) {
+	            // Apply config defaults
+	            this.cfg = this.cfg.extend(cfg);
+
+	            // Set initial values
+	            this.reset();
+	        },
+
+	        /**
+	         * Resets this hasher to its initial state.
+	         *
+	         * @example
+	         *
+	         *     hasher.reset();
+	         */
+	        reset: function () {
+	            // Reset data buffer
+	            BufferedBlockAlgorithm.reset.call(this);
+
+	            // Perform concrete-hasher logic
+	            this._doReset();
+	        },
+
+	        /**
+	         * Updates this hasher with a message.
+	         *
+	         * @param {WordArray|string} messageUpdate The message to append.
+	         *
+	         * @return {Hasher} This hasher.
+	         *
+	         * @example
+	         *
+	         *     hasher.update('message');
+	         *     hasher.update(wordArray);
+	         */
+	        update: function (messageUpdate) {
+	            // Append
+	            this._append(messageUpdate);
+
+	            // Update the hash
+	            this._process();
+
+	            // Chainable
+	            return this;
+	        },
+
+	        /**
+	         * Finalizes the hash computation.
+	         * Note that the finalize operation is effectively a destructive, read-once operation.
+	         *
+	         * @param {WordArray|string} messageUpdate (Optional) A final message update.
+	         *
+	         * @return {WordArray} The hash.
+	         *
+	         * @example
+	         *
+	         *     var hash = hasher.finalize();
+	         *     var hash = hasher.finalize('message');
+	         *     var hash = hasher.finalize(wordArray);
+	         */
+	        finalize: function (messageUpdate) {
+	            // Final message update
+	            if (messageUpdate) {
+	                this._append(messageUpdate);
+	            }
+
+	            // Perform concrete-hasher logic
+	            var hash = this._doFinalize();
+
+	            return hash;
+	        },
+
+	        blockSize: 512/32,
+
+	        /**
+	         * Creates a shortcut function to a hasher's object interface.
+	         *
+	         * @param {Hasher} hasher The hasher to create a helper for.
+	         *
+	         * @return {Function} The shortcut function.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var SHA256 = CryptoJS.lib.Hasher._createHelper(CryptoJS.algo.SHA256);
+	         */
+	        _createHelper: function (hasher) {
+	            return function (message, cfg) {
+	                return new hasher.init(cfg).finalize(message);
+	            };
+	        },
+
+	        /**
+	         * Creates a shortcut function to the HMAC's object interface.
+	         *
+	         * @param {Hasher} hasher The hasher to use in this HMAC helper.
+	         *
+	         * @return {Function} The shortcut function.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var HmacSHA256 = CryptoJS.lib.Hasher._createHmacHelper(CryptoJS.algo.SHA256);
+	         */
+	        _createHmacHelper: function (hasher) {
+	            return function (message, key) {
+	                return new C_algo.HMAC.init(hasher, key).finalize(message);
+	            };
+	        }
+	    });
+
+	    /**
+	     * Algorithm namespace.
+	     */
+	    var C_algo = C.algo = {};
+
+	    return C;
+	}(Math));
+
+
+	return CryptoJS;
+
+}));
+},{}],2:[function(require,module,exports){
+;(function (root, factory) {
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"));
+	}
+	else if (typeof define === "function" && define.amd) {
+		// AMD
+		define(["./core"], factory);
+	}
+	else {
+		// Global (browser)
+		factory(root.CryptoJS);
+	}
+}(this, function (CryptoJS) {
+
+	(function () {
+	    // Shortcuts
+	    var C = CryptoJS;
+	    var C_lib = C.lib;
+	    var WordArray = C_lib.WordArray;
+	    var C_enc = C.enc;
+
+	    /**
+	     * Base64 encoding strategy.
+	     */
+	    var Base64 = C_enc.Base64 = {
+	        /**
+	         * Converts a word array to a Base64 string.
+	         *
+	         * @param {WordArray} wordArray The word array.
+	         *
+	         * @return {string} The Base64 string.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var base64String = CryptoJS.enc.Base64.stringify(wordArray);
+	         */
+	        stringify: function (wordArray) {
+	            // Shortcuts
+	            var words = wordArray.words;
+	            var sigBytes = wordArray.sigBytes;
+	            var map = this._map;
+
+	            // Clamp excess bits
+	            wordArray.clamp();
+
+	            // Convert
+	            var base64Chars = [];
+	            for (var i = 0; i < sigBytes; i += 3) {
+	                var byte1 = (words[i >>> 2]       >>> (24 - (i % 4) * 8))       & 0xff;
+	                var byte2 = (words[(i + 1) >>> 2] >>> (24 - ((i + 1) % 4) * 8)) & 0xff;
+	                var byte3 = (words[(i + 2) >>> 2] >>> (24 - ((i + 2) % 4) * 8)) & 0xff;
+
+	                var triplet = (byte1 << 16) | (byte2 << 8) | byte3;
+
+	                for (var j = 0; (j < 4) && (i + j * 0.75 < sigBytes); j++) {
+	                    base64Chars.push(map.charAt((triplet >>> (6 * (3 - j))) & 0x3f));
+	                }
+	            }
+
+	            // Add padding
+	            var paddingChar = map.charAt(64);
+	            if (paddingChar) {
+	                while (base64Chars.length % 4) {
+	                    base64Chars.push(paddingChar);
+	                }
+	            }
+
+	            return base64Chars.join('');
+	        },
+
+	        /**
+	         * Converts a Base64 string to a word array.
+	         *
+	         * @param {string} base64Str The Base64 string.
+	         *
+	         * @return {WordArray} The word array.
+	         *
+	         * @static
+	         *
+	         * @example
+	         *
+	         *     var wordArray = CryptoJS.enc.Base64.parse(base64String);
+	         */
+	        parse: function (base64Str) {
+	            // Shortcuts
+	            var base64StrLength = base64Str.length;
+	            var map = this._map;
+	            var reverseMap = this._reverseMap;
+
+	            if (!reverseMap) {
+	                    reverseMap = this._reverseMap = [];
+	                    for (var j = 0; j < map.length; j++) {
+	                        reverseMap[map.charCodeAt(j)] = j;
+	                    }
+	            }
+
+	            // Ignore padding
+	            var paddingChar = map.charAt(64);
+	            if (paddingChar) {
+	                var paddingIndex = base64Str.indexOf(paddingChar);
+	                if (paddingIndex !== -1) {
+	                    base64StrLength = paddingIndex;
+	                }
+	            }
+
+	            // Convert
+	            return parseLoop(base64Str, base64StrLength, reverseMap);
+
+	        },
+
+	        _map: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+	    };
+
+	    function parseLoop(base64Str, base64StrLength, reverseMap) {
+	      var words = [];
+	      var nBytes = 0;
+	      for (var i = 0; i < base64StrLength; i++) {
+	          if (i % 4) {
+	              var bits1 = reverseMap[base64Str.charCodeAt(i - 1)] << ((i % 4) * 2);
+	              var bits2 = reverseMap[base64Str.charCodeAt(i)] >>> (6 - (i % 4) * 2);
+	              words[nBytes >>> 2] |= (bits1 | bits2) << (24 - (nBytes % 4) * 8);
+	              nBytes++;
+	          }
+	      }
+	      return WordArray.create(words, nBytes);
+	    }
+	}());
+
+
+	return CryptoJS.enc.Base64;
+
+}));
+},{"./core":1}],3:[function(require,module,exports){
+;(function (root, factory) {
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"));
+	}
+	else if (typeof define === "function" && define.amd) {
+		// AMD
+		define(["./core"], factory);
+	}
+	else {
+		// Global (browser)
+		factory(root.CryptoJS);
+	}
+}(this, function (CryptoJS) {
+
+	(function () {
+	    // Shortcuts
+	    var C = CryptoJS;
+	    var C_lib = C.lib;
+	    var WordArray = C_lib.WordArray;
+	    var Hasher = C_lib.Hasher;
+	    var C_algo = C.algo;
+
+	    // Reusable object
+	    var W = [];
+
+	    /**
+	     * SHA-1 hash algorithm.
+	     */
+	    var SHA1 = C_algo.SHA1 = Hasher.extend({
+	        _doReset: function () {
+	            this._hash = new WordArray.init([
+	                0x67452301, 0xefcdab89,
+	                0x98badcfe, 0x10325476,
+	                0xc3d2e1f0
+	            ]);
+	        },
+
+	        _doProcessBlock: function (M, offset) {
+	            // Shortcut
+	            var H = this._hash.words;
+
+	            // Working variables
+	            var a = H[0];
+	            var b = H[1];
+	            var c = H[2];
+	            var d = H[3];
+	            var e = H[4];
+
+	            // Computation
+	            for (var i = 0; i < 80; i++) {
+	                if (i < 16) {
+	                    W[i] = M[offset + i] | 0;
+	                } else {
+	                    var n = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+	                    W[i] = (n << 1) | (n >>> 31);
+	                }
+
+	                var t = ((a << 5) | (a >>> 27)) + e + W[i];
+	                if (i < 20) {
+	                    t += ((b & c) | (~b & d)) + 0x5a827999;
+	                } else if (i < 40) {
+	                    t += (b ^ c ^ d) + 0x6ed9eba1;
+	                } else if (i < 60) {
+	                    t += ((b & c) | (b & d) | (c & d)) - 0x70e44324;
+	                } else /* if (i < 80) */ {
+	                    t += (b ^ c ^ d) - 0x359d3e2a;
+	                }
+
+	                e = d;
+	                d = c;
+	                c = (b << 30) | (b >>> 2);
+	                b = a;
+	                a = t;
+	            }
+
+	            // Intermediate hash value
+	            H[0] = (H[0] + a) | 0;
+	            H[1] = (H[1] + b) | 0;
+	            H[2] = (H[2] + c) | 0;
+	            H[3] = (H[3] + d) | 0;
+	            H[4] = (H[4] + e) | 0;
+	        },
+
+	        _doFinalize: function () {
+	            // Shortcuts
+	            var data = this._data;
+	            var dataWords = data.words;
+
+	            var nBitsTotal = this._nDataBytes * 8;
+	            var nBitsLeft = data.sigBytes * 8;
+
+	            // Add padding
+	            dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
+	            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 14] = Math.floor(nBitsTotal / 0x100000000);
+	            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 15] = nBitsTotal;
+	            data.sigBytes = dataWords.length * 4;
+
+	            // Hash final blocks
+	            this._process();
+
+	            // Return final computed hash
+	            return this._hash;
+	        },
+
+	        clone: function () {
+	            var clone = Hasher.clone.call(this);
+	            clone._hash = this._hash.clone();
+
+	            return clone;
+	        }
+	    });
+
+	    /**
+	     * Shortcut function to the hasher's object interface.
+	     *
+	     * @param {WordArray|string} message The message to hash.
+	     *
+	     * @return {WordArray} The hash.
+	     *
+	     * @static
+	     *
+	     * @example
+	     *
+	     *     var hash = CryptoJS.SHA1('message');
+	     *     var hash = CryptoJS.SHA1(wordArray);
+	     */
+	    C.SHA1 = Hasher._createHelper(SHA1);
+
+	    /**
+	     * Shortcut function to the HMAC's object interface.
+	     *
+	     * @param {WordArray|string} message The message to hash.
+	     * @param {WordArray|string} key The secret key.
+	     *
+	     * @return {WordArray} The HMAC.
+	     *
+	     * @static
+	     *
+	     * @example
+	     *
+	     *     var hmac = CryptoJS.HmacSHA1(message, key);
+	     */
+	    C.HmacSHA1 = Hasher._createHmacHelper(SHA1);
+	}());
+
+
+	return CryptoJS.SHA1;
+
+}));
+},{"./core":1}],4:[function(require,module,exports){
+;(function (root, factory) {
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"));
+	}
+	else if (typeof define === "function" && define.amd) {
+		// AMD
+		define(["./core"], factory);
+	}
+	else {
+		// Global (browser)
+		factory(root.CryptoJS);
+	}
+}(this, function (CryptoJS) {
+
+	(function (Math) {
+	    // Shortcuts
+	    var C = CryptoJS;
+	    var C_lib = C.lib;
+	    var WordArray = C_lib.WordArray;
+	    var Hasher = C_lib.Hasher;
+	    var C_algo = C.algo;
+
+	    // Initialization and round constants tables
+	    var H = [];
+	    var K = [];
+
+	    // Compute constants
+	    (function () {
+	        function isPrime(n) {
+	            var sqrtN = Math.sqrt(n);
+	            for (var factor = 2; factor <= sqrtN; factor++) {
+	                if (!(n % factor)) {
+	                    return false;
+	                }
+	            }
+
+	            return true;
+	        }
+
+	        function getFractionalBits(n) {
+	            return ((n - (n | 0)) * 0x100000000) | 0;
+	        }
+
+	        var n = 2;
+	        var nPrime = 0;
+	        while (nPrime < 64) {
+	            if (isPrime(n)) {
+	                if (nPrime < 8) {
+	                    H[nPrime] = getFractionalBits(Math.pow(n, 1 / 2));
+	                }
+	                K[nPrime] = getFractionalBits(Math.pow(n, 1 / 3));
+
+	                nPrime++;
+	            }
+
+	            n++;
+	        }
+	    }());
+
+	    // Reusable object
+	    var W = [];
+
+	    /**
+	     * SHA-256 hash algorithm.
+	     */
+	    var SHA256 = C_algo.SHA256 = Hasher.extend({
+	        _doReset: function () {
+	            this._hash = new WordArray.init(H.slice(0));
+	        },
+
+	        _doProcessBlock: function (M, offset) {
+	            // Shortcut
+	            var H = this._hash.words;
+
+	            // Working variables
+	            var a = H[0];
+	            var b = H[1];
+	            var c = H[2];
+	            var d = H[3];
+	            var e = H[4];
+	            var f = H[5];
+	            var g = H[6];
+	            var h = H[7];
+
+	            // Computation
+	            for (var i = 0; i < 64; i++) {
+	                if (i < 16) {
+	                    W[i] = M[offset + i] | 0;
+	                } else {
+	                    var gamma0x = W[i - 15];
+	                    var gamma0  = ((gamma0x << 25) | (gamma0x >>> 7))  ^
+	                                  ((gamma0x << 14) | (gamma0x >>> 18)) ^
+	                                   (gamma0x >>> 3);
+
+	                    var gamma1x = W[i - 2];
+	                    var gamma1  = ((gamma1x << 15) | (gamma1x >>> 17)) ^
+	                                  ((gamma1x << 13) | (gamma1x >>> 19)) ^
+	                                   (gamma1x >>> 10);
+
+	                    W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16];
+	                }
+
+	                var ch  = (e & f) ^ (~e & g);
+	                var maj = (a & b) ^ (a & c) ^ (b & c);
+
+	                var sigma0 = ((a << 30) | (a >>> 2)) ^ ((a << 19) | (a >>> 13)) ^ ((a << 10) | (a >>> 22));
+	                var sigma1 = ((e << 26) | (e >>> 6)) ^ ((e << 21) | (e >>> 11)) ^ ((e << 7)  | (e >>> 25));
+
+	                var t1 = h + sigma1 + ch + K[i] + W[i];
+	                var t2 = sigma0 + maj;
+
+	                h = g;
+	                g = f;
+	                f = e;
+	                e = (d + t1) | 0;
+	                d = c;
+	                c = b;
+	                b = a;
+	                a = (t1 + t2) | 0;
+	            }
+
+	            // Intermediate hash value
+	            H[0] = (H[0] + a) | 0;
+	            H[1] = (H[1] + b) | 0;
+	            H[2] = (H[2] + c) | 0;
+	            H[3] = (H[3] + d) | 0;
+	            H[4] = (H[4] + e) | 0;
+	            H[5] = (H[5] + f) | 0;
+	            H[6] = (H[6] + g) | 0;
+	            H[7] = (H[7] + h) | 0;
+	        },
+
+	        _doFinalize: function () {
+	            // Shortcuts
+	            var data = this._data;
+	            var dataWords = data.words;
+
+	            var nBitsTotal = this._nDataBytes * 8;
+	            var nBitsLeft = data.sigBytes * 8;
+
+	            // Add padding
+	            dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
+	            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 14] = Math.floor(nBitsTotal / 0x100000000);
+	            dataWords[(((nBitsLeft + 64) >>> 9) << 4) + 15] = nBitsTotal;
+	            data.sigBytes = dataWords.length * 4;
+
+	            // Hash final blocks
+	            this._process();
+
+	            // Return final computed hash
+	            return this._hash;
+	        },
+
+	        clone: function () {
+	            var clone = Hasher.clone.call(this);
+	            clone._hash = this._hash.clone();
+
+	            return clone;
+	        }
+	    });
+
+	    /**
+	     * Shortcut function to the hasher's object interface.
+	     *
+	     * @param {WordArray|string} message The message to hash.
+	     *
+	     * @return {WordArray} The hash.
+	     *
+	     * @static
+	     *
+	     * @example
+	     *
+	     *     var hash = CryptoJS.SHA256('message');
+	     *     var hash = CryptoJS.SHA256(wordArray);
+	     */
+	    C.SHA256 = Hasher._createHelper(SHA256);
+
+	    /**
+	     * Shortcut function to the HMAC's object interface.
+	     *
+	     * @param {WordArray|string} message The message to hash.
+	     * @param {WordArray|string} key The secret key.
+	     *
+	     * @return {WordArray} The HMAC.
+	     *
+	     * @static
+	     *
+	     * @example
+	     *
+	     *     var hmac = CryptoJS.HmacSHA256(message, key);
+	     */
+	    C.HmacSHA256 = Hasher._createHmacHelper(SHA256);
+	}(Math));
+
+
+	return CryptoJS.SHA256;
+
+}));
+},{"./core":1}],5:[function(require,module,exports){
+;(function (root, factory, undef) {
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"), require("./x64-core"));
+	}
+	else if (typeof define === "function" && define.amd) {
+		// AMD
+		define(["./core", "./x64-core"], factory);
+	}
+	else {
+		// Global (browser)
+		factory(root.CryptoJS);
+	}
+}(this, function (CryptoJS) {
+
+	(function () {
+	    // Shortcuts
+	    var C = CryptoJS;
+	    var C_lib = C.lib;
+	    var Hasher = C_lib.Hasher;
+	    var C_x64 = C.x64;
+	    var X64Word = C_x64.Word;
+	    var X64WordArray = C_x64.WordArray;
+	    var C_algo = C.algo;
+
+	    function X64Word_create() {
+	        return X64Word.create.apply(X64Word, arguments);
+	    }
+
+	    // Constants
+	    var K = [
+	        X64Word_create(0x428a2f98, 0xd728ae22), X64Word_create(0x71374491, 0x23ef65cd),
+	        X64Word_create(0xb5c0fbcf, 0xec4d3b2f), X64Word_create(0xe9b5dba5, 0x8189dbbc),
+	        X64Word_create(0x3956c25b, 0xf348b538), X64Word_create(0x59f111f1, 0xb605d019),
+	        X64Word_create(0x923f82a4, 0xaf194f9b), X64Word_create(0xab1c5ed5, 0xda6d8118),
+	        X64Word_create(0xd807aa98, 0xa3030242), X64Word_create(0x12835b01, 0x45706fbe),
+	        X64Word_create(0x243185be, 0x4ee4b28c), X64Word_create(0x550c7dc3, 0xd5ffb4e2),
+	        X64Word_create(0x72be5d74, 0xf27b896f), X64Word_create(0x80deb1fe, 0x3b1696b1),
+	        X64Word_create(0x9bdc06a7, 0x25c71235), X64Word_create(0xc19bf174, 0xcf692694),
+	        X64Word_create(0xe49b69c1, 0x9ef14ad2), X64Word_create(0xefbe4786, 0x384f25e3),
+	        X64Word_create(0x0fc19dc6, 0x8b8cd5b5), X64Word_create(0x240ca1cc, 0x77ac9c65),
+	        X64Word_create(0x2de92c6f, 0x592b0275), X64Word_create(0x4a7484aa, 0x6ea6e483),
+	        X64Word_create(0x5cb0a9dc, 0xbd41fbd4), X64Word_create(0x76f988da, 0x831153b5),
+	        X64Word_create(0x983e5152, 0xee66dfab), X64Word_create(0xa831c66d, 0x2db43210),
+	        X64Word_create(0xb00327c8, 0x98fb213f), X64Word_create(0xbf597fc7, 0xbeef0ee4),
+	        X64Word_create(0xc6e00bf3, 0x3da88fc2), X64Word_create(0xd5a79147, 0x930aa725),
+	        X64Word_create(0x06ca6351, 0xe003826f), X64Word_create(0x14292967, 0x0a0e6e70),
+	        X64Word_create(0x27b70a85, 0x46d22ffc), X64Word_create(0x2e1b2138, 0x5c26c926),
+	        X64Word_create(0x4d2c6dfc, 0x5ac42aed), X64Word_create(0x53380d13, 0x9d95b3df),
+	        X64Word_create(0x650a7354, 0x8baf63de), X64Word_create(0x766a0abb, 0x3c77b2a8),
+	        X64Word_create(0x81c2c92e, 0x47edaee6), X64Word_create(0x92722c85, 0x1482353b),
+	        X64Word_create(0xa2bfe8a1, 0x4cf10364), X64Word_create(0xa81a664b, 0xbc423001),
+	        X64Word_create(0xc24b8b70, 0xd0f89791), X64Word_create(0xc76c51a3, 0x0654be30),
+	        X64Word_create(0xd192e819, 0xd6ef5218), X64Word_create(0xd6990624, 0x5565a910),
+	        X64Word_create(0xf40e3585, 0x5771202a), X64Word_create(0x106aa070, 0x32bbd1b8),
+	        X64Word_create(0x19a4c116, 0xb8d2d0c8), X64Word_create(0x1e376c08, 0x5141ab53),
+	        X64Word_create(0x2748774c, 0xdf8eeb99), X64Word_create(0x34b0bcb5, 0xe19b48a8),
+	        X64Word_create(0x391c0cb3, 0xc5c95a63), X64Word_create(0x4ed8aa4a, 0xe3418acb),
+	        X64Word_create(0x5b9cca4f, 0x7763e373), X64Word_create(0x682e6ff3, 0xd6b2b8a3),
+	        X64Word_create(0x748f82ee, 0x5defb2fc), X64Word_create(0x78a5636f, 0x43172f60),
+	        X64Word_create(0x84c87814, 0xa1f0ab72), X64Word_create(0x8cc70208, 0x1a6439ec),
+	        X64Word_create(0x90befffa, 0x23631e28), X64Word_create(0xa4506ceb, 0xde82bde9),
+	        X64Word_create(0xbef9a3f7, 0xb2c67915), X64Word_create(0xc67178f2, 0xe372532b),
+	        X64Word_create(0xca273ece, 0xea26619c), X64Word_create(0xd186b8c7, 0x21c0c207),
+	        X64Word_create(0xeada7dd6, 0xcde0eb1e), X64Word_create(0xf57d4f7f, 0xee6ed178),
+	        X64Word_create(0x06f067aa, 0x72176fba), X64Word_create(0x0a637dc5, 0xa2c898a6),
+	        X64Word_create(0x113f9804, 0xbef90dae), X64Word_create(0x1b710b35, 0x131c471b),
+	        X64Word_create(0x28db77f5, 0x23047d84), X64Word_create(0x32caab7b, 0x40c72493),
+	        X64Word_create(0x3c9ebe0a, 0x15c9bebc), X64Word_create(0x431d67c4, 0x9c100d4c),
+	        X64Word_create(0x4cc5d4be, 0xcb3e42b6), X64Word_create(0x597f299c, 0xfc657e2a),
+	        X64Word_create(0x5fcb6fab, 0x3ad6faec), X64Word_create(0x6c44198c, 0x4a475817)
+	    ];
+
+	    // Reusable objects
+	    var W = [];
+	    (function () {
+	        for (var i = 0; i < 80; i++) {
+	            W[i] = X64Word_create();
+	        }
+	    }());
+
+	    /**
+	     * SHA-512 hash algorithm.
+	     */
+	    var SHA512 = C_algo.SHA512 = Hasher.extend({
+	        _doReset: function () {
+	            this._hash = new X64WordArray.init([
+	                new X64Word.init(0x6a09e667, 0xf3bcc908), new X64Word.init(0xbb67ae85, 0x84caa73b),
+	                new X64Word.init(0x3c6ef372, 0xfe94f82b), new X64Word.init(0xa54ff53a, 0x5f1d36f1),
+	                new X64Word.init(0x510e527f, 0xade682d1), new X64Word.init(0x9b05688c, 0x2b3e6c1f),
+	                new X64Word.init(0x1f83d9ab, 0xfb41bd6b), new X64Word.init(0x5be0cd19, 0x137e2179)
+	            ]);
+	        },
+
+	        _doProcessBlock: function (M, offset) {
+	            // Shortcuts
+	            var H = this._hash.words;
+
+	            var H0 = H[0];
+	            var H1 = H[1];
+	            var H2 = H[2];
+	            var H3 = H[3];
+	            var H4 = H[4];
+	            var H5 = H[5];
+	            var H6 = H[6];
+	            var H7 = H[7];
+
+	            var H0h = H0.high;
+	            var H0l = H0.low;
+	            var H1h = H1.high;
+	            var H1l = H1.low;
+	            var H2h = H2.high;
+	            var H2l = H2.low;
+	            var H3h = H3.high;
+	            var H3l = H3.low;
+	            var H4h = H4.high;
+	            var H4l = H4.low;
+	            var H5h = H5.high;
+	            var H5l = H5.low;
+	            var H6h = H6.high;
+	            var H6l = H6.low;
+	            var H7h = H7.high;
+	            var H7l = H7.low;
+
+	            // Working variables
+	            var ah = H0h;
+	            var al = H0l;
+	            var bh = H1h;
+	            var bl = H1l;
+	            var ch = H2h;
+	            var cl = H2l;
+	            var dh = H3h;
+	            var dl = H3l;
+	            var eh = H4h;
+	            var el = H4l;
+	            var fh = H5h;
+	            var fl = H5l;
+	            var gh = H6h;
+	            var gl = H6l;
+	            var hh = H7h;
+	            var hl = H7l;
+
+	            // Rounds
+	            for (var i = 0; i < 80; i++) {
+	                // Shortcut
+	                var Wi = W[i];
+
+	                // Extend message
+	                if (i < 16) {
+	                    var Wih = Wi.high = M[offset + i * 2]     | 0;
+	                    var Wil = Wi.low  = M[offset + i * 2 + 1] | 0;
+	                } else {
+	                    // Gamma0
+	                    var gamma0x  = W[i - 15];
+	                    var gamma0xh = gamma0x.high;
+	                    var gamma0xl = gamma0x.low;
+	                    var gamma0h  = ((gamma0xh >>> 1) | (gamma0xl << 31)) ^ ((gamma0xh >>> 8) | (gamma0xl << 24)) ^ (gamma0xh >>> 7);
+	                    var gamma0l  = ((gamma0xl >>> 1) | (gamma0xh << 31)) ^ ((gamma0xl >>> 8) | (gamma0xh << 24)) ^ ((gamma0xl >>> 7) | (gamma0xh << 25));
+
+	                    // Gamma1
+	                    var gamma1x  = W[i - 2];
+	                    var gamma1xh = gamma1x.high;
+	                    var gamma1xl = gamma1x.low;
+	                    var gamma1h  = ((gamma1xh >>> 19) | (gamma1xl << 13)) ^ ((gamma1xh << 3) | (gamma1xl >>> 29)) ^ (gamma1xh >>> 6);
+	                    var gamma1l  = ((gamma1xl >>> 19) | (gamma1xh << 13)) ^ ((gamma1xl << 3) | (gamma1xh >>> 29)) ^ ((gamma1xl >>> 6) | (gamma1xh << 26));
+
+	                    // W[i] = gamma0 + W[i - 7] + gamma1 + W[i - 16]
+	                    var Wi7  = W[i - 7];
+	                    var Wi7h = Wi7.high;
+	                    var Wi7l = Wi7.low;
+
+	                    var Wi16  = W[i - 16];
+	                    var Wi16h = Wi16.high;
+	                    var Wi16l = Wi16.low;
+
+	                    var Wil = gamma0l + Wi7l;
+	                    var Wih = gamma0h + Wi7h + ((Wil >>> 0) < (gamma0l >>> 0) ? 1 : 0);
+	                    var Wil = Wil + gamma1l;
+	                    var Wih = Wih + gamma1h + ((Wil >>> 0) < (gamma1l >>> 0) ? 1 : 0);
+	                    var Wil = Wil + Wi16l;
+	                    var Wih = Wih + Wi16h + ((Wil >>> 0) < (Wi16l >>> 0) ? 1 : 0);
+
+	                    Wi.high = Wih;
+	                    Wi.low  = Wil;
+	                }
+
+	                var chh  = (eh & fh) ^ (~eh & gh);
+	                var chl  = (el & fl) ^ (~el & gl);
+	                var majh = (ah & bh) ^ (ah & ch) ^ (bh & ch);
+	                var majl = (al & bl) ^ (al & cl) ^ (bl & cl);
+
+	                var sigma0h = ((ah >>> 28) | (al << 4))  ^ ((ah << 30)  | (al >>> 2)) ^ ((ah << 25) | (al >>> 7));
+	                var sigma0l = ((al >>> 28) | (ah << 4))  ^ ((al << 30)  | (ah >>> 2)) ^ ((al << 25) | (ah >>> 7));
+	                var sigma1h = ((eh >>> 14) | (el << 18)) ^ ((eh >>> 18) | (el << 14)) ^ ((eh << 23) | (el >>> 9));
+	                var sigma1l = ((el >>> 14) | (eh << 18)) ^ ((el >>> 18) | (eh << 14)) ^ ((el << 23) | (eh >>> 9));
+
+	                // t1 = h + sigma1 + ch + K[i] + W[i]
+	                var Ki  = K[i];
+	                var Kih = Ki.high;
+	                var Kil = Ki.low;
+
+	                var t1l = hl + sigma1l;
+	                var t1h = hh + sigma1h + ((t1l >>> 0) < (hl >>> 0) ? 1 : 0);
+	                var t1l = t1l + chl;
+	                var t1h = t1h + chh + ((t1l >>> 0) < (chl >>> 0) ? 1 : 0);
+	                var t1l = t1l + Kil;
+	                var t1h = t1h + Kih + ((t1l >>> 0) < (Kil >>> 0) ? 1 : 0);
+	                var t1l = t1l + Wil;
+	                var t1h = t1h + Wih + ((t1l >>> 0) < (Wil >>> 0) ? 1 : 0);
+
+	                // t2 = sigma0 + maj
+	                var t2l = sigma0l + majl;
+	                var t2h = sigma0h + majh + ((t2l >>> 0) < (sigma0l >>> 0) ? 1 : 0);
+
+	                // Update working variables
+	                hh = gh;
+	                hl = gl;
+	                gh = fh;
+	                gl = fl;
+	                fh = eh;
+	                fl = el;
+	                el = (dl + t1l) | 0;
+	                eh = (dh + t1h + ((el >>> 0) < (dl >>> 0) ? 1 : 0)) | 0;
+	                dh = ch;
+	                dl = cl;
+	                ch = bh;
+	                cl = bl;
+	                bh = ah;
+	                bl = al;
+	                al = (t1l + t2l) | 0;
+	                ah = (t1h + t2h + ((al >>> 0) < (t1l >>> 0) ? 1 : 0)) | 0;
+	            }
+
+	            // Intermediate hash value
+	            H0l = H0.low  = (H0l + al);
+	            H0.high = (H0h + ah + ((H0l >>> 0) < (al >>> 0) ? 1 : 0));
+	            H1l = H1.low  = (H1l + bl);
+	            H1.high = (H1h + bh + ((H1l >>> 0) < (bl >>> 0) ? 1 : 0));
+	            H2l = H2.low  = (H2l + cl);
+	            H2.high = (H2h + ch + ((H2l >>> 0) < (cl >>> 0) ? 1 : 0));
+	            H3l = H3.low  = (H3l + dl);
+	            H3.high = (H3h + dh + ((H3l >>> 0) < (dl >>> 0) ? 1 : 0));
+	            H4l = H4.low  = (H4l + el);
+	            H4.high = (H4h + eh + ((H4l >>> 0) < (el >>> 0) ? 1 : 0));
+	            H5l = H5.low  = (H5l + fl);
+	            H5.high = (H5h + fh + ((H5l >>> 0) < (fl >>> 0) ? 1 : 0));
+	            H6l = H6.low  = (H6l + gl);
+	            H6.high = (H6h + gh + ((H6l >>> 0) < (gl >>> 0) ? 1 : 0));
+	            H7l = H7.low  = (H7l + hl);
+	            H7.high = (H7h + hh + ((H7l >>> 0) < (hl >>> 0) ? 1 : 0));
+	        },
+
+	        _doFinalize: function () {
+	            // Shortcuts
+	            var data = this._data;
+	            var dataWords = data.words;
+
+	            var nBitsTotal = this._nDataBytes * 8;
+	            var nBitsLeft = data.sigBytes * 8;
+
+	            // Add padding
+	            dataWords[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
+	            dataWords[(((nBitsLeft + 128) >>> 10) << 5) + 30] = Math.floor(nBitsTotal / 0x100000000);
+	            dataWords[(((nBitsLeft + 128) >>> 10) << 5) + 31] = nBitsTotal;
+	            data.sigBytes = dataWords.length * 4;
+
+	            // Hash final blocks
+	            this._process();
+
+	            // Convert hash to 32-bit word array before returning
+	            var hash = this._hash.toX32();
+
+	            // Return final computed hash
+	            return hash;
+	        },
+
+	        clone: function () {
+	            var clone = Hasher.clone.call(this);
+	            clone._hash = this._hash.clone();
+
+	            return clone;
+	        },
+
+	        blockSize: 1024/32
+	    });
+
+	    /**
+	     * Shortcut function to the hasher's object interface.
+	     *
+	     * @param {WordArray|string} message The message to hash.
+	     *
+	     * @return {WordArray} The hash.
+	     *
+	     * @static
+	     *
+	     * @example
+	     *
+	     *     var hash = CryptoJS.SHA512('message');
+	     *     var hash = CryptoJS.SHA512(wordArray);
+	     */
+	    C.SHA512 = Hasher._createHelper(SHA512);
+
+	    /**
+	     * Shortcut function to the HMAC's object interface.
+	     *
+	     * @param {WordArray|string} message The message to hash.
+	     * @param {WordArray|string} key The secret key.
+	     *
+	     * @return {WordArray} The HMAC.
+	     *
+	     * @static
+	     *
+	     * @example
+	     *
+	     *     var hmac = CryptoJS.HmacSHA512(message, key);
+	     */
+	    C.HmacSHA512 = Hasher._createHmacHelper(SHA512);
+	}());
+
+
+	return CryptoJS.SHA512;
+
+}));
+},{"./core":1,"./x64-core":6}],6:[function(require,module,exports){
+;(function (root, factory) {
+	if (typeof exports === "object") {
+		// CommonJS
+		module.exports = exports = factory(require("./core"));
+	}
+	else if (typeof define === "function" && define.amd) {
+		// AMD
+		define(["./core"], factory);
+	}
+	else {
+		// Global (browser)
+		factory(root.CryptoJS);
+	}
+}(this, function (CryptoJS) {
+
+	(function (undefined) {
+	    // Shortcuts
+	    var C = CryptoJS;
+	    var C_lib = C.lib;
+	    var Base = C_lib.Base;
+	    var X32WordArray = C_lib.WordArray;
+
+	    /**
+	     * x64 namespace.
+	     */
+	    var C_x64 = C.x64 = {};
+
+	    /**
+	     * A 64-bit word.
+	     */
+	    var X64Word = C_x64.Word = Base.extend({
+	        /**
+	         * Initializes a newly created 64-bit word.
+	         *
+	         * @param {number} high The high 32 bits.
+	         * @param {number} low The low 32 bits.
+	         *
+	         * @example
+	         *
+	         *     var x64Word = CryptoJS.x64.Word.create(0x00010203, 0x04050607);
+	         */
+	        init: function (high, low) {
+	            this.high = high;
+	            this.low = low;
+	        }
+
+	        /**
+	         * Bitwise NOTs this word.
+	         *
+	         * @return {X64Word} A new x64-Word object after negating.
+	         *
+	         * @example
+	         *
+	         *     var negated = x64Word.not();
+	         */
+	        // not: function () {
+	            // var high = ~this.high;
+	            // var low = ~this.low;
+
+	            // return X64Word.create(high, low);
+	        // },
+
+	        /**
+	         * Bitwise ANDs this word with the passed word.
+	         *
+	         * @param {X64Word} word The x64-Word to AND with this word.
+	         *
+	         * @return {X64Word} A new x64-Word object after ANDing.
+	         *
+	         * @example
+	         *
+	         *     var anded = x64Word.and(anotherX64Word);
+	         */
+	        // and: function (word) {
+	            // var high = this.high & word.high;
+	            // var low = this.low & word.low;
+
+	            // return X64Word.create(high, low);
+	        // },
+
+	        /**
+	         * Bitwise ORs this word with the passed word.
+	         *
+	         * @param {X64Word} word The x64-Word to OR with this word.
+	         *
+	         * @return {X64Word} A new x64-Word object after ORing.
+	         *
+	         * @example
+	         *
+	         *     var ored = x64Word.or(anotherX64Word);
+	         */
+	        // or: function (word) {
+	            // var high = this.high | word.high;
+	            // var low = this.low | word.low;
+
+	            // return X64Word.create(high, low);
+	        // },
+
+	        /**
+	         * Bitwise XORs this word with the passed word.
+	         *
+	         * @param {X64Word} word The x64-Word to XOR with this word.
+	         *
+	         * @return {X64Word} A new x64-Word object after XORing.
+	         *
+	         * @example
+	         *
+	         *     var xored = x64Word.xor(anotherX64Word);
+	         */
+	        // xor: function (word) {
+	            // var high = this.high ^ word.high;
+	            // var low = this.low ^ word.low;
+
+	            // return X64Word.create(high, low);
+	        // },
+
+	        /**
+	         * Shifts this word n bits to the left.
+	         *
+	         * @param {number} n The number of bits to shift.
+	         *
+	         * @return {X64Word} A new x64-Word object after shifting.
+	         *
+	         * @example
+	         *
+	         *     var shifted = x64Word.shiftL(25);
+	         */
+	        // shiftL: function (n) {
+	            // if (n < 32) {
+	                // var high = (this.high << n) | (this.low >>> (32 - n));
+	                // var low = this.low << n;
+	            // } else {
+	                // var high = this.low << (n - 32);
+	                // var low = 0;
+	            // }
+
+	            // return X64Word.create(high, low);
+	        // },
+
+	        /**
+	         * Shifts this word n bits to the right.
+	         *
+	         * @param {number} n The number of bits to shift.
+	         *
+	         * @return {X64Word} A new x64-Word object after shifting.
+	         *
+	         * @example
+	         *
+	         *     var shifted = x64Word.shiftR(7);
+	         */
+	        // shiftR: function (n) {
+	            // if (n < 32) {
+	                // var low = (this.low >>> n) | (this.high << (32 - n));
+	                // var high = this.high >>> n;
+	            // } else {
+	                // var low = this.high >>> (n - 32);
+	                // var high = 0;
+	            // }
+
+	            // return X64Word.create(high, low);
+	        // },
+
+	        /**
+	         * Rotates this word n bits to the left.
+	         *
+	         * @param {number} n The number of bits to rotate.
+	         *
+	         * @return {X64Word} A new x64-Word object after rotating.
+	         *
+	         * @example
+	         *
+	         *     var rotated = x64Word.rotL(25);
+	         */
+	        // rotL: function (n) {
+	            // return this.shiftL(n).or(this.shiftR(64 - n));
+	        // },
+
+	        /**
+	         * Rotates this word n bits to the right.
+	         *
+	         * @param {number} n The number of bits to rotate.
+	         *
+	         * @return {X64Word} A new x64-Word object after rotating.
+	         *
+	         * @example
+	         *
+	         *     var rotated = x64Word.rotR(7);
+	         */
+	        // rotR: function (n) {
+	            // return this.shiftR(n).or(this.shiftL(64 - n));
+	        // },
+
+	        /**
+	         * Adds this word with the passed word.
+	         *
+	         * @param {X64Word} word The x64-Word to add with this word.
+	         *
+	         * @return {X64Word} A new x64-Word object after adding.
+	         *
+	         * @example
+	         *
+	         *     var added = x64Word.add(anotherX64Word);
+	         */
+	        // add: function (word) {
+	            // var low = (this.low + word.low) | 0;
+	            // var carry = (low >>> 0) < (this.low >>> 0) ? 1 : 0;
+	            // var high = (this.high + word.high + carry) | 0;
+
+	            // return X64Word.create(high, low);
+	        // }
+	    });
+
+	    /**
+	     * An array of 64-bit words.
+	     *
+	     * @property {Array} words The array of CryptoJS.x64.Word objects.
+	     * @property {number} sigBytes The number of significant bytes in this word array.
+	     */
+	    var X64WordArray = C_x64.WordArray = Base.extend({
+	        /**
+	         * Initializes a newly created word array.
+	         *
+	         * @param {Array} words (Optional) An array of CryptoJS.x64.Word objects.
+	         * @param {number} sigBytes (Optional) The number of significant bytes in the words.
+	         *
+	         * @example
+	         *
+	         *     var wordArray = CryptoJS.x64.WordArray.create();
+	         *
+	         *     var wordArray = CryptoJS.x64.WordArray.create([
+	         *         CryptoJS.x64.Word.create(0x00010203, 0x04050607),
+	         *         CryptoJS.x64.Word.create(0x18191a1b, 0x1c1d1e1f)
+	         *     ]);
+	         *
+	         *     var wordArray = CryptoJS.x64.WordArray.create([
+	         *         CryptoJS.x64.Word.create(0x00010203, 0x04050607),
+	         *         CryptoJS.x64.Word.create(0x18191a1b, 0x1c1d1e1f)
+	         *     ], 10);
+	         */
+	        init: function (words, sigBytes) {
+	            words = this.words = words || [];
+
+	            if (sigBytes != undefined) {
+	                this.sigBytes = sigBytes;
+	            } else {
+	                this.sigBytes = words.length * 8;
+	            }
+	        },
+
+	        /**
+	         * Converts this 64-bit word array to a 32-bit word array.
+	         *
+	         * @return {CryptoJS.lib.WordArray} This word array's data as a 32-bit word array.
+	         *
+	         * @example
+	         *
+	         *     var x32WordArray = x64WordArray.toX32();
+	         */
+	        toX32: function () {
+	            // Shortcuts
+	            var x64Words = this.words;
+	            var x64WordsLength = x64Words.length;
+
+	            // Convert
+	            var x32Words = [];
+	            for (var i = 0; i < x64WordsLength; i++) {
+	                var x64Word = x64Words[i];
+	                x32Words.push(x64Word.high);
+	                x32Words.push(x64Word.low);
+	            }
+
+	            return X32WordArray.create(x32Words, this.sigBytes);
+	        },
+
+	        /**
+	         * Creates a copy of this word array.
+	         *
+	         * @return {X64WordArray} The clone.
+	         *
+	         * @example
+	         *
+	         *     var clone = x64WordArray.clone();
+	         */
+	        clone: function () {
+	            var clone = Base.clone.call(this);
+
+	            // Clone "words" array
+	            var words = clone.words = this.words.slice(0);
+
+	            // Clone each X64Word object
+	            var wordsLength = words.length;
+	            for (var i = 0; i < wordsLength; i++) {
+	                words[i] = words[i].clone();
+	            }
+
+	            return clone;
+	        }
+	    });
+	}());
+
+
+	return CryptoJS;
+
+}));
+},{"./core":1}],7:[function(require,module,exports){
 'use strict'
 
 var mergeDescriptors = require('merge-descriptors')
@@ -119,14 +1996,14 @@ function isFunction (value) {
   return typeof value === 'function'
 }
 
-},{"is-object":2,"merge-descriptors":3}],2:[function(require,module,exports){
+},{"is-object":8,"merge-descriptors":9}],8:[function(require,module,exports){
 "use strict";
 
 module.exports = function isObject(x) {
 	return typeof x === "object" && x !== null;
 };
 
-},{}],3:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*!
  * merge-descriptors
  * Copyright(c) 2014 Jonathan Ong
@@ -188,7 +2065,7 @@ function merge(dest, src, redefine) {
   return dest
 }
 
-},{}],4:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict'
 
 module.exports = function createNotFoundError (path) {
@@ -197,7 +2074,7 @@ module.exports = function createNotFoundError (path) {
   return err
 }
 
-},{}],5:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -383,7 +2260,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],6:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 var fillMissingKeys = require('fill-keys');
@@ -478,7 +2355,7 @@ if (require.cache) {
   proxyquire.plugin = replacePrelude.plugin;
 }
 
-},{"fill-keys":1,"module-not-found-error":4}],7:[function(require,module,exports){
+},{"fill-keys":7,"module-not-found-error":10}],13:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty
@@ -598,7 +2475,7 @@ function querystringify(obj, prefix) {
 exports.stringify = querystringify;
 exports.parse = querystring;
 
-},{}],8:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 /**
@@ -638,7 +2515,7 @@ module.exports = function required(port, protocol) {
   return port !== 0;
 };
 
-},{}],9:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function (setImmediate,clearImmediate){
 var nextTick = require('process/browser.js').nextTick;
 var apply = Function.prototype.apply;
@@ -717,7 +2594,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
   delete immediateIds[id];
 };
 }).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":5,"timers":9}],10:[function(require,module,exports){
+},{"process/browser.js":11,"timers":15}],16:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -1171,7 +3048,7 @@ Url.qs = qs;
 module.exports = Url;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"querystringify":7,"requires-port":8}],"/wrapper/pktf1/helpers/base-configs.js":[function(require,module,exports){
+},{"querystringify":13,"requires-port":14}],"/wrapper/pktf1/helpers/base-configs.js":[function(require,module,exports){
 'use strict';
 
 // =============================================================================
@@ -1710,7 +3587,9 @@ module.exports = {
 // -----------------------------------------------------------------------------
 
 var Proxyquireify = require('proxyquireify')(require);
+
 var StubLoader = require('./stub-loader');
+var TestUtilities = require('./utilities.js');
 var Utilities = require('utilities');
 
 var Network = StubLoader.stub('network.js');
@@ -1815,16 +3694,46 @@ function getMockApi() {
     };
 }
 
+/**
+ * Returns a fresh instance of a base mocked partner module
+ * This is useful when constructing a mock factory instance directly
+ *
+ * @param {object} customizations modifications to the base module
+ * @return {object} a fresh partner module of which properties can be overwritten
+ */
+function getMockModule(customizations) {
+    return TestUtilities.deepMergeObjects({
+        type: 'identity',
+        api: '1',
+        main: function () {},
+        profile: {
+            partnerId: 'MockModuleIp',
+            statsId: 'MOCK',
+            version: '1.0.0',
+            source: 'mock.module.ip',
+            cacheExpiry: {
+                match: 1000,
+                pass: 2000,
+                error: 3000
+            },
+            targetingKeys: {
+                exchangeBidding: 'mock_module_tgt'
+            }
+        }
+    }, customizations);
+}
+
 // =============================================================================
 // EXPORTS /////////////////////////////////////////////////////////////////////
 // -----------------------------------------------------------------------------
 
 module.exports = {
     factory: factory,
-    getMockApi: getMockApi
+    getMockApi: getMockApi,
+    getMockModule: getMockModule
 };
 
-},{"./stub-loader":"/wrapper/pktf1/helpers/stub-loader.js","identity-partner-factory.js":"/wrapper/src/modules/identity-layer/identity-partner-factory.js","proxyquireify":6,"utilities":"/wrapper/src/libs/utilities.js"}],"/wrapper/pktf1/helpers/mock-data.js":[function(require,module,exports){
+},{"./stub-loader":"/wrapper/pktf1/helpers/stub-loader.js","./utilities.js":"/wrapper/pktf1/helpers/utilities.js","identity-partner-factory.js":"/wrapper/src/modules/identity-layer/identity-partner-factory.js","proxyquireify":12,"utilities":"/wrapper/src/libs/utilities.js"}],"/wrapper/pktf1/helpers/mock-data.js":[function(require,module,exports){
 'use strict';
 
 // =============================================================================
@@ -2074,7 +3983,7 @@ module.exports = {
     testSessionTypes: testSessionTypes
 };
 
-},{"./xhr-filter":"/wrapper/pktf1/helpers/xhr-filter.js","url-parse":10}],"/wrapper/pktf1/helpers/polyfills/promise.js":[function(require,module,exports){
+},{"./xhr-filter":"/wrapper/pktf1/helpers/xhr-filter.js","url-parse":16}],"/wrapper/pktf1/helpers/polyfills/promise.js":[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -3255,7 +5164,7 @@ return Promise$2;
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":5}],"/wrapper/pktf1/helpers/render-checker.js":[function(require,module,exports){
+},{"_process":11}],"/wrapper/pktf1/helpers/render-checker.js":[function(require,module,exports){
 'use strict';
 
 // =============================================================================
@@ -3502,6 +5411,36 @@ function mergeObjects(target, source) {
 }
 
 /**
+ * Deep copies all items in `source` to `target`. Items from `source` overwrite
+ * those in `target` if they have the same property name, and the item in
+ * `target` is not an object (inlcluding null), regardless of depth. Note that
+ * as a result of this, the returned object will always have equal number or
+ * or more properties than `target`, for all depth levels.
+ *
+ * @param  {object} target  The object to copy to.
+ * @param  {object} source  The object to copy from.
+ *
+ * @return {object}         A pointer to `target`.
+ */
+function deepMergeObjects(target, source) {
+    for (var prop in source) {
+        if (!source.hasOwnProperty(prop)) {
+            continue;
+        }
+
+        if (getType(target[prop]) === 'object') {
+            if (getType(source[prop]) === 'object') {
+                deepMergeObjects(target[prop], source[prop]);
+            }
+        } else {
+            target[prop] = source[prop];
+        }
+    }
+
+    return target;
+}
+
+/**
  * Deep clones an object.
  *
  * @param  {object} original The object to be cloned.
@@ -3641,6 +5580,7 @@ module.exports = {
     getType: getType,
     appendToArray: appendToArray,
     mergeObjects: mergeObjects,
+    deepMergeObjects: deepMergeObjects,
     clonePlainObject: clonePlainObject,
     deepGet: deepGet,
     deepSet: deepSet,
@@ -3802,7 +5742,7 @@ XhrFilter.filters = filters;
 
 module.exports = XhrFilter;
 
-},{"./utilities":"/wrapper/pktf1/helpers/utilities.js"}],11:[function(require,module,exports){
+},{"./utilities":"/wrapper/pktf1/helpers/utilities.js"}],17:[function(require,module,exports){
 // Device.js
 // (c) 2014 Matthew Hudson
 // Device.js is freely distributable under the MIT license.
@@ -4860,7 +6800,7 @@ describe('System Tests: Partner', function () {
 
 });
 
-},{"../../../../helpers/base-configs":"/wrapper/pktf1/helpers/base-configs.js","../../../../helpers/gpt-page-maker":"/wrapper/pktf1/helpers/gpt-page-maker.js","../../../../helpers/hacks":"/wrapper/pktf1/helpers/hacks.js","../../../../helpers/header-stats-auditor":"/wrapper/pktf1/helpers/header-stats-auditor.js","../../../../helpers/render-checker":"/wrapper/pktf1/helpers/render-checker.js","../../../../helpers/utilities":"/wrapper/pktf1/helpers/utilities.js","../../../../helpers/xhr-filter":"/wrapper/pktf1/helpers/xhr-filter.js","../../../../libs/external/device":11,"pre-gpt-shell.js":"/wrapper/src/shells/pre-gpt-shell.js","url-parse":10}],"/wrapper/pktf1/stubs/libs/bid-transformer.stub.js":[function(require,module,exports){
+},{"../../../../helpers/base-configs":"/wrapper/pktf1/helpers/base-configs.js","../../../../helpers/gpt-page-maker":"/wrapper/pktf1/helpers/gpt-page-maker.js","../../../../helpers/hacks":"/wrapper/pktf1/helpers/hacks.js","../../../../helpers/header-stats-auditor":"/wrapper/pktf1/helpers/header-stats-auditor.js","../../../../helpers/render-checker":"/wrapper/pktf1/helpers/render-checker.js","../../../../helpers/utilities":"/wrapper/pktf1/helpers/utilities.js","../../../../helpers/xhr-filter":"/wrapper/pktf1/helpers/xhr-filter.js","../../../../libs/external/device":17,"pre-gpt-shell.js":"/wrapper/src/shells/pre-gpt-shell.js","url-parse":16}],"/wrapper/pktf1/stubs/libs/bid-transformer.stub.js":[function(require,module,exports){
 
 },{}],"/wrapper/pktf1/stubs/libs/browser.stub.js":[function(require,module,exports){
 'use strict';
@@ -4989,7 +6929,7 @@ module.exports = {
 },{"classify.js":"/wrapper/src/libs/classify.js","header-stats-service.js":"/wrapper/src/services/header-stats-service.js","header-tag-slot.js":"/wrapper/src/libs/header-tag-slot.js","layer.js":"/wrapper/src/layers/layer.js","prms.js":"/wrapper/src/libs/external/prms.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/layers/gpt-layer.js":[function(require,module,exports){
 "use strict";function GptLayer(e){var t,r,__directInterface,s,i;return function(){t=Layer(),s=e.desktopGlobalTimeout,i=e.mobileGlobalTimeout,"mobile"===SpaceCamp.DeviceTypeChecker.getDeviceType()?SpaceCamp.globalTimeout=i:SpaceCamp.globalTimeout=s,r={slotDemandHistory:{},desktopGlobalTimeout:s,mobileGlobalTimeout:i},__directInterface={};for(var a=0;a<GptLayerModules.length;a++)__directInterface=Utilities.mergeObjects(__directInterface,GptLayerModules[a](e,r,t._executeNext));t._setDirectInterface("GptLayer",__directInterface)}(),Classify.derive(t,{__baseClass:t,__state:r,__directInterface:__directInterface})}var Classify=require("classify.js"),Layer=require("layer.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),GptLayerModules=[require("gpt-set-targeting.js"),require("gpt-clear-targeting.js"),require("gpt-map-slots.js"),require("gpt-display.js"),require("gpt-refresh.js"),require("gpt-destroy-slots.js"),require("gpt-options.js")];module.exports=GptLayer;
 },{"classify.js":"/wrapper/src/libs/classify.js","gpt-clear-targeting.js":"/wrapper/src/modules/gpt-layer/gpt-clear-targeting.js","gpt-destroy-slots.js":"/wrapper/src/modules/gpt-layer/gpt-destroy-slots.js","gpt-display.js":"/wrapper/src/modules/gpt-layer/gpt-display.js","gpt-map-slots.js":"/wrapper/src/modules/gpt-layer/gpt-map-slots.js","gpt-options.js":"/wrapper/src/modules/gpt-layer/gpt-options.js","gpt-refresh.js":"/wrapper/src/modules/gpt-layer/gpt-refresh.js","gpt-set-targeting.js":"/wrapper/src/modules/gpt-layer/gpt-set-targeting.js","layer.js":"/wrapper/src/layers/layer.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/layers/identity-layer.js":[function(require,module,exports){
-"use strict";function IdentityLayer(e){function t(e,t){return f[e]=m.IN_PROGRESS,new Prms(function(r){t.instance.retrieve().then(function(){t.enableSetTargeting&&Utilities.isFunction(t.instance.getTargets)&&SpaceCamp.services.GptService.setIdentityTargeting(t.instance.getTargets())}).then(function(){f[e]=m.COMPLETE,r()}).catch(function(t){f[e]=m.COMPLETE,r()})})}function r(){for(var e=[],r=Prms.defer(),i=Object.keys(v);i.length;){var n=Utilities.randomSplice(i),s=v[n];if(s.enabled)try{e.push(t(n,s))}catch(e){}}return Prms.all(e).then(function(){r.resolve()}),r}function i(){for(var e in f)f.hasOwnProperty(e)&&f[e]!==m.COMPLETE&&EventsService.emit("hs_identity_timeout",{statsId:v[e].instance.getStatsId()})}function n(){var e={};for(var t in v)if(v.hasOwnProperty(t)){var r=v[t];if(r.enabled){var i=r.instance.getResults();i&&(e[t]={data:i})}}return e}function s(){l===m.NOT_STARTED&&(y=r(),l=m.IN_PROGRESS,y.promise.then(function(){i(),l=m.COMPLETE}),0===d?y.resolve():T||(T=TimerService.createTimer(d,!1,function(){y.resolve()})))}function a(){return l===m.NOT_STARTED?Prms.resolve(null):(l!==m.COMPLETE&&T&&TimerService.startTimer(T),y.promise.then(function(){return n()}))}function c(e,t){return a().then(function(r){if(r&&!Utilities.isEmpty(r))for(var i=0;i<t.length;i++)t[i].identityData=r;return u._executeNext(e,t)})}function o(){var e={};for(var t in v)if(v.hasOwnProperty(t)){var r=v[t];if(r.enabled){var i=r.instance.getResults();f[t]===m.COMPLETE?(e[t]=i?{data:i}:{data:{}},e[t].responsePending=!1):e[t]={data:{},responsePending:!0}}}return e}var u,v,l,f,d,T,y,m={NOT_STARTED:0,IN_PROGRESS:1,COMPLETE:2};return function(){EventsService=SpaceCamp.services.EventsService,TimerService=SpaceCamp.services.TimerService,u=Layer(),l=m.NOT_STARTED,f={},v=e.partners,d=e.timeout,EventsService.emit("hs_define_identity_timeout",{timeout:d});for(var t=Object.keys(v),r=t.length-1;r>=0;r--){var i=Utilities.randomSplice(t),n=v[i];if(n.enabled)try{var T=IdentityPartnerConstructors[i];if(Utilities.isObject(T)?n.instance=IdentityPartnerFactory(T,n.configs):n.instance=T(n.configs),!n.instance){n.enabled=!1;continue}f[i]=m.NOT_STARTED}catch(e){n.enabled=!1}}u._setDirectInterface("IdentityLayer",{retrieve:s,getResult:a,getIdentityResults:o}),u._setExecutor(c)}(),Classify.derive(u,{__EnumStatuses:m,retrieve:s,getResult:a,__executor:c,__sendStatsTimeouts:i,__getAllPartnerResults:n,__invokeAllPartners:r,__partnerCaller:t})}var Classify=require("classify.js"),Layer=require("layer.js"),Prms=require("prms.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),IdentityPartnerFactory=require("identity-partner-factory"),IdentityPartnerConstructors={AdserverOrgIp:require("adserver-org-ip.js")},EventsService,TimerService;module.exports=IdentityLayer;
+"use strict";function IdentityLayer(e){function t(e,t){return f[e]=m.IN_PROGRESS,new Prms(function(r){t.instance.retrieve().then(function(){t.enableSetTargeting&&Utilities.isFunction(t.instance.getTargets)&&SpaceCamp.services.GptService.setIdentityTargeting(t.instance.getTargets())}).then(function(){f[e]=m.COMPLETE,r()}).catch(function(t){f[e]=m.COMPLETE,r()})})}function r(){for(var e=[],r=Prms.defer(),n=Object.keys(v);n.length;){var i=Utilities.randomSplice(n),s=v[i];if(s.enabled)try{e.push(t(i,s))}catch(e){}}return Prms.all(e).then(function(){r.resolve()}),r}function n(){for(var e in f)f.hasOwnProperty(e)&&f[e]!==m.COMPLETE&&EventsService.emit("hs_identity_timeout",{statsId:v[e].instance.getStatsId()})}function i(){var e={};for(var t in v)if(v.hasOwnProperty(t)){var r=v[t];if(r.enabled){var n=r.instance.getResults();n&&(e[t]={data:n})}}return e}function s(){l===m.NOT_STARTED&&(y=r(),l=m.IN_PROGRESS,y.promise.then(function(){n(),l=m.COMPLETE}),0===d?y.resolve():T||(T=TimerService.createTimer(d,!1,function(){y.resolve()})))}function a(){return l===m.NOT_STARTED?Prms.resolve(null):(l!==m.COMPLETE&&T&&TimerService.startTimer(T),y.promise.then(function(){return i()}))}function c(e,t){return a().then(function(r){if(r&&!Utilities.isEmpty(r))for(var n=0;n<t.length;n++)t[n].identityData=r;return u._executeNext(e,t)})}function o(){var e={};for(var t in v)if(v.hasOwnProperty(t)){var r=v[t];if(r.enabled){var n=r.instance.getResults();f[t]===m.COMPLETE?(e[t]=n?{data:n}:{data:{}},e[t].responsePending=!1):e[t]={data:{},responsePending:!0}}}return e}var u,v,l,f,d,T,y,m={NOT_STARTED:0,IN_PROGRESS:1,COMPLETE:2};return function(){EventsService=SpaceCamp.services.EventsService,TimerService=SpaceCamp.services.TimerService,u=Layer(),l=m.NOT_STARTED,f={},v=e.partners,d=e.timeout,EventsService.emit("hs_define_identity_timeout",{timeout:d});for(var t=Object.keys(v),n=t.length-1;n>=0;n--){var i=Utilities.randomSplice(t),T=v[i];if(T.enabled)try{var y=IdentityPartnerConstructors[i];if(Utilities.isObject(y)?T.instance=IdentityPartnerFactory(y,T.configs):T.instance=y(T.configs),!T.instance){T.enabled=!1;continue}f[i]=m.NOT_STARTED}catch(e){T.enabled=!1}}u._setDirectInterface("IdentityLayer",{retrieve:s,getResult:a,getIdentityResults:o,invokeAllPartners:r}),u._setExecutor(c)}(),Classify.derive(u,{__EnumStatuses:m,retrieve:s,getResult:a,__executor:c,__sendStatsTimeouts:n,__getAllPartnerResults:i,invokeAllPartners:r,__partnerCaller:t})}var Classify=require("classify.js"),Layer=require("layer.js"),Prms=require("prms.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),IdentityPartnerFactory=require("identity-partner-factory"),IdentityPartnerConstructors={AdserverOrgIp:require("adserver-org-ip.js")},EventsService,TimerService;module.exports=IdentityLayer;
 },{"adserver-org-ip.js":"/wrapper/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js","classify.js":"/wrapper/src/libs/classify.js","identity-partner-factory":"/wrapper/src/modules/identity-layer/identity-partner-factory.js","layer.js":"/wrapper/src/layers/layer.js","prms.js":"/wrapper/src/libs/external/prms.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/layers/layer.js":[function(require,module,exports){
 "use strict";function Layer(){function e(e,r){return Prms.resolve(r)}function r(e,r){__directInterface={},__directInterface[e]=r}function t(e){i=e}function n(){return __directInterface}function u(e){s=e}function o(e,r){return s(e,r)}function c(e,r){return Prms.resolve().then(function(){return i(e,r)})}var __directInterface,i,s;return function(){__directInterface=null,i=e,s=e}(),{__layerLoopBack:e,_setDirectInterface:r,_setExecutor:t,_executeNext:o,setNext:u,getDirectInterface:n,execute:c}}var Prms=require("prms.js"),Whoopsie=require("whoopsie.js");module.exports=Layer;
 },{"prms.js":"/wrapper/src/libs/external/prms.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/layers/mediation-layer.js":[function(require,module,exports){
@@ -5020,7 +6960,7 @@ module.exports = {
 (function (process,global,setImmediate){
 !function(n,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t(n.async=n.async||{})}(this,function(n){"use strict";function t(n){return n}function e(n,t,e){switch(e.length){case 0:return n.call(t);case 1:return n.call(t,e[0]);case 2:return n.call(t,e[0],e[1]);case 3:return n.call(t,e[0],e[1],e[2])}return n.apply(t,e)}function r(n,t,r){return t=nt(void 0===t?n.length-1:t,0),function(){for(var u=arguments,o=-1,i=nt(u.length-t,0),c=Array(i);++o<i;)c[o]=u[t+o];o=-1;for(var f=Array(t+1);++o<t;)f[o]=u[o];return f[t]=r(c),e(n,this,f)}}function u(n){return function(){return n}}function o(n){var t=typeof n;return null!=n&&("object"==t||"function"==t)}function i(n){var t=o(n)?ot.call(n):"";return t==tt||t==et||t==rt}function c(n){return!!lt&&lt in n}function f(n){if(null!=n){try{return pt.call(n)}catch(n){}try{return n+""}catch(n){}}return""}function a(n){return!(!o(n)||c(n))&&(i(n)?bt:yt).test(f(n))}function l(n,t){return null==n?void 0:n[t]}function s(n,t){var e=l(n,t);return a(e)?e:void 0}function p(n,e){return xt(r(n,e,t),n+"")}function h(n){return p(function(t,e){var r=Et(function(e,r){var u=this;return n(t,function(n,t){n.apply(u,e.concat([t]))},r)});return e.length?r.apply(this,e):r})}function y(n){return"number"==typeof n&&n>-1&&n%1==0&&n<=Lt}function v(n){return null!=n&&y(n.length)&&!i(n)}function d(){}function m(n){return function(){if(null!==n){var t=n;n=null,t.apply(this,arguments)}}}function g(n,t){for(var e=-1,r=Array(n);++e<n;)r[e]=t(e);return r}function b(n){return null!=n&&"object"==typeof n}function j(n){return b(n)&&It.call(n)==Tt}function S(){return!1}function k(n,t){return!!(t=null==t?Wt:t)&&("number"==typeof n||Qt.test(n))&&n>-1&&n%1==0&&n<t}function O(n){return b(n)&&y(n.length)&&!!Gt[Jt.call(n)]}function w(n,t){var e=zt(n),r=!e&&Pt(n),u=!e&&!r&&Ct(n),o=!e&&!r&&!u&&ee(n),i=e||r||u||o,c=i?g(n.length,String):[],f=c.length;for(var a in n)!t&&!ue.call(n,a)||i&&("length"==a||u&&("offset"==a||"parent"==a)||o&&("buffer"==a||"byteLength"==a||"byteOffset"==a)||k(a,f))||c.push(a);return c}function x(n){var t=n&&n.constructor;return n===("function"==typeof t&&t.prototype||oe)}function E(n){if(!x(n))return ie(n);var t=[];for(var e in Object(n))fe.call(n,e)&&"constructor"!=e&&t.push(e);return t}function L(n){return v(n)?w(n):E(n)}function A(n){var t=-1,e=n.length;return function(){return++t<e?{value:n[t],key:t}:null}}function _(n){var t=-1;return function(){var e=n.next();return e.done?null:(t++,{value:e.value,key:t})}}function T(n){var t=L(n),e=-1,r=t.length;return function(){var u=t[++e];return e<r?{value:n[u],key:u}:null}}function F(n){if(v(n))return A(n);var t=_t(n);return t?_(t):T(n)}function I(n){return function(){if(null===n)throw new Error("Callback was already called.");var t=n;n=null,t.apply(this,arguments)}}function B(n){return function(t,e,r){function u(n,t){if(f-=1,n)c=!0,r(n);else{if(t===ae||c&&f<=0)return c=!0,r(null);o()}}function o(){for(;f<n&&!c;){var t=i();if(null===t)return c=!0,void(f<=0&&r(null));f+=1,e(t.value,t.key,I(u))}}if(r=m(r||d),n<=0||!t)return r(null);var i=F(t),c=!1,f=0;o()}}function $(n,t,e,r){B(t)(n,e,r)}function M(n,t){return function(e,r,u){return n(e,t,r,u)}}function P(n,t,e){function r(n){n?e(n):++o===i&&e(null)}e=m(e||d);var u=0,o=0,i=n.length;for(0===i&&e(null);u<i;u++)t(n[u],u,I(r))}function z(n){return function(t,e,r){return n(se,t,e,r)}}function R(n,t,e,r){r=m(r||d),t=t||[];var u=[],o=0;n(t,function(n,t,r){var i=o++;e(n,function(n,t){u[i]=t,r(n)})},function(n){r(n,u)})}function U(n){return function(t,e,r,u){return n(B(e),t,r,u)}}function V(n){return Et(function(t,e){var r;try{r=n.apply(this,t)}catch(n){return e(n)}o(r)&&"function"==typeof r.then?r.then(function(n){e(null,n)},function(n){e(n.message?n:new Error(n))}):e(null,r)})}function D(n,t){for(var e=-1,r=n?n.length:0;++e<r&&!1!==t(n[e],e,n););return n}function q(n,t){return n&&ge(n,t,L)}function C(n,t,e,r){for(var u=n.length,o=e+(r?1:-1);r?o--:++o<u;)if(t(n[o],o,n))return o;return-1}function W(n){return n!==n}function Q(n,t,e){for(var r=e-1,u=n.length;++r<u;)if(n[r]===t)return r;return-1}function G(n,t,e){return t===t?Q(n,t,e):C(n,W,e)}function N(n,t){for(var e=-1,r=n?n.length:0,u=Array(r);++e<r;)u[e]=t(n[e],e,n);return u}function H(n,t){var e=-1,r=n.length;for(t||(t=Array(r));++e<r;)t[e]=n[e];return t}function J(n){return"symbol"==typeof n||b(n)&&Oe.call(n)==Se}function K(n){if("string"==typeof n)return n;if(zt(n))return N(n,K)+"";if(J(n))return Ee?Ee.call(n):"";var t=n+"";return"0"==t&&1/n==-we?"-0":t}function X(n,t,e){var r=-1,u=n.length;t<0&&(t=-t>u?0:u+t),e=e>u?u:e,e<0&&(e+=u),u=t>e?0:e-t>>>0,t>>>=0;for(var o=Array(u);++r<u;)o[r]=n[r+t];return o}function Y(n,t,e){var r=n.length;return e=void 0===e?r:e,!t&&e>=r?n:X(n,t,e)}function Z(n,t){for(var e=n.length;e--&&G(t,n[e],0)>-1;);return e}function nn(n,t){for(var e=-1,r=n.length;++e<r&&G(t,n[e],0)>-1;);return e}function tn(n){return n.split("")}function en(n){return Le.test(n)}function rn(n){return n.match(Pe)||[]}function un(n){return en(n)?rn(n):tn(n)}function on(n){return null==n?"":K(n)}function cn(n,t,e){if((n=on(n))&&(e||void 0===t))return n.replace(ze,"");if(!n||!(t=K(t)))return n;var r=un(n),u=un(t);return Y(r,nn(r,u),Z(r,u)+1).join("")}function fn(n){return n=n.toString().replace(De,""),n=n.match(Re)[2].replace(" ",""),n=n?n.split(Ue):[],n=n.map(function(n){return cn(n.replace(Ve,""))})}function an(n,t){var e={};q(n,function(n,t){function r(t,e){var r=N(u,function(n){return t[n]});r.push(e),n.apply(null,r)}var u;if(zt(n))u=H(n),n=u.pop(),e[t]=u.concat(u.length>0?r:n);else if(1===n.length)e[t]=n;else{if(u=fn(n),0===n.length&&0===u.length)throw new Error("autoInject task functions require explicit parameters.");u.pop(),e[t]=u.concat(r)}}),be(e,t)}function ln(n){setTimeout(n,0)}function sn(n){return p(function(t,e){n(function(){t.apply(null,e)})})}function pn(){this.head=this.tail=null,this.length=0}function hn(n,t){n.length=1,n.head=n.tail=t}function yn(n,t,e){function r(n,t,e){if(null!=e&&"function"!=typeof e)throw new Error("task callback must be a function");if(c.started=!0,zt(n)||(n=[n]),0===n.length&&c.idle())return We(function(){c.drain()});for(var r=0,u=n.length;r<u;r++){var o={data:n[r],callback:e||d};t?c._tasks.unshift(o):c._tasks.push(o)}We(c.process)}function u(n){return p(function(t){o-=1;for(var e=0,r=n.length;e<r;e++){var u=n[e],f=G(i,u,0);f>=0&&i.splice(f),u.callback.apply(u,t),null!=t[0]&&c.error(t[0],u.data)}o<=c.concurrency-c.buffer&&c.unsaturated(),c.idle()&&c.drain(),c.process()})}if(null==t)t=1;else if(0===t)throw new Error("Concurrency must not be zero");var o=0,i=[],c={_tasks:new pn,concurrency:t,payload:e,saturated:d,unsaturated:d,buffer:t/4,empty:d,drain:d,error:d,started:!1,paused:!1,push:function(n,t){r(n,!1,t)},kill:function(){c.drain=d,c._tasks.empty()},unshift:function(n,t){r(n,!0,t)},process:function(){for(;!c.paused&&o<c.concurrency&&c._tasks.length;){var t=[],e=[],r=c._tasks.length;c.payload&&(r=Math.min(r,c.payload));for(var f=0;f<r;f++){var a=c._tasks.shift();t.push(a),e.push(a.data)}0===c._tasks.length&&c.empty(),o+=1,i.push(t[0]),o===c.concurrency&&c.saturated();var l=I(u(t));n(e,l)}},length:function(){return c._tasks.length},running:function(){return o},workersList:function(){return i},idle:function(){return c._tasks.length+o===0},pause:function(){c.paused=!0},resume:function(){if(!1!==c.paused){c.paused=!1;for(var n=Math.min(c.concurrency,c._tasks.length),t=1;t<=n;t++)We(c.process)}}};return c}function vn(n,t){return yn(n,1,t)}function dn(n,t,e,r){r=m(r||d),Ge(n,function(n,r,u){e(t,n,function(n,e){t=e,u(n)})},function(n){r(n,t)})}function mn(n,t,e,r){var u=[];n(t,function(n,t,r){e(n,function(n,t){u=u.concat(t||[]),r(n)})},function(n){r(n,u)})}function gn(n,t,e){return function(r,u,o,i){function c(){i&&i(null,e(!1))}function f(n,r,u){if(!i)return u();o(n,function(r,c){i&&(r||t(c))?(r?i(r):i(r,e(!0,n)),i=o=!1,u(r,ae)):u()})}arguments.length>3?(i=i||d,n(r,u,f,c)):(i=o,i=i||d,o=u,n(r,f,c))}}function bn(n,t){return t}function jn(n){return p(function(t,e){t.apply(null,e.concat([p(function(t,e){"object"==typeof console&&(t?console.error&&console.error(t):console[n]&&D(e,function(t){console[n](t)}))})]))})}function Sn(n,t,e){function r(t,r){return t?e(t):r?void n(u):e(null)}e=I(e||d);var u=p(function(n,u){if(n)return e(n);u.push(r),t.apply(this,u)});r(null,!0)}function kn(n,t,e){e=I(e||d);var r=p(function(u,o){return u?e(u):t.apply(this,o)?n(r):void e.apply(null,[null].concat(o))});n(r)}function On(n,t,e){kn(n,function(){return!t.apply(this,arguments)},e)}function wn(n,t,e){function r(t){if(t)return e(t);n(u)}function u(n,u){return n?e(n):u?void t(r):e(null)}e=I(e||d),n(u)}function xn(n){return function(t,e,r){return n(t,r)}}function En(n,t,e){se(n,xn(t),e)}function Ln(n,t,e,r){B(t)(n,xn(e),r)}function An(n){return Et(function(t,e){var r=!0;t.push(function(){var n=arguments;r?We(function(){e.apply(null,n)}):e.apply(null,n)}),n.apply(this,t),r=!1})}function _n(n){return!n}function Tn(n){return function(t){return null==t?void 0:t[n]}}function Fn(n,t,e,r){r=m(r||d);var u=[];n(t,function(n,t,r){e(n,function(e,o){e?r(e):(o&&u.push({index:t,value:n}),r())})},function(n){n?r(n):r(null,N(u.sort(function(n,t){return n.index-t.index}),Tn("value")))})}function In(n,t){function e(n){if(n)return r(n);u(e)}var r=I(t||d),u=An(n);e()}function Bn(n,t,e,r){r=m(r||d);var u={};$(n,t,function(n,t,r){e(n,t,function(n,e){if(n)return r(n);u[t]=e,r()})},function(n){r(n,u)})}function $n(n,t){return t in n}function Mn(n,e){var r=Object.create(null),u=Object.create(null);e=e||t;var o=Et(function(t,o){var i=e.apply(null,t);$n(r,i)?We(function(){o.apply(null,r[i])}):$n(u,i)?u[i].push(o):(u[i]=[o],n.apply(null,t.concat([p(function(n){r[i]=n;var t=u[i];delete u[i];for(var e=0,o=t.length;e<o;e++)t[e].apply(null,n)})])))});return o.memo=r,o.unmemoized=n,o}function Pn(n,t,e){e=e||d;var r=v(t)?[]:{};n(t,function(n,t,e){n(p(function(n,u){u.length<=1&&(u=u[0]),r[t]=u,e(n)}))},function(n){e(n,r)})}function zn(n,t){Pn(se,n,t)}function Rn(n,t,e){Pn(B(t),n,e)}function Un(n,t){if(t=m(t||d),!zt(n))return t(new TypeError("First argument to race must be an array of functions"));if(!n.length)return t();for(var e=0,r=n.length;e<r;e++)n[e](t)}function Vn(n,t,e,r){dn(vr.call(n).reverse(),t,e,r)}function Dn(n){return Et(function(t,e){return t.push(p(function(n,t){if(n)e(null,{error:n});else{var r=null;1===t.length?r=t[0]:t.length>1&&(r=t),e(null,{value:r})}})),n.apply(this,t)})}function qn(n,t,e,r){Fn(n,t,function(n,t){e(n,function(n,e){n?t(n):t(null,!e)})},r)}function Cn(n){var t;return zt(n)?t=N(n,Dn):(t={},q(n,function(n,e){t[e]=Dn.call(this,n)})),t}function Wn(n,t,e){function r(){t(function(n){n&&f++<c.times&&("function"!=typeof c.errorFilter||c.errorFilter(n))?setTimeout(r,c.intervalFunc(f)):e.apply(null,arguments)})}var o=5,i=0,c={times:o,intervalFunc:u(i)};if(arguments.length<3&&"function"==typeof n?(e=t||d,t=n):(!function(n,t){if("object"==typeof t)n.times=+t.times||o,n.intervalFunc="function"==typeof t.interval?t.interval:u(+t.interval||i),n.errorFilter=t.errorFilter;else{if("number"!=typeof t&&"string"!=typeof t)throw new Error("Invalid arguments for async.retry");n.times=+t||o}}(c,n),e=e||d),"function"!=typeof t)throw new Error("Invalid arguments for async.retry");var f=1;r()}function Qn(n,t){Pn(Ge,n,t)}function Gn(n,t,e){function r(n,t){var e=n.criteria,r=t.criteria;return e<r?-1:e>r?1:0}pe(n,function(n,e){t(n,function(t,r){if(t)return e(t);e(null,{value:n,criteria:r})})},function(n,t){if(n)return e(n);e(null,N(t.sort(r),Tn("value")))})}function Nn(n,t,e){function r(){c||(o.apply(null,arguments),clearTimeout(i))}function u(){var t=n.name||"anonymous",r=new Error('Callback function "'+t+'" timed out.');r.code="ETIMEDOUT",e&&(r.info=e),c=!0,o(r)}var o,i,c=!1;return Et(function(e,c){o=c,i=setTimeout(u,t),n.apply(null,e.concat(r))})}function Hn(n,t,e,r){for(var u=-1,o=wr(Or((t-n)/(e||1)),0),i=Array(o);o--;)i[r?o:++u]=n,n+=e;return i}function Jn(n,t,e,r){ye(Hn(0,n,1),t,e,r)}function Kn(n,t,e,r){3===arguments.length&&(r=e,e=t,t=zt(n)?[]:{}),r=m(r||d),se(n,function(n,r,u){e(t,n,r,u)},function(n){r(n,t)})}function Xn(n){return function(){return(n.unmemoized||n).apply(null,arguments)}}function Yn(n,t,e){if(e=I(e||d),!n())return e(null);var r=p(function(u,o){return u?e(u):n()?t(r):void e.apply(null,[null].concat(o))});t(r)}function Zn(n,t,e){Yn(function(){return!n.apply(this,arguments)},t,e)}var nt=Math.max,tt="[object Function]",et="[object GeneratorFunction]",rt="[object Proxy]",ut=Object.prototype,ot=ut.toString,it="object"==typeof global&&global&&global.Object===Object&&global,ct="object"==typeof self&&self&&self.Object===Object&&self,ft=it||ct||Function("return this")(),at=ft["__core-js_shared__"],lt=function(){var n=/[^.]+$/.exec(at&&at.keys&&at.keys.IE_PROTO||"");return n?"Symbol(src)_1."+n:""}(),st=Function.prototype,pt=st.toString,ht=/[\\^$.*+?()[\]{}|]/g,yt=/^\[object .+?Constructor\]$/,vt=Function.prototype,dt=Object.prototype,mt=vt.toString,gt=dt.hasOwnProperty,bt=RegExp("^"+mt.call(gt).replace(ht,"\\$&").replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g,"$1.*?")+"$"),jt=function(){try{var n=s(Object,"defineProperty");return n({},"",{}),n}catch(n){}}(),St=jt?function(n,t){return jt(n,"toString",{configurable:!0,enumerable:!1,value:u(t),writable:!0})}:t,kt=500,Ot=16,wt=Date.now,xt=function(n){var t=0,e=0;return function(){var r=wt(),u=Ot-(r-e);if(e=r,u>0){if(++t>=kt)return arguments[0]}else t=0;return n.apply(void 0,arguments)}}(St),Et=function(n){return p(function(t){var e=t.pop();n.call(this,t,e)})},Lt=9007199254740991,At="function"==typeof Symbol&&Symbol.iterator,_t=function(n){return At&&n[At]&&n[At]()},Tt="[object Arguments]",Ft=Object.prototype,It=Ft.toString,Bt=Object.prototype,$t=Bt.hasOwnProperty,Mt=Bt.propertyIsEnumerable,Pt=j(function(){return arguments}())?j:function(n){return b(n)&&$t.call(n,"callee")&&!Mt.call(n,"callee")},zt=Array.isArray,Rt="object"==typeof n&&n&&!n.nodeType&&n,Ut=Rt&&"object"==typeof module&&module&&!module.nodeType&&module,Vt=Ut&&Ut.exports===Rt,Dt=Vt?ft.Buffer:void 0,qt=Dt?Dt.isBuffer:void 0,Ct=qt||S,Wt=9007199254740991,Qt=/^(?:0|[1-9]\d*)$/,Gt={};Gt["[object Float32Array]"]=Gt["[object Float64Array]"]=Gt["[object Int8Array]"]=Gt["[object Int16Array]"]=Gt["[object Int32Array]"]=Gt["[object Uint8Array]"]=Gt["[object Uint8ClampedArray]"]=Gt["[object Uint16Array]"]=Gt["[object Uint32Array]"]=!0,Gt["[object Arguments]"]=Gt["[object Array]"]=Gt["[object ArrayBuffer]"]=Gt["[object Boolean]"]=Gt["[object DataView]"]=Gt["[object Date]"]=Gt["[object Error]"]=Gt["[object Function]"]=Gt["[object Map]"]=Gt["[object Number]"]=Gt["[object Object]"]=Gt["[object RegExp]"]=Gt["[object Set]"]=Gt["[object String]"]=Gt["[object WeakMap]"]=!1;var Nt,Ht=Object.prototype,Jt=Ht.toString,Kt="object"==typeof n&&n&&!n.nodeType&&n,Xt=Kt&&"object"==typeof module&&module&&!module.nodeType&&module,Yt=Xt&&Xt.exports===Kt,Zt=Yt&&it.process,ne=function(){try{return Zt&&Zt.binding("util")}catch(n){}}(),te=ne&&ne.isTypedArray,ee=te?function(n){return function(t){return n(t)}}(te):O,re=Object.prototype,ue=re.hasOwnProperty,oe=Object.prototype,ie=function(n,t){return function(e){return n(t(e))}}(Object.keys,Object),ce=Object.prototype,fe=ce.hasOwnProperty,ae={},le=M($,1/0),se=function(n,t,e){(v(n)?P:le)(n,t,e)},pe=z(R),he=h(pe),ye=U(R),ve=M(ye,1),de=h(ve),me=p(function(n,t){return p(function(e){return n.apply(null,t.concat(e))})}),ge=function(n){return function(t,e,r){for(var u=-1,o=Object(t),i=r(t),c=i.length;c--;){var f=i[n?c:++u];if(!1===e(o[f],f,o))break}return t}}(),be=function(n,t,e){function r(n,t){g.push(function(){c(n,t)})}function u(){if(0===g.length&&0===h)return e(null,s);for(;g.length&&h<t;){g.shift()()}}function o(n,t){var e=v[n];e||(e=v[n]=[]),e.push(t)}function i(n){D(v[n]||[],function(n){n()}),u()}function c(n,t){if(!y){var r=I(p(function(t,r){if(h--,r.length<=1&&(r=r[0]),t){var u={};q(s,function(n,t){u[t]=n}),u[n]=r,y=!0,v=[],e(t,u)}else s[n]=r,i(n)}));h++;var u=t[t.length-1];t.length>1?u(s,r):u(r)}}function f(t){var e=[];return q(n,function(n,r){zt(n)&&G(n,t,0)>=0&&e.push(r)}),e}"function"==typeof t&&(e=t,t=null),e=m(e||d);var a=L(n),l=a.length;if(!l)return e(null);t||(t=l);var s={},h=0,y=!1,v={},g=[],b=[],j={};q(n,function(t,e){if(!zt(t))return r(e,[t]),void b.push(e);var u=t.slice(0,t.length-1),i=u.length;if(0===i)return r(e,t),void b.push(e);j[e]=i,D(u,function(c){if(!n[c])throw new Error("async.auto task `"+e+"` has a non-existent dependency in "+u.join(", "));o(c,function(){0===--i&&r(e,t)})})}),function(){for(var n,t=0;b.length;)n=b.pop(),t++,D(f(n),function(n){0==--j[n]&&b.push(n)});if(t!==l)throw new Error("async.auto cannot execute tasks due to a recursive dependency")}(),u()},je=ft.Symbol,Se="[object Symbol]",ke=Object.prototype,Oe=ke.toString,we=1/0,xe=je?je.prototype:void 0,Ee=xe?xe.toString:void 0,Le=RegExp("[\\u200d\\ud800-\\udfff\\u0300-\\u036f\\ufe20-\\ufe23\\u20d0-\\u20f0\\ufe0e\\ufe0f]"),Ae="[\\u0300-\\u036f\\ufe20-\\ufe23\\u20d0-\\u20f0]",_e="\\ud83c[\\udffb-\\udfff]",Te="(?:\\ud83c[\\udde6-\\uddff]){2}",Fe="[\\ud800-\\udbff][\\udc00-\\udfff]",Ie="(?:[\\u0300-\\u036f\\ufe20-\\ufe23\\u20d0-\\u20f0]|\\ud83c[\\udffb-\\udfff])?",Be="(?:\\u200d(?:"+["[^\\ud800-\\udfff]",Te,Fe].join("|")+")[\\ufe0e\\ufe0f]?"+Ie+")*",$e="[\\ufe0e\\ufe0f]?"+Ie+Be,Me="(?:"+["[^\\ud800-\\udfff]"+Ae+"?",Ae,Te,Fe,"[\\ud800-\\udfff]"].join("|")+")",Pe=RegExp(_e+"(?="+_e+")|"+Me+$e,"g"),ze=/^\s+|\s+$/g,Re=/^(function)?\s*[^\(]*\(\s*([^\)]*)\)/m,Ue=/,/,Ve=/(=.+)?(\s*)$/,De=/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/gm,qe="function"==typeof setImmediate&&setImmediate,Ce="object"==typeof process&&"function"==typeof process.nextTick;Nt=qe?setImmediate:Ce?process.nextTick:ln;var We=sn(Nt);pn.prototype.removeLink=function(n){return n.prev?n.prev.next=n.next:this.head=n.next,n.next?n.next.prev=n.prev:this.tail=n.prev,n.prev=n.next=null,this.length-=1,n},pn.prototype.empty=pn,pn.prototype.insertAfter=function(n,t){t.prev=n,t.next=n.next,n.next?n.next.prev=t:this.tail=t,n.next=t,this.length+=1},pn.prototype.insertBefore=function(n,t){t.prev=n.prev,t.next=n,n.prev?n.prev.next=t:this.head=t,n.prev=t,this.length+=1},pn.prototype.unshift=function(n){this.head?this.insertBefore(this.head,n):hn(this,n)},pn.prototype.push=function(n){this.tail?this.insertAfter(this.tail,n):hn(this,n)},pn.prototype.shift=function(){return this.head&&this.removeLink(this.head)},pn.prototype.pop=function(){return this.tail&&this.removeLink(this.tail)};var Qe,Ge=M($,1),Ne=p(function(n){return p(function(t){var e=this,r=t[t.length-1];"function"==typeof r?t.pop():r=d,dn(n,t,function(n,t,r){t.apply(e,n.concat([p(function(n,t){r(n,t)})]))},function(n,t){r.apply(e,[n].concat(t))})})}),He=p(function(n){return Ne.apply(null,n.reverse())}),Je=z(mn),Ke=function(n){return function(t,e,r){return n(Ge,t,e,r)}}(mn),Xe=p(function(n){var t=[null].concat(n);return Et(function(n,e){return e.apply(this,t)})}),Ye=gn(se,t,bn),Ze=gn($,t,bn),nr=gn(Ge,t,bn),tr=jn("dir"),er=M(Ln,1),rr=gn(se,_n,_n),ur=gn($,_n,_n),or=M(ur,1),ir=z(Fn),cr=U(Fn),fr=M(cr,1),ar=jn("log"),lr=M(Bn,1/0),sr=M(Bn,1);Qe=Ce?process.nextTick:qe?setImmediate:ln;var pr=sn(Qe),hr=function(n,t){return yn(function(t,e){n(t[0],e)},t,1)},yr=function(n,t){var e=hr(n,t);return e.push=function(n,t,r){if(null==r&&(r=d),"function"!=typeof r)throw new Error("task callback must be a function");if(e.started=!0,zt(n)||(n=[n]),0===n.length)return We(function(){e.drain()});t=t||0;for(var u=e._tasks.head;u&&t>=u.priority;)u=u.next;for(var o=0,i=n.length;o<i;o++){var c={data:n[o],priority:t,callback:r};u?e._tasks.insertBefore(u,c):e._tasks.push(c)}We(e.process)},delete e.unshift,e},vr=Array.prototype.slice,dr=z(qn),mr=U(qn),gr=M(mr,1),br=function(n,t){return t||(t=n,n=null),Et(function(e,r){function u(n){t.apply(null,e.concat([n]))}n?Wn(n,u,r):Wn(u,r)})},jr=gn(se,Boolean,t),Sr=gn($,Boolean,t),kr=M(Sr,1),Or=Math.ceil,wr=Math.max,xr=M(Jn,1/0),Er=M(Jn,1),Lr=function(n,t){function e(u){if(r===n.length)return t.apply(null,[null].concat(u));var o=I(p(function(n,r){if(n)return t.apply(null,[n].concat(r));e(r)}));u.push(o),n[r++].apply(null,u)}if(t=m(t||d),!zt(n))return t(new Error("First argument to waterfall must be an array of functions"));if(!n.length)return t();var r=0;e([])},Ar={applyEach:he,applyEachSeries:de,apply:me,asyncify:V,auto:be,autoInject:an,cargo:vn,compose:He,concat:Je,concatSeries:Ke,constant:Xe,detect:Ye,detectLimit:Ze,detectSeries:nr,dir:tr,doDuring:Sn,doUntil:On,doWhilst:kn,during:wn,each:En,eachLimit:Ln,eachOf:se,eachOfLimit:$,eachOfSeries:Ge,eachSeries:er,ensureAsync:An,every:rr,everyLimit:ur,everySeries:or,filter:ir,filterLimit:cr,filterSeries:fr,forever:In,log:ar,map:pe,mapLimit:ye,mapSeries:ve,mapValues:lr,mapValuesLimit:Bn,mapValuesSeries:sr,memoize:Mn,nextTick:pr,parallel:zn,parallelLimit:Rn,priorityQueue:yr,queue:hr,race:Un,reduce:dn,reduceRight:Vn,reflect:Dn,reflectAll:Cn,reject:dr,rejectLimit:mr,rejectSeries:gr,retry:Wn,retryable:br,seq:Ne,series:Qn,setImmediate:We,some:jr,someLimit:Sr,someSeries:kr,sortBy:Gn,timeout:Nn,times:xr,timesLimit:Jn,timesSeries:Er,transform:Kn,unmemoize:Xn,until:Zn,waterfall:Lr,whilst:Yn,all:rr,any:jr,forEach:En,forEachSeries:er,forEachLimit:Ln,forEachOf:se,forEachOfSeries:Ge,forEachOfLimit:$,inject:dn,foldl:dn,foldr:Vn,select:ir,selectLimit:cr,selectSeries:fr,wrapSync:V};n.default=Ar,n.applyEach=he,n.applyEachSeries=de,n.apply=me,n.asyncify=V,n.auto=be,n.autoInject=an,n.cargo=vn,n.compose=He,n.concat=Je,n.concatSeries=Ke,n.constant=Xe,n.detect=Ye,n.detectLimit=Ze,n.detectSeries=nr,n.dir=tr,n.doDuring=Sn,n.doUntil=On,n.doWhilst=kn,n.during=wn,n.each=En,n.eachLimit=Ln,n.eachOf=se,n.eachOfLimit=$,n.eachOfSeries=Ge,n.eachSeries=er,n.ensureAsync=An,n.every=rr,n.everyLimit=ur,n.everySeries=or,n.filter=ir,n.filterLimit=cr,n.filterSeries=fr,n.forever=In,n.log=ar,n.map=pe,n.mapLimit=ye,n.mapSeries=ve,n.mapValues=lr,n.mapValuesLimit=Bn,n.mapValuesSeries=sr,n.memoize=Mn,n.nextTick=pr,n.parallel=zn,n.parallelLimit=Rn,n.priorityQueue=yr,n.queue=hr,n.race=Un,n.reduce=dn,n.reduceRight=Vn,n.reflect=Dn,n.reflectAll=Cn,n.reject=dr,n.rejectLimit=mr,n.rejectSeries=gr,n.retry=Wn,n.retryable=br,n.seq=Ne,n.series=Qn,n.setImmediate=We,n.some=jr,n.someLimit=Sr,n.someSeries=kr,n.sortBy=Gn,n.timeout=Nn,n.times=xr,n.timesLimit=Jn,n.timesSeries=Er,n.transform=Kn,n.unmemoize=Xn,n.until=Zn,n.waterfall=Lr,n.whilst=Yn,n.all=rr,n.allLimit=ur,n.allSeries=or,n.any=jr,n.anyLimit=Sr,n.anySeries=kr,n.find=Ye,n.findLimit=Ze,n.findSeries=nr,n.forEach=En,n.forEachSeries=er,n.forEachLimit=Ln,n.forEachOf=se,n.forEachOfSeries=Ge,n.forEachOfLimit=$,n.inject=dn,n.foldl=dn,n.foldr=Vn,n.select=ir,n.selectLimit=cr,n.selectSeries=fr,n.wrapSync=V,Object.defineProperty(n,"__esModule",{value:!0})});
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("timers").setImmediate)
-},{"_process":5,"timers":9}],"/wrapper/src/libs/external/base64.js":[function(require,module,exports){
+},{"_process":11,"timers":15}],"/wrapper/src/libs/external/base64.js":[function(require,module,exports){
 !function(t,e){"function"==typeof define&&define.amd?define([],function(){e(t)}):e(t)}("undefined"!=typeof exports?exports:this,function(t){if(t.atob)try{t.atob(" ")}catch(e){t.atob=function(t){var e=function(e){return t(String(e).replace(/[\t\n\f\r ]+/g,""))};return e.original=t,e}(t.atob)}else{var e="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",r=/^(?:[A-Za-z\d+\/]{4})*?(?:[A-Za-z\d+\/]{2}(?:==)?|[A-Za-z\d+\/]{3}=?)?$/;t.btoa=function(t){t=String(t);for(var r,n,o,a,i="",c=0,d=t.length%3;c<t.length;){if((n=t.charCodeAt(c++))>255||(o=t.charCodeAt(c++))>255||(a=t.charCodeAt(c++))>255)throw new TypeError("Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.");r=n<<16|o<<8|a,i+=e.charAt(r>>18&63)+e.charAt(r>>12&63)+e.charAt(r>>6&63)+e.charAt(63&r)}return d?i.slice(0,d-3)+"===".substring(d):i},t.atob=function(t){if(t=String(t).replace(/[\t\n\f\r ]+/g,""),!r.test(t))throw new TypeError("Failed to execute 'atob' on 'Window': The string to be decoded is not correctly encoded.");t+="==".slice(2-(3&t.length));for(var n,o,a,i="",c=0;c<t.length;)n=e.indexOf(t.charAt(c++))<<18|e.indexOf(t.charAt(c++))<<12|(o=e.indexOf(t.charAt(c++)))<<6|(a=e.indexOf(t.charAt(c++))),i+=64===o?String.fromCharCode(n>>16&255):64===a?String.fromCharCode(n>>16&255,n>>8&255):String.fromCharCode(n>>16&255,n>>8&255,255&n);return i}}});
 },{}],"/wrapper/src/libs/external/device.js":[function(require,module,exports){
 "use strict";var device,find,userAgent;device={},userAgent=window.navigator.userAgent.toLowerCase(),device.ios=function(){return device.iphone()||device.ipod()||device.ipad()},device.iphone=function(){return!device.windows()&&find("iphone")},device.ipod=function(){return find("ipod")},device.ipad=function(){return find("ipad")},device.android=function(){return!device.windows()&&find("android")},device.androidPhone=function(){return device.android()&&find("mobile")},device.androidTablet=function(){return device.android()&&!find("mobile")},device.blackberry=function(){return find("blackberry")||find("bb10")||find("rim")},device.blackberryPhone=function(){return device.blackberry()&&!find("tablet")},device.blackberryTablet=function(){return device.blackberry()&&find("tablet")},device.windows=function(){return find("windows")},device.windowsPhone=function(){return device.windows()&&find("phone")},device.windowsTablet=function(){return device.windows()&&find("touch")&&!device.windowsPhone()},device.fxos=function(){return(find("(mobile;")||find("(tablet;"))&&find("; rv:")},device.fxosPhone=function(){return device.fxos()&&find("mobile")},device.fxosTablet=function(){return device.fxos()&&find("tablet")},device.meego=function(){return find("meego")},device.mobile=function(){return device.androidPhone()||device.iphone()||device.ipod()||device.windowsPhone()||device.blackberryPhone()||device.fxosPhone()||device.meego()},device.tablet=function(){return device.ipad()||device.androidTablet()||device.blackberryTablet()||device.windowsTablet()||device.fxosTablet()},device.desktop=function(){return!device.tablet()&&!device.mobile()},find=function(e){return-1!==userAgent.indexOf(e)},module.exports=device;
@@ -5081,7 +7021,7 @@ function noop(){}function Promise(e){if("object"!=typeof this)throw new TypeErro
 },{"../../../libs/external/schema-inspector.js":"/wrapper/src/libs/external/schema-inspector.js"}],"/wrapper/src/modules/identity-layer/adserver-org-ip/adserver-org-ip.js":[function(require,module,exports){
 "use strict";function retrieve(){var r={ttd_pid:TTD_PID,fmt:FORMAT,p:API.configs.publisherId};API.Utilities.ajax({url:API.Utilities.getProtocol()+BASE_URL,method:"GET",data:r,onSuccess:function(r){try{var e=JSON.parse(r);if(!e.TDID)return void API.registerError("response does not contain TDID");var i=[];for(var t in e)e.hasOwnProperty(t)&&i.push({id:e[t],ext:{rtiPartner:t}});API.registerMatch({source:profile.source,uids:i})}catch(r){API.registerError("response is not valid JSON")}},onFailure:function(r){API.registerError("API returned error response "+r)}})}function main(r){API=r,API.onRetrieve(retrieve)}var API,BASE_URL="//match.adsrvr.org/track/rid",TTD_PID="casale",FORMAT="json",profile={partnerId:"AdserverOrgIp",statsId:"ADSORG",version:"1.3.0",source:"adserver.org",cacheExpiry:{match:6048e5,pass:864e5,error:864e5},targetingKeys:{exchangeBidding:"ixpid_1"}};module.exports={type:"identity",api:"1",main:main,profile:profile};
 },{}],"/wrapper/src/modules/identity-layer/identity-partner-factory.js":[function(require,module,exports){
-"use strict";function IdentityPartnerFactory(e,t){function r(e){return!!(e&&e.uids&&Utilities.isString(e.source)&&Utilities.isArray(e.uids))&&e.uids.every(function(e){return!Utilities.isEmpty(e)&&e.id})}function i(e,t){var r={match:"hs_identity_response",pass:"hs_identity_pass",error:"hs_identity_error"}[e];EventsService.emit(r,{statsId:f}),EventsService.emit("ip_module_result_"+b,e,t),"match"===e&&(h=t)}function n(e,t){if(!U){U=!0;var r={response:e,version:S};"pass"!==e&&(r.data=t);var n=g.cacheExpiry[e];LocalCache.setData(E,r,n),i(e,t),P&&P()}}function s(e){return ComplianceService.isPrivacyEnabled()&&"gdpr"===e?ComplianceService.gdpr.getConsent():null}function o(e){var t=LocalCache.getData(e);return t&&"match"===t.response&&t.data?t.data:null}function c(e){var t={url:e.url,method:e.method,async:!0,withCredentials:!0,jsonp:!1,continueAfterTimeout:!1,timeout:e.timeout||0};return e.onSuccess&&(t.onSuccess=e.onSuccess),e.onTimeout&&(t.onTimeout=e.onTimeout),e.onFailure&&(t.onFailure=e.onFailure),void 0!==e.data&&(t.data=e.data),void 0!==e.contentType&&(t.contentType=e.contentType),Network.ajax(t)}function a(){return g.sonar&&g.sonar.enabled?_||(_=PublisherSonarService.getSonarPayload(g.sonar.entrypoints)):_={},_}function u(e){y=e}function l(){var e=LocalCache.getEntry(E);return e?"pass"===e.data.response&&g.sonar&&g.sonar.enabled&&PublisherSonarService.getLastUpdated(a())>e.created?null:"match"!==e.data.response&&e.data.version!==S?null:"match"!==e.data.response||r(e.data.data)?e.data:null:null}function d(){return f}function p(){return h}function v(){if(y)return y;if(h&&Utilities.isArray(h.uids)&&h.uids.length&&h.uids[0].id){var e={};return e[g.targetingKeys.exchangeBidding]=h.uids[0].id,e}return null}function m(){var e=l();if(e)return EventsService.emit("hs_identity_cached",{statsId:f}),i(e.response,e.data),Prms.resolve();var t=Prms.resolve();return g.consent&&ComplianceService.isPrivacyEnabled()&&(t=t.then(function(){return ComplianceService.wait()})),t.then(function(){return new Prms(function(e){EventsService.emit("hs_identity_request",{statsId:f}),U=!1,P=e,EventsService.emit("ip_module_retrieve_"+b)})})}var g,b,S,f,j,h,y,_,P,E,U;return function(){ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService,PublisherSonarService=SpaceCamp.services.PublisherSonarService,g=e.profile,b=g.partnerId,S=g.version,f=g.statsId,h=null,y=null,P=null,E=b,j={Utilities:{buildUrl:Network.buildUrl,getPageUrl:Browser.getPageUrl,getProtocol:Browser.getProtocol,getReferrer:Browser.getReferrer,getTime:System.now,getType:Utilities.getType,isArray:Utilities.isArray,isEmpty:Utilities.isEmpty,isFunction:Utilities.isFunction,isInteger:Utilities.isInteger,isNumeric:Utilities.isNumeric,isString:Utilities.isString,isObject:Utilities.isObject,isTopFrame:Browser.isTopFrame,isXhrSupported:Network.isXhrSupported,ajax:c,getConsent:s,getIdentityResultFrom:o,getPublisherSonarData:a},onRetrieve:EventsService.on.bind(null,"ip_module_retrieve_"+b),onResult:EventsService.on.bind(null,"ip_module_result_"+b),registerMatch:n.bind(null,"match"),registerPass:n.bind(null,"pass"),registerError:n.bind(null,"error"),registerEbTargeting:u,configs:t},e.main(j)}(),{__partnerProfile:g,__partnerApi:j,get __identityStore(){return h},set __identityStore(e){h=e},get __identityEbKv(){return y},set __identityEbKv(e){y=e},get __retrieveResolve(){return P},set __retrieveResolve(e){P=e},__registerResponseRetrieval:n,get __apiUtilityGetPublisherSonarData(){return a},set __apiUtilityGetPublisherSonarData(e){a=e},get __validateEid(){return r},set __validateEid(e){r=e},get __getCacheData(){return l},set __getCacheData(e){l=e},get __registerRetrieval(){return i},set __registerRetrieval(e){i=e},getStatsId:d,getResults:p,getTargets:v,retrieve:m}}var Browser=require("browser.js"),LocalCache=require("cache.js"),Network=require("network.js"),Prms=require("prms.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),ComplianceService,EventsService,PublisherSonarService;module.exports=IdentityPartnerFactory;
+"use strict";function IdentityPartnerFactory(e,t){function r(e){return!!(e&&e.uids&&Utilities.isString(e.source)&&Utilities.isArray(e.uids))&&e.uids.every(function(e){return Boolean(!Utilities.isEmpty(e)&&e.id)})}function n(e,t){var r={match:"hs_identity_response",pass:"hs_identity_pass",error:"hs_identity_error"}[e];EventsService.emit(r,{statsId:C}),EventsService.emit("ip_module_result_"+y,e,t),"match"===e&&(U=t)}function i(e,t){if(!T){T=!0;var r={response:e,version:_.version};"pass"!==e&&(r.data=t),Object.keys(O).length&&(r.consent=O);var i=_.cacheExpiry[e];LocalCache.setData(F,r,i),n(e,t),w&&w()}}function s(e){if(!ComplianceService.isPrivacyEnabled())return null;if("gdpr"===e){var t=ComplianceService.gdpr.getConsent();return t&&t.consentString&&(O.gdpr=!0),t}return null}function o(e){var t=LocalCache.getData(e);return t&&"match"===t.response&&t.data?t.data:null}function c(e){var t={url:e.url,method:e.method,async:!0,withCredentials:!0,jsonp:!1,continueAfterTimeout:!1,timeout:e.timeout||0};return e.onSuccess&&(t.onSuccess=e.onSuccess),e.onTimeout&&(t.onTimeout=e.onTimeout),e.onFailure&&(t.onFailure=e.onFailure),void 0!==e.data&&(t.data=e.data),void 0!==e.contentType&&(t.contentType=e.contentType),Network.ajax(t)}function a(){return _.sonar&&_.sonar.enabled?PublisherSonarService.getSonarPayload(_.sonar.entrypoints):{}}function u(e){E=e}function l(e){return Boolean(_.sonar&&_.sonar.enabled&&PublisherSonarService.getLastUpdated(a())>e.created)}function d(e){return!(!_.consent||!ComplianceService.isPrivacyEnabled())&&((!e.data.consent||!Utilities.isArraySubset(Object.keys(_.consent),Object.keys(e.data.consent)))&&ComplianceService.wait().then(function(){return Object.keys(_.consent).some(function(t){if(e.data.consent&&e.data.consent[t])return!1;var r=ComplianceService[t].getConsent();return r&&r.consentString})}))}function p(e){return e.data.version!==_.version}function v(e){return!r(e.data.data)}function m(){return _.consent&&ComplianceService.isPrivacyEnabled()?ComplianceService.wait():null}function f(){var e=LocalCache.getEntry(F);return Prms.resolve().then(function(){if(!e)return null;var t=I[e.data.response];return t?Prms.all(t.map(function(t){return t.call(null,e)})):null}).then(function(t){return!t||t.indexOf(!0)>-1?null:(EventsService.emit("hs_identity_cached",{statsId:C}),n(e.data.response,e.data.data),e.data)})}function b(){return Prms.resolve().then(function(){return Prms.all(k.map(function(e){return e.call()}))}).then(function(){return new Prms(function(e){EventsService.emit("hs_identity_request",{statsId:C}),T=!1,w=e,EventsService.emit("ip_module_retrieve_"+y)})})}function g(){return C}function S(){return U}function j(){if(E)return E;if(U&&Utilities.isArray(U.uids)&&U.uids.length&&U.uids[0].id){var e={};return e[_.targetingKeys.exchangeBidding]=U.uids[0].id,e}return null}function h(){return f().then(function(e){return e?null:b()})}var _,y,C,P,U,E,O,w,F,T,I={match:[l,v],pass:[l,d,p],error:[p]},k=[m];return function(){ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService,PublisherSonarService=SpaceCamp.services.PublisherSonarService,_=e.profile,y=_.partnerId,C=_.statsId,U=null,E=null,w=null,F=y,O={},P={Utilities:{buildUrl:Network.buildUrl,getPageUrl:Browser.getPageUrl,getProtocol:Browser.getProtocol,getReferrer:Browser.getReferrer,getTime:System.now,getType:Utilities.getType,isArray:Utilities.isArray,isEmpty:Utilities.isEmpty,isFunction:Utilities.isFunction,isInteger:Utilities.isInteger,isNumeric:Utilities.isNumeric,isString:Utilities.isString,isObject:Utilities.isObject,isTopFrame:Browser.isTopFrame,isXhrSupported:Network.isXhrSupported,ajax:c,getConsent:s,getIdentityResultFrom:o,getPublisherSonarData:a},onRetrieve:EventsService.on.bind(null,"ip_module_retrieve_"+y),onResult:EventsService.on.bind(null,"ip_module_result_"+y),registerMatch:i.bind(null,"match"),registerPass:i.bind(null,"pass"),registerError:i.bind(null,"error"),registerEbTargeting:u,configs:t},e.main(P)}(),{__partnerProfile:_,__partnerApi:P,__cacheBustTriggers:I,__partnerRetrieveWaits:k,get __identityStore(){return U},set __identityStore(e){U=e},get __identityEbKv(){return E},set __identityEbKv(e){E=e},get __retrieveResolve(){return w},set __retrieveResolve(e){w=e},__registerResponseRetrieval:i,__bustCacheForInvalidEids:v,__bustCacheForSonarUpdate:l,__bustCacheForConsentUpdate:d,__bustCacheForModuleUpdate:p,__waitForConsent:m,get __validateEid(){return r},set __validateEid(e){r=e},get __retrieveFromCache(){return f},set __retrieveFromCache(e){f=e},get __retrieveFromPartner(){return b},set __retrieveFromPartner(e){b=e},get __registerRetrieval(){return n},set __registerRetrieval(e){n=e},getStatsId:g,getResults:S,getTargets:j,retrieve:h}}var Browser=require("browser.js"),LocalCache=require("cache.js"),Network=require("network.js"),Prms=require("prms.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),ComplianceService,EventsService,PublisherSonarService;module.exports=IdentityPartnerFactory;
 },{"browser.js":"/wrapper/src/libs/browser.js","cache.js":"/wrapper/src/libs/cache.js","network.js":"/wrapper/src/libs/network.js","prms.js":"/wrapper/src/libs/external/prms.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/modules/identity-layer/live-intent-ip/live-intent-ip-validator.js":[function(require,module,exports){
 "use strict";var Inspector=require("../../../libs/external/schema-inspector.js"),partnerValidator=function(r){var e=Inspector.validate({type:"object",properties:{}},r);return e.valid?null:e.format()};module.exports=partnerValidator;
 },{"../../../libs/external/schema-inspector.js":"/wrapper/src/libs/external/schema-inspector.js"}],"/wrapper/src/modules/identity-layer/live-intent-ip/live-intent-ip.js":[function(require,module,exports){
@@ -5113,8 +7053,8 @@ arguments[4]["/wrapper/src/modules/identity-layer/live-intent-ip/live-intent-ip-
 },{"browser.js":"/wrapper/src/libs/browser.js","cache.js":"/wrapper/src/libs/cache.js","network.js":"/wrapper/src/libs/network.js","normal-distribution-timeout-module.js":"/wrapper/src/modules/adaptive-timeout-service/normal-distribution-timeout-module.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/services/key-value-service.js":[function(require,module,exports){
 "use strict";function KeyValueService(){function e(e){return"object"==typeof e&&null!==e&&!Array.isArray(e)}function t(){return Utilities.deepCopy(s)}function i(){return Utilities.deepCopy(a)}function u(){return!0}function r(t){return!!e(t)&&(a.site=Utilities.deepCopy(t),!0)}function n(t){return!!e(t)&&(a.user=Utilities.deepCopy(t),!0)}var s={site:{},user:{}},a={};return function(){a=Utilities.deepCopy(s)}(),{getDefaultKeyValueData:t,getKeyValueData:i,hasKeyValueAccess:u,setSiteKeyValueData:r,setUserKeyValueData:n}}var Utilities=require("utilities.js");module.exports=KeyValueService;
 },{"utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/services/publisher-sonar-service.js":[function(require,module,exports){
-"use strict";function PublisherSonarService(){function e(){if(o)for(var e in localStorage)if(localStorage.hasOwnProperty(e)&&0===e.indexOf(s)){var r=e.split("_");if(!(r.length<5)){var t={attr:parseInt(r[1],10),algo:parseInt(r[2],10),impl:parseInt(r[3],10),prov:r[4],name:r[5]||""};if(t.attr>0&&t.algo>0&&t.impl>0&&t.prov){var i;try{i=JSON.parse(localStorage.getItem(e))}catch(e){continue}i.created=i.created||0,i&&i.value&&Utilities.isString(i.value)&&Utilities.isInteger(i.created)&&!(i.created>System.now())&&(n[r.slice(1).join("_")]={time:i.created,data:i.value,meta:t})}}}}function r(){n={},e()}function t(e){var r={};return e.forEach(function(e){for(var t in n)if(n.hasOwnProperty(t)){var i=!0,a=n[t].meta;for(var o in e.filter)if(e.filter.hasOwnProperty(o)&&a[o]!==e.filter[o]){i=!1;break}if(i){var s=e.key||l+t;r[s]=n[t];break}}}),r}function i(e){return n||r(),e?t(e):Utilities.deepCopy(n)}function a(e){return e||(n||r(),e=n),Object.keys(e).reduce(function(r,t){return e[t].time>r?e[t].time:r},0)}var n,o,s="ixps_",l="sonar_";return function(){o=Browser.isLocalStorageSupported()}(),{__localStorageAvailable:o,getSonarPayload:i,getLastUpdated:a}}var Browser=require("browser.js"),System=require("system.js"),Utilities=require("utilities.js");module.exports=PublisherSonarService;
-},{"browser.js":"/wrapper/src/libs/browser.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/services/render-service.js":[function(require,module,exports){
+"use strict";function PublisherSonarService(){function e(){if(u)for(var e in localStorage)if(localStorage.hasOwnProperty(e)&&0===e.indexOf(c)){var t=e.split("_");if(!(t.length<5)){var r={attr:parseInt(t[1],10),algo:parseInt(t[2],10),impl:parseInt(t[3],10),prov:t[4],name:t[5]||""};if(r.attr>0&&r.algo>0&&r.impl>0&&r.prov){var a;try{a=JSON.parse(localStorage.getItem(e))}catch(e){continue}a.created=a.created||0,a&&a.value&&Utilities.isString(a.value)&&Utilities.isInteger(a.created)&&!(a.created>System.now())&&(o[t.slice(1).join("_")]={time:a.created,data:a.value,meta:r})}}}}function t(){o={},e()}function r(e){var t={};return e.forEach(function(e){for(var r in o)if(o.hasOwnProperty(r)){var a=!0,i=o[r].meta;for(var s in e.filter)if(e.filter.hasOwnProperty(s)&&i[s]!==e.filter[s]){a=!1;break}if(a){var n=e.key||l+r;t[n]=o[r];break}}}),t}function a(e){return o||t(),e?r(e):Utilities.deepCopy(o)}function i(e){return e||(o||t(),e=o),Object.keys(e).reduce(function(t,r){return e[r].time>t?e[r].time:t},0)}function s(e,t){switch(e){case 1:return SHA1(t).toString(BASE64);case 2:return SHA256(t).toString(BASE64);case 3:return SHA512(t).toString(BASE64);default:return t.toString(BASE64)}}function n(e){return!Utilities.isString(e)||Utilities.isEmpty(e)?{status:!1,message:"Email must be a non empty string"}:u?(S.forEach(function(t){var r=[c,1,t,1,"sp"],a=s(t,e),i={value:a,created:System.now()};localStorage.setItem(r.join("_"),JSON.stringify(i))}),t(),{status:!0,message:"Successfully stored email"}):{status:!1,message:"Local Storage not available"}}var o,u,c="ixps",l="sonar_",S=[1,2,3];return function(){u=Browser.isLocalStorageSupported()}(),{__localStorageAvailable:u,__generateHash:s,getSonarPayload:a,getLastUpdated:i,setSonarEmail:n}}var SHA1=require("crypto-js/sha1"),SHA256=require("crypto-js/sha256"),SHA512=require("crypto-js/sha512"),BASE64=require("crypto-js/enc-base64"),Browser=require("browser.js"),System=require("system.js"),Utilities=require("utilities.js");module.exports=PublisherSonarService;
+},{"browser.js":"/wrapper/src/libs/browser.js","crypto-js/enc-base64":2,"crypto-js/sha1":3,"crypto-js/sha256":4,"crypto-js/sha512":5,"system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/services/render-service.js":[function(require,module,exports){
 "use strict";function RenderService(e){function r(e,r,i,t){if(e.hasOwnProperty(r)&&e[r].hasOwnProperty(i)){for(var n=null,a=0;a<t.length;a++){var s=t[a];e[r][i].hasOwnProperty(s)&&(n=e[r][i][s])}return n}}function i(e){return!!p.hasOwnProperty(e)&&(l[e]=!0,delete p[e],!0)}function t(){var e=System.now();for(var r in p)p.hasOwnProperty(r)&&p[r].timeOfExpiry&&e>p[r].timeOfExpiry&&i(r)}function n(e){var r;do{r=System.generateUniqueId(Constants.PUBKIT_AD_ID_LENGTH,"ALPHANUM")}while(p.hasOwnProperty[r]);return p[r]=e,r}function a(e){if(p.hasOwnProperty(e)&&p[e].timeOfExpiry&&System.now()>p[e].timeOfExpiry&&i(e),l[e])return EventsService.emit("internal_info","Attempted to render expired ad "+e),null;if(!p.hasOwnProperty(e))throw Whoopsie("INVALID_VALUE","`pubKitAdId` does not match any registered ad");var r=p[e];return i(e),r}function s(e){if(e.auxFn)try{e.auxFn.apply(null,e.auxArgs)}catch(e){EventsService.emit("internal_error","Error occurred running ad aux function.",e.stack)}}function o(e,r){var i=a(r);if(!i)return!1;s(i);try{System.documentWrite(e,i.adm)}catch(e){return EventsService.emit("internal_error",'Error occurred while rendering ad "'+r+'".',e.stack),!1}return!0}function d(e){var r=n(e);if(e.price||e.dealId){var i=e.partnerId,t=e.requestId;if(h.hasOwnProperty(i)){var a;a=Utilities.isString(e.size)?e.size:Size.arrayToString(e.size),Size.isSpecialSize(a)&&(_[t]=a),y[i]||(y[i]={}),y[i][a]||(y[i][a]={}),y[i][a][t]||(y[i][a][t]=[]),y[i][a][t].push(r);var s=e.price;s&&(g[i]||(g[i]={}),g[i][s]||(g[i][s]={}),g[i][s][t]||(g[i][s][t]=[]),g[i][s][t].push(r));var o=e.dealId;return o&&(S[i]||(S[i]={}),S[i][o]||(S[i][o]={}),S[i][o][t]||(S[i][o][t]=[]),S[i][o][t].push(r)),r}}}function v(e,r,i,t,n){try{if(!y.hasOwnProperty(e))return void EventsService.emit("internal_error","Partner "+e+" missing from ad ID map.");if(!Utilities.isObject(i))return void EventsService.emit("internal_error","invalid targeting map");if(!i.hasOwnProperty(h[e].idKey))return void EventsService.emit("internal_error","targeting map missing key "+h[e].idKey);var a=i[h[e].idKey];if(!Utilities.isArray(a))return void EventsService.emit("internal_error","invalid targeting map");if(!Utilities.isNumeric(t))return void EventsService.emit("internal_error","invalid width");if(!Utilities.isNumeric(n))return void EventsService.emit("internal_error","invalid height");var s=t+"x"+n;if(f&&f.hasOwnProperty(s)){var d=f[s];s=d[0]+"x"+d[1]}for(var v=0;v<a.length;v++){var c=a[v],u=_[c]||s;if(!y[e].hasOwnProperty(u))return void EventsService.emit("internal_error","Size key "+u+" missing from ad ID map for partner "+e);if(y[e][u].hasOwnProperty(c)){var p=y[e][u][c];if(p.length){o(r,Utilities.randomSplice(p));break}}}}catch(r){EventsService.emit("internal_error",'Error occurred while rendering ad for "'+e+'".',r.stack)}}function c(e,i){if(void 0!==e.partner&&void 0!==e.id&&void 0!==e.targeting&&(void 0!==e.size||void 0!==e.price)){var t=e.partner,n=e.price,o=e.id,d=e.targeting,v=e.size;if(h[t]){if(!d.hasOwnProperty(h[t].idKey))return void EventsService.emit("internal_error","targeting map missing key "+h[t].idKey);var c=d[h[t].idKey],u=null;if(void 0!==n)for(var p=[S,g],l=0;l<p.length&&!(u=r(p[l],t,n,c));l++);else{if(!Size.isSize(v))return;var m=Size.arrayToString(v);if(f&&f.hasOwnProperty(m)){var _=f[m];m=Size.arrayToString(_)}u=r(y,t,m,c)}if(u){var E=Utilities.randomSplice(u),w=a(E);if(!w)return void EventsService.emit("internal_error","No ad found for ad ID "+E);s(w);for(var O,P=w.size,x=w.adm,I=document.getElementsByTagName("iframe"),z=0;z<I.length;z++)if(I[z].contentWindow===i){O=I[z];break}O&&(O.width=String(P[0]),O.height=String(P[1]),""!==O.parentElement.style.width&&""!==O.parentElement.style.height&&(O.parentElement.style.width=P[0]+"px",O.parentElement.style.height=P[1]+"px")),i.postMessage("ix_ht_render_adm:"+JSON.stringify({adm:x,id:o,size:P}),"*")}}}}function u(e,r,i){h.hasOwnProperty(e)||(h[e]={}),h[e].lineItemType=r,h[e].idKey=i}var p,l,m,f,h={},y={},g={},S={},_={};return function(){p={},l={},f=e.sizeRetargeting||null,m=setInterval(t,Constants.RENDER_SERVICE_EXPIRY_SWEEP_TIMER),EventsService=SpaceCamp.services.EventsService,window.addEventListener("message",function(e){try{if(!Utilities.isString(e.data)||"ix_ht_render:"!==e.data.substr(0,"ix_ht_render:".length))return;c(JSON.parse(e.data.substr("ix_ht_render:".length)),e.source,e.origin)}catch(e){EventsService.emit("internal_error","Error occurred while rendering ad.",e.stack)}},!1)}(),{__adStorage:p,__expiredAdStorage:l,__expirySweepIntervalId:m,__findAdIdsFromMap:r,registerAd:d,render:o,registerPartner:u,renderDfpAd:v,__expireAd:i,__removeExpiredAds:t}}var Constants=require("constants.js"),Size=require("size.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),Utilities=require("utilities.js"),Whoopsie=require("whoopsie.js"),EventsService;module.exports=RenderService;
 },{"constants.js":"/wrapper/src/libs/constants.js","size.js":"/wrapper/src/libs/size.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","utilities.js":"/wrapper/src/libs/utilities.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/services/stubs/compliance-service.stub.js":[function(require,module,exports){
 "use strict";function ComplianceServiceStub(){function n(){return{applies:!0,consentString:""}}function e(){return{version:1,uspString:""}}function r(){return!1}function t(n){return n}function i(){return Prms.resolve()}return{gdpr:{getConsent:n,setApplies:function(){}},usp:{getConsent:e},isPrivacyEnabled:r,delay:t,wait:i}}var Prms=require("prms.js");module.exports=ComplianceServiceStub;
@@ -5123,19 +7063,19 @@ arguments[4]["/wrapper/src/modules/identity-layer/live-intent-ip/live-intent-ip-
 },{"system.js":"/wrapper/src/libs/system.js"}],"/wrapper/src/services/stubs/gpt-service.stub.js":[function(require,module,exports){
 "use strict";var System=require("system.js");module.exports=function(){return{setIdentityTargeting:System.noOp}};
 },{"system.js":"/wrapper/src/libs/system.js"}],"/wrapper/src/services/stubs/publisher-sonar-service.stub.js":[function(require,module,exports){
-"use strict";module.exports=function(){return{getSonarPayload:function(){return{}},getLastUpdated:function(){return 0}}};
+"use strict";module.exports=function(){return{getSonarPayload:function(){return{}},getLastUpdated:function(){return 0},setSonarEmail:function(){return{}}}};
 },{}],"/wrapper/src/services/timer-service.js":[function(require,module,exports){
 "use strict";function TimerService(){function e(e){return function(){a[e].state=o.TERMINATED;for(var t=0;t<a[e].cbs.length;t++)try{a[e].cbs[t]()}catch(e){}delete a[e].cbs,delete a[e].timer}}function t(t,r,s){var i=System.generateUniqueId(Constants.SESSION_ID_LENGTH);return r=!!r,s=s?[s]:[],a[i]={state:o.NEW,cbs:s,timeout:t},r&&(a[i].state=o.RUNNABLE,a[i].timer=setTimeout(e(i),t)),i}function r(t){a.hasOwnProperty(t)&&a[t].state===o.NEW&&(a[t].state=o.RUNNABLE,a[t].timer=setTimeout(e(t),a[t].timeout))}function s(e,t){a.hasOwnProperty(e)&&a[e].state!==o.TERMINATED&&a[e].cbs.unshift(t)}function i(e){return a.hasOwnProperty(e)?a[e].state:null}function n(e){a.hasOwnProperty(e)&&a[e].state!==o.TERMINATED&&(a[e].state=o.TERMINATED,clearTimeout(a[e].timer),delete a[e].cbs,delete a[e].timer)}var a,o={NEW:0,RUNNABLE:1,TERMINATED:2};return function(){a={}}(),{TimerStates:o,__timerStorage:a,__generateTimerCallback:e,createTimer:t,startTimer:r,addTimerCallback:s,getTimerState:i,clearTimer:n}}var Constants=require("constants.js"),System=require("system.js"),Whoopsie=require("whoopsie.js");module.exports=TimerService;
 },{"constants.js":"/wrapper/src/libs/constants.js","system.js":"/wrapper/src/libs/system.js","whoopsie.js":"/wrapper/src/libs/whoopsie.js"}],"/wrapper/src/shells/cassandra-shell.js":[function(require,module,exports){
-"use strict";function CassandraShell(){function r(r){if(!Utilities.isObject(r))return void EventsService.emit("error","invalid first-party data: `data` must be an object");if(r.hasOwnProperty("rubicon")){if(!Utilities.isObject(r.rubicon))return void EventsService.emit("error","invalid first-party data.rubicon");for(var e in r.rubicon)if(r.rubicon.hasOwnProperty(e)&&-1===["keywords","inventory","visitor"].indexOf(e))return void EventsService.emit("error","invalid first-party data: unrecognized property "+e+" of `data.rubicon`");if(r.rubicon.hasOwnProperty("keywords")&&!Utilities.isArray(r.rubicon.keywords,"string"))return void EventsService.emit("error","invalid first-party data: `data.rubicon.keywords` must be an array of strings");if(r.rubicon.hasOwnProperty("inventory")){if(!Utilities.isObject(r.rubicon.inventory))return void EventsService.emit("error","invalid first-party data: `data.rubicon.inventory` must be an object");for(var t in r.rubicon.inventory)if(r.rubicon.inventory.hasOwnProperty(t)&&!Utilities.isArray(r.rubicon.inventory[t],"string"))return void EventsService.emit("error","invalid first-party data: property "+t+" of `data.rubicon.inventory` must be an array of strings")}if(r.rubicon.hasOwnProperty("visitor")){if(!Utilities.isObject(r.rubicon.visitor))return void EventsService.emit("error","invalid first-party data: `data.rubicon.visitor` must be an object");for(var i in r.rubicon.visitor)if(r.rubicon.visitor.hasOwnProperty(i)&&!Utilities.isArray(r.rubicon.visitor[i],"string"))return void EventsService.emit("error","invalid first-party data: property "+i+" of `data.rubicon.visitor` must be an array of strings")}}try{__directInterface.Layers.PartnersLayer.setFirstPartyData(r)}catch(r){EventsService.emit("error",r)}}function e(r,e){try{if(!Utilities.isFunction(e))return EventsService.emit("error","callback must be a function"),"";if(!Utilities.isArray(r,"object"))return void EventsService.emit("error","slotDemandObjs must be an array of objects");for(var t=0;t<r.length;t++){var i=r[t];if(!i.hasOwnProperty("slot"))return void EventsService.emit("error","slotDemandObjs["+t+"]: members must contain the slot property");if(!(i.slot.getSlotElementId&&i.slot.setTargeting&&i.slot.getTargeting&&i.slot.clearTargeting))return void EventsService.emit("error","slotDemandObjs["+t+"]: `slot` must be a google slot object");if(i.hasOwnProperty("firstPartyData")){if(!Utilities.isObject(i.firstPartyData))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `data` must be an object");if(i.firstPartyData.hasOwnProperty("rubicon")){var n=i.firstPartyData.rubicon;if(!Utilities.isObject(n))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid rubicon first-party data");for(var a in n)if(n.hasOwnProperty(a)&&-1===["keywords","inventory","visitor","position"].indexOf(a))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: unrecognized property of `firstPartyData.rubicon`");if(n.hasOwnProperty("keywords")&&!Utilities.isArray(n.keywords,"string"))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.keywords` must be an array of strings");if(!n.hasOwnProperty("inventory")){if(!Utilities.isObject(n.inventory))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.inventory` must be an object");for(var s in n.inventory)if(n.inventory.hasOwnProperty(s)&&!Utilities.isArray(n.inventory[s],"string"))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: property "+s+" of `firstPartyData.rubicon.inventory` must be an array of strings")}if(n.hasOwnProperty("visitor")){if(!Utilities.isObject(n.visitor))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.visitor` must be an object");for(var o in n.visitor)if(n.visitor.hasOwnProperty(o)&&!Utilities.isArray(n.visitor[o],"string"))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: property "+o+" of `firstPartyData.rubicon.visitor` must be an array of strings")}if(n.hasOwnProperty("position")&&!Utilities.isString(n.position))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.position` must be a string")}}}__directInterface.Layers.GptLayer.retrieveAndSetTargeting(r).then(function(){e()}).catch(function(r){EventsService.emit("error",r),setTimeout(e.bind(null,"Error occurred while retrieving demand"+r.toString()),0)})}catch(r){EventsService.emit("error",r),setTimeout(e.bind(null,"Error occurred while retrieving demand"+r.toString()),0)}}function t(r,e,t){var i="";try{if(!Utilities.isBoolean(e))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(t))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(r))return EventsService.emit("error","`eventName` must be a string"),i;if(!o.hasOwnProperty(r))return EventsService.emit("error","Unrecognized event "+r),i;var n=function(){var e=Array.prototype.slice.call(arguments);t(r,JSON.stringify(e))};i=e?EventsService.once(r,n):EventsService.on(r,n)}catch(r){EventsService.emit("error",r)}return i}function i(r){try{if(!Utilities.isString(r))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(r)}catch(r){EventsService.emit("error",r)}}function n(){return __directInterface.Layers.IdentityLayer.getIdentityResults()}var a,__directInterface,s,o={error:1,warning:2,global_timeout_reached:3,partner_instantiated:4,partner_request_sent:5,partner_request_complete:6};if(function(){try{a=window.configs,__directInterface=Loader(a).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;try{__directInterface.Layers.IdentityLayer.retrieve()}catch(r){}}catch(r){s={setFirstPartyData:function(){},retrieveAndSetDemand:function(r,e){return setTimeout(e.bind(null,"wrapper failed to load"),0),""},subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),s)return s;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var v in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(v)&&(shellInterface[v]=window[SpaceCamp.NAMESPACE][v]);shellInterface.setFirstPartyData=r,shellInterface.retrieveAndSetDemand=ComplianceService.delay(e),shellInterface.subscribeEvent=t,shellInterface.unsubscribeEvent=i,shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData,shellInterface.getIdentityInfo=n;try{eval(window.adapter.exports)}catch(r){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),ComplianceService,EventsService;module.exports=CassandraShell;
+"use strict";function CassandraShell(){function r(r){if(!Utilities.isObject(r))return void EventsService.emit("error","invalid first-party data: `data` must be an object");if(r.hasOwnProperty("rubicon")){if(!Utilities.isObject(r.rubicon))return void EventsService.emit("error","invalid first-party data.rubicon");for(var e in r.rubicon)if(r.rubicon.hasOwnProperty(e)&&-1===["keywords","inventory","visitor"].indexOf(e))return void EventsService.emit("error","invalid first-party data: unrecognized property "+e+" of `data.rubicon`");if(r.rubicon.hasOwnProperty("keywords")&&!Utilities.isArray(r.rubicon.keywords,"string"))return void EventsService.emit("error","invalid first-party data: `data.rubicon.keywords` must be an array of strings");if(r.rubicon.hasOwnProperty("inventory")){if(!Utilities.isObject(r.rubicon.inventory))return void EventsService.emit("error","invalid first-party data: `data.rubicon.inventory` must be an object");for(var t in r.rubicon.inventory)if(r.rubicon.inventory.hasOwnProperty(t)&&!Utilities.isArray(r.rubicon.inventory[t],"string"))return void EventsService.emit("error","invalid first-party data: property "+t+" of `data.rubicon.inventory` must be an array of strings")}if(r.rubicon.hasOwnProperty("visitor")){if(!Utilities.isObject(r.rubicon.visitor))return void EventsService.emit("error","invalid first-party data: `data.rubicon.visitor` must be an object");for(var i in r.rubicon.visitor)if(r.rubicon.visitor.hasOwnProperty(i)&&!Utilities.isArray(r.rubicon.visitor[i],"string"))return void EventsService.emit("error","invalid first-party data: property "+i+" of `data.rubicon.visitor` must be an array of strings")}}try{__directInterface.Layers.PartnersLayer.setFirstPartyData(r)}catch(r){EventsService.emit("error",r)}}function e(r,e){try{if(!Utilities.isFunction(e))return EventsService.emit("error","callback must be a function"),"";if(!Utilities.isArray(r,"object"))return void EventsService.emit("error","slotDemandObjs must be an array of objects");for(var t=0;t<r.length;t++){var i=r[t];if(!i.hasOwnProperty("slot"))return void EventsService.emit("error","slotDemandObjs["+t+"]: members must contain the slot property");if(!(i.slot.getSlotElementId&&i.slot.setTargeting&&i.slot.getTargeting&&i.slot.clearTargeting))return void EventsService.emit("error","slotDemandObjs["+t+"]: `slot` must be a google slot object");if(i.hasOwnProperty("firstPartyData")){if(!Utilities.isObject(i.firstPartyData))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `data` must be an object");if(i.firstPartyData.hasOwnProperty("rubicon")){var n=i.firstPartyData.rubicon;if(!Utilities.isObject(n))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid rubicon first-party data");for(var a in n)if(n.hasOwnProperty(a)&&-1===["keywords","inventory","visitor","position"].indexOf(a))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: unrecognized property of `firstPartyData.rubicon`");if(n.hasOwnProperty("keywords")&&!Utilities.isArray(n.keywords,"string"))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.keywords` must be an array of strings");if(!n.hasOwnProperty("inventory")){if(!Utilities.isObject(n.inventory))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.inventory` must be an object");for(var s in n.inventory)if(n.inventory.hasOwnProperty(s)&&!Utilities.isArray(n.inventory[s],"string"))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: property "+s+" of `firstPartyData.rubicon.inventory` must be an array of strings")}if(n.hasOwnProperty("visitor")){if(!Utilities.isObject(n.visitor))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.visitor` must be an object");for(var o in n.visitor)if(n.visitor.hasOwnProperty(o)&&!Utilities.isArray(n.visitor[o],"string"))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: property "+o+" of `firstPartyData.rubicon.visitor` must be an array of strings")}if(n.hasOwnProperty("position")&&!Utilities.isString(n.position))return void EventsService.emit("error","slotDemandObjs["+t+"]: invalid first-party data: `firstPartyData.rubicon.position` must be a string")}}}__directInterface.Layers.GptLayer.retrieveAndSetTargeting(r).then(function(){e()}).catch(function(r){EventsService.emit("error",r),setTimeout(e.bind(null,"Error occurred while retrieving demand"+r.toString()),0)})}catch(r){EventsService.emit("error",r),setTimeout(e.bind(null,"Error occurred while retrieving demand"+r.toString()),0)}}function t(r,e,t){var i="";try{if(!Utilities.isBoolean(e))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(t))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(r))return EventsService.emit("error","`eventName` must be a string"),i;if(!v.hasOwnProperty(r))return EventsService.emit("error","Unrecognized event "+r),i;var n=function(){var e=Array.prototype.slice.call(arguments);t(r,JSON.stringify(e))};i=e?EventsService.once(r,n):EventsService.on(r,n)}catch(r){EventsService.emit("error",r)}return i}function i(r){try{if(!Utilities.isString(r))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(r)}catch(r){EventsService.emit("error",r)}}function n(){return __directInterface.Layers.IdentityLayer.getIdentityResults()}function a(r){var e={status:!1,message:"Identity feature not enabled"};return e=SpaceCamp.services.PublisherSonarService.setSonarEmail(r),e.status&&__directInterface.Layers.IdentityLayer.invokeAllPartners(),e}var s,__directInterface,o,v={error:1,warning:2,global_timeout_reached:3,partner_instantiated:4,partner_request_sent:5,partner_request_complete:6};if(function(){try{s=window.configs,__directInterface=Loader(s).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;try{__directInterface.Layers.IdentityLayer.retrieve()}catch(r){}}catch(r){o={setFirstPartyData:function(){},retrieveAndSetDemand:function(r,e){return setTimeout(e.bind(null,"wrapper failed to load"),0),""},subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),o)return o;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var c in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(c)&&(shellInterface[c]=window[SpaceCamp.NAMESPACE][c]);shellInterface.setFirstPartyData=r,shellInterface.retrieveAndSetDemand=ComplianceService.delay(e),shellInterface.subscribeEvent=t,shellInterface.unsubscribeEvent=i,shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData,shellInterface.getIdentityInfo=n,shellInterface.setSonarEmail=a;try{eval(window.adapter.exports)}catch(r){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),ComplianceService,EventsService;module.exports=CassandraShell;
 },{"browser.js":"/wrapper/src/libs/browser.js","command-queue.js":"/wrapper/src/libs/command-queue.js","loader.js":"/wrapper/src/loader.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/shells/direct-bidding-shell.js":[function(require,module,exports){
-"use strict";function DirectBiddingShell(){function r(r){if(!Utilities.isObject(r))return void EventsService.emit("error","invalid first-party data: `data` must be an object");if(r.hasOwnProperty("rubicon")){if(!Utilities.isObject(r.rubicon))return void EventsService.emit("error","invalid first-party data.rubicon");for(var e in r.rubicon)if(r.rubicon.hasOwnProperty(e)&&-1===["keywords","inventory","visitor"].indexOf(e))return void EventsService.emit("error","invalid first-party data: unrecognized property "+e+" of `data.rubicon`");if(r.rubicon.hasOwnProperty("keywords")&&!Utilities.isArray(r.rubicon.keywords,"string"))return void EventsService.emit("error","invalid first-party data: `data.rubicon.keywords` must be an array of strings");if(r.rubicon.hasOwnProperty("inventory")){if(!Utilities.isObject(r.rubicon.inventory))return void EventsService.emit("error","invalid first-party data: `data.rubicon.inventory` must be an object");for(var t in r.rubicon.inventory)if(r.rubicon.inventory.hasOwnProperty(t)&&!Utilities.isArray(r.rubicon.inventory[t],"string"))return void EventsService.emit("error","invalid first-party data: property "+t+" of `data.rubicon.inventory` must be an array of strings")}if(r.rubicon.hasOwnProperty("visitor")){if(!Utilities.isObject(r.rubicon.visitor))return void EventsService.emit("error","invalid first-party data: `data.rubicon.visitor` must be an object");for(var i in r.rubicon.visitor)if(r.rubicon.visitor.hasOwnProperty(i)&&!Utilities.isArray(r.rubicon.visitor[i],"string"))return void EventsService.emit("error","invalid first-party data: property "+i+" of `data.rubicon.visitor` must be an array of strings")}}try{__directInterface.Layers.PartnersLayer.setFirstPartyData(r)}catch(r){EventsService.emit("error",r)}}function e(r,e,t){var i={sessionId:""},n="";try{if(!Utilities.isFunction(e))throw n="callback must be a function",EventsService.emit("error",n),new Error(n);if(!Utilities.isArray(r,"object"))return n="htSlotDemandObjs must be an array of objects",EventsService.emit("error",n),void e({},new Error(n));for(var a=0;a<r.length;a++){var o=r[a];if(!o.hasOwnProperty("htSlotName"))return n="htSlotDemandObjs["+a+"]: members must contain the htSlotName property",EventsService.emit("error",n),void e({},new Error(n));if(!Utilities.isString(o.htSlotName))return n="htSlotDemandObjs["+a+"]: htSlotName must be a string",EventsService.emit("error",n),void e({},new Error(n));if(o.hasOwnProperty("firstPartyData")){if(!Utilities.isObject(o.firstPartyData))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `data` must be an object",EventsService.emit("error",n),void e({},new Error(n));if(o.firstPartyData.hasOwnProperty("rubicon")){var s=o.firstPartyData.rubicon;if(!Utilities.isObject(s))return n="htSlotDemandObjs["+a+"]: invalid rubicon first-party data",EventsService.emit("error",n),void e({},new Error(n));for(var v in s)if(s.hasOwnProperty(v)&&-1===["keywords","inventory","visitor","position"].indexOf(v))return n="htSlotDemandObjs["+a+"]: invalid first-party data: unrecognized property of `firstPartyData.rubicon`",EventsService.emit("error",n),void e({},new Error(n));if(s.hasOwnProperty("keywords")&&!Utilities.isArray(s.keywords,"string"))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.keywords` must be an array of strings",EventsService.emit("error",n),void e({},new Error(n));if(!s.hasOwnProperty("inventory")){if(!Utilities.isObject(s.inventory))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.inventory` must be an object",EventsService.emit("error",n),void e({},new Error(n));for(var c in s.inventory)if(s.inventory.hasOwnProperty(c)&&!Utilities.isArray(s.inventory[c],"string"))return n="htSlotDemandObjs["+a+"]: invalid first-party data: property "+c+" of `firstPartyData.rubicon.inventory` must be an array of strings",EventsService.emit("error",n),void e({},new Error(n))}if(s.hasOwnProperty("visitor")){if(!Utilities.isObject(s.visitor))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.visitor` must be an object",EventsService.emit("error",n),void e({},new Error(n));for(var u in s.visitor)if(s.visitor.hasOwnProperty(u)&&!Utilities.isArray(s.visitor[u],"string"))return n="htSlotDemandObjs["+a+"]: invalid first-party data: property "+u+" of `firstPartyData.rubicon.visitor` must be an array of strings",EventsService.emit("error",n),void e({},new Error(n))}if(s.hasOwnProperty("position")&&!Utilities.isString(s.position))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.position` must be a string",EventsService.emit("error",n),void e({},new Error(n))}}}if("undefined"!==Utilities.getType(t)){if(!Utilities.isObject(t))return n="options must be an object",EventsService.emit("error",n),void e({},new Error(n));if(t.hasOwnProperty("timeout")&&(!Utilities.isInteger(t.timeout)||t.timeout<0))return n="options.timeout must be an integer greater than 0",EventsService.emit("error",n),void e({},new Error(n))}i=__directInterface.Layers.DirectBiddingLayer.retrieveDemand(r,t),i.promise.then(function(r){e(r)}).catch(function(r){EventsService.emit("error",r),setTimeout(e.bind(null,{}),0)})}catch(r){EventsService.emit("error",r),setTimeout(e.bind(null,{}),0)}return i.sessionId}function t(r,e,t){if(__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemandValidation(r,e,t))try{ComplianceService.delay(function(){__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemand(r,t).promise.then(function(r){e(r)}).catch(function(r){EventsService.emit("error",r),setTimeout(e.bind(null,{}),0)})})()}catch(r){EventsService.emit("error",r),setTimeout(e.bind(null,{}),0)}}function i(r,e){return __directInterface.Layers.VideoInterfaceLayer.buildGamMvt(r,e)}function n(){var r=y;"mobile"===SpaceCamp.DeviceTypeChecker.getDeviceType()&&(r=m);try{r=SpaceCamp.services.AdaptiveTimeoutService.getTimeout(r)}catch(r){}return r}function a(r,e,t){var i="";try{if(!Utilities.isBoolean(e))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(t))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(r))return EventsService.emit("error","`eventName` must be a string"),i;if(!u.hasOwnProperty(r))return EventsService.emit("error","Unrecognized event "+r),i;var n=function(){var e=Array.prototype.slice.call(arguments);t(r,JSON.stringify(e))};i=e?EventsService.once(r,n):EventsService.on(r,n)}catch(r){EventsService.emit("error",r)}return i}function o(r){try{if(!Utilities.isString(r))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(r)}catch(r){EventsService.emit("error",r)}}function s(){var r={};r=__directInterface.Layers.IdentityLayer.getIdentityResults();for(var e in d)d.hasOwnProperty(e)&&delete r[d[e]];return r}var v,__directInterface,c,u={error:1,warning:2,global_timeout_reached:3,partner_instantiated:4,partner_request_sent:5,partner_request_complete:6},d,y,m;if(function(){try{v=window.configs,d=[],y=v.Layers[0].configs.desktopGlobalTimeout,m=v.Layers[0].configs.mobileGlobalTimeout,__directInterface=Loader(v).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;try{__directInterface.Layers.IdentityLayer.retrieve()}catch(r){}}catch(r){c={setFirstPartyData:function(){},retrieveDemand:function(r,e){return setTimeout(e.bind(null,{}),0),""},retrieveVideoDemand:function(r,e){return setTimeout(e.bind(null,{}),0),""},subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),c)return c;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var f in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(f)&&(shellInterface[f]=window[SpaceCamp.NAMESPACE][f]);shellInterface.__RTISupressList=d,shellInterface.setFirstPartyData=r,shellInterface.retrieveDemand=ComplianceService.delay(e),shellInterface.retrieveVideoDemand=t,shellInterface.buildGamMvt=i,shellInterface.subscribeEvent=a,shellInterface.unsubscribeEvent=o,shellInterface.getTimeout=n,shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData,shellInterface.getIdentityInfo=s;try{eval(window.adapter.exports)}catch(r){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),ComplianceService,EventsService;module.exports=DirectBiddingShell;
+"use strict";function DirectBiddingShell(){function e(e){if(!Utilities.isObject(e))return void EventsService.emit("error","invalid first-party data: `data` must be an object");if(e.hasOwnProperty("rubicon")){if(!Utilities.isObject(e.rubicon))return void EventsService.emit("error","invalid first-party data.rubicon");for(var r in e.rubicon)if(e.rubicon.hasOwnProperty(r)&&-1===["keywords","inventory","visitor"].indexOf(r))return void EventsService.emit("error","invalid first-party data: unrecognized property "+r+" of `data.rubicon`");if(e.rubicon.hasOwnProperty("keywords")&&!Utilities.isArray(e.rubicon.keywords,"string"))return void EventsService.emit("error","invalid first-party data: `data.rubicon.keywords` must be an array of strings");if(e.rubicon.hasOwnProperty("inventory")){if(!Utilities.isObject(e.rubicon.inventory))return void EventsService.emit("error","invalid first-party data: `data.rubicon.inventory` must be an object");for(var t in e.rubicon.inventory)if(e.rubicon.inventory.hasOwnProperty(t)&&!Utilities.isArray(e.rubicon.inventory[t],"string"))return void EventsService.emit("error","invalid first-party data: property "+t+" of `data.rubicon.inventory` must be an array of strings")}if(e.rubicon.hasOwnProperty("visitor")){if(!Utilities.isObject(e.rubicon.visitor))return void EventsService.emit("error","invalid first-party data: `data.rubicon.visitor` must be an object");for(var i in e.rubicon.visitor)if(e.rubicon.visitor.hasOwnProperty(i)&&!Utilities.isArray(e.rubicon.visitor[i],"string"))return void EventsService.emit("error","invalid first-party data: property "+i+" of `data.rubicon.visitor` must be an array of strings")}}try{__directInterface.Layers.PartnersLayer.setFirstPartyData(e)}catch(e){EventsService.emit("error",e)}}function r(e,r,t){var i={sessionId:""},n="";try{if(!Utilities.isFunction(r))throw n="callback must be a function",EventsService.emit("error",n),new Error(n);if(!Utilities.isArray(e,"object"))return n="htSlotDemandObjs must be an array of objects",EventsService.emit("error",n),void r({},new Error(n));for(var a=0;a<e.length;a++){var o=e[a];if(!o.hasOwnProperty("htSlotName"))return n="htSlotDemandObjs["+a+"]: members must contain the htSlotName property",EventsService.emit("error",n),void r({},new Error(n));if(!Utilities.isString(o.htSlotName))return n="htSlotDemandObjs["+a+"]: htSlotName must be a string",EventsService.emit("error",n),void r({},new Error(n));if(o.hasOwnProperty("firstPartyData")){if(!Utilities.isObject(o.firstPartyData))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `data` must be an object",EventsService.emit("error",n),void r({},new Error(n));if(o.firstPartyData.hasOwnProperty("rubicon")){var s=o.firstPartyData.rubicon;if(!Utilities.isObject(s))return n="htSlotDemandObjs["+a+"]: invalid rubicon first-party data",EventsService.emit("error",n),void r({},new Error(n));for(var v in s)if(s.hasOwnProperty(v)&&-1===["keywords","inventory","visitor","position"].indexOf(v))return n="htSlotDemandObjs["+a+"]: invalid first-party data: unrecognized property of `firstPartyData.rubicon`",EventsService.emit("error",n),void r({},new Error(n));if(s.hasOwnProperty("keywords")&&!Utilities.isArray(s.keywords,"string"))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.keywords` must be an array of strings",EventsService.emit("error",n),void r({},new Error(n));if(!s.hasOwnProperty("inventory")){if(!Utilities.isObject(s.inventory))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.inventory` must be an object",EventsService.emit("error",n),void r({},new Error(n));for(var c in s.inventory)if(s.inventory.hasOwnProperty(c)&&!Utilities.isArray(s.inventory[c],"string"))return n="htSlotDemandObjs["+a+"]: invalid first-party data: property "+c+" of `firstPartyData.rubicon.inventory` must be an array of strings",EventsService.emit("error",n),void r({},new Error(n))}if(s.hasOwnProperty("visitor")){if(!Utilities.isObject(s.visitor))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.visitor` must be an object",EventsService.emit("error",n),void r({},new Error(n));for(var u in s.visitor)if(s.visitor.hasOwnProperty(u)&&!Utilities.isArray(s.visitor[u],"string"))return n="htSlotDemandObjs["+a+"]: invalid first-party data: property "+u+" of `firstPartyData.rubicon.visitor` must be an array of strings",EventsService.emit("error",n),void r({},new Error(n))}if(s.hasOwnProperty("position")&&!Utilities.isString(s.position))return n="htSlotDemandObjs["+a+"]: invalid first-party data: `firstPartyData.rubicon.position` must be a string",EventsService.emit("error",n),void r({},new Error(n))}}}if("undefined"!==Utilities.getType(t)){if(!Utilities.isObject(t))return n="options must be an object",EventsService.emit("error",n),void r({},new Error(n));if(t.hasOwnProperty("timeout")&&(!Utilities.isInteger(t.timeout)||t.timeout<0))return n="options.timeout must be an integer greater than 0",EventsService.emit("error",n),void r({},new Error(n))}i=__directInterface.Layers.DirectBiddingLayer.retrieveDemand(e,t),i.promise.then(function(e){r(e)}).catch(function(e){EventsService.emit("error",e),setTimeout(r.bind(null,{}),0)})}catch(e){EventsService.emit("error",e),setTimeout(r.bind(null,{}),0)}return i.sessionId}function t(e,r,t){if(__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemandValidation(e,r,t))try{ComplianceService.delay(function(){__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemand(e,t).promise.then(function(e){r(e)}).catch(function(e){EventsService.emit("error",e),setTimeout(r.bind(null,{}),0)})})()}catch(e){EventsService.emit("error",e),setTimeout(r.bind(null,{}),0)}}function i(e,r){return __directInterface.Layers.VideoInterfaceLayer.buildGamMvt(e,r)}function n(){var e=m;"mobile"===SpaceCamp.DeviceTypeChecker.getDeviceType()&&(e=f);try{e=SpaceCamp.services.AdaptiveTimeoutService.getTimeout(e)}catch(e){}return e}function a(e,r,t){var i="";try{if(!Utilities.isBoolean(r))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(t))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(e))return EventsService.emit("error","`eventName` must be a string"),i;if(!d.hasOwnProperty(e))return EventsService.emit("error","Unrecognized event "+e),i;var n=function(){var r=Array.prototype.slice.call(arguments);t(e,JSON.stringify(r))};i=r?EventsService.once(e,n):EventsService.on(e,n)}catch(e){EventsService.emit("error",e)}return i}function o(e){try{if(!Utilities.isString(e))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(e)}catch(e){EventsService.emit("error",e)}}function s(){var e={};e=__directInterface.Layers.IdentityLayer.getIdentityResults();for(var r in y)y.hasOwnProperty(r)&&delete e[y[r]];return e}function v(e){var r={status:!1,message:"Identity feature not enabled"};return r=SpaceCamp.services.PublisherSonarService.setSonarEmail(e),r.status&&__directInterface.Layers.IdentityLayer.invokeAllPartners(),r}var c,__directInterface,u,d={error:1,warning:2,global_timeout_reached:3,partner_instantiated:4,partner_request_sent:5,partner_request_complete:6},y,m,f;if(function(){try{c=window.configs,y=[],m=c.Layers[0].configs.desktopGlobalTimeout,f=c.Layers[0].configs.mobileGlobalTimeout,__directInterface=Loader(c).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;try{__directInterface.Layers.IdentityLayer.retrieve()}catch(e){}}catch(e){u={setFirstPartyData:function(){},retrieveDemand:function(e,r){return setTimeout(r.bind(null,{}),0),""},retrieveVideoDemand:function(e,r){return setTimeout(r.bind(null,{}),0),""},subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),u)return u;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var l in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(l)&&(shellInterface[l]=window[SpaceCamp.NAMESPACE][l]);shellInterface.__RTISupressList=y,shellInterface.setFirstPartyData=e,shellInterface.retrieveDemand=ComplianceService.delay(r),shellInterface.retrieveVideoDemand=t,shellInterface.buildGamMvt=i,shellInterface.subscribeEvent=a,shellInterface.unsubscribeEvent=o,shellInterface.getTimeout=n,shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData,shellInterface.getIdentityInfo=s,shellInterface.setSonarEmail=v;try{eval(window.adapter.exports)}catch(e){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),ComplianceService,EventsService;module.exports=DirectBiddingShell;
 },{"browser.js":"/wrapper/src/libs/browser.js","command-queue.js":"/wrapper/src/libs/command-queue.js","loader.js":"/wrapper/src/loader.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/shells/identity-shell.js":[function(require,module,exports){
-"use strict";function IdentityShell(){function e(e,r,t){var i="";try{if(!Utilities.isBoolean(r))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(t))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(e))return EventsService.emit("error","`eventName` must be a string"),i;if(!c.hasOwnProperty(e))return EventsService.emit("error","Unrecognized event "+e),i;if("rti_partner_request_complete"===e&&!0===s.emitted)return t(e,s.args),i;var n=function(){var r=Array.prototype.slice.call(arguments);t(e,JSON.stringify(r))};i=r?EventsService.once(e,n):EventsService.on(e,n)}catch(e){EventsService.emit("error",e)}return i}function r(e){try{if(!Utilities.isString(e))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(e)}catch(e){EventsService.emit("error",e)}}function t(){return __directInterface.Layers.IdentityLayer.getAllPartnerResults()}var i,__directInterface,n,s={emitted:!1,args:{}},c={error:1,warning:2,rti_partner_request_complete:3};if(function(){try{i=window.configs,__directInterface=Loader(i).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;var r=Math.random().toString(36).slice(-5);EventsService.emit("hs_session_start",{sessionId:r}),e("rti_partner_request_complete",!0,function(e,t){s={emitted:!0,args:t},EventsService.emit("hs_session_end",{sessionId:r})}),ComplianceService.wait().then(function(){__directInterface.Layers.IdentityLayer.retrieve()}).catch(function(e){})}catch(e){n={subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),n)return n;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var a in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(a)&&(shellInterface[a]=window[SpaceCamp.NAMESPACE][a]);return shellInterface.subscribeEvent=e,shellInterface.unsubscribeEvent=r,shellInterface.getIdentityInfo=t,shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),ComplianceService,EventsService;module.exports=IdentityShell;
+"use strict";function IdentityShell(){function e(e,r,t){var i="";try{if(!Utilities.isBoolean(r))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(t))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(e))return EventsService.emit("error","`eventName` must be a string"),i;if(!c.hasOwnProperty(e))return EventsService.emit("error","Unrecognized event "+e),i;if("rti_partner_request_complete"===e&&!0===a.emitted)return t(e,a.args),i;var n=function(){var r=Array.prototype.slice.call(arguments);t(e,JSON.stringify(r))};i=r?EventsService.once(e,n):EventsService.on(e,n)}catch(e){EventsService.emit("error",e)}return i}function r(e){try{if(!Utilities.isString(e))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(e)}catch(e){EventsService.emit("error",e)}}function t(){return __directInterface.Layers.IdentityLayer.getAllPartnerResults()}function i(e){var r={status:!1,message:"Identity feature not enabled"};return r=SpaceCamp.services.PublisherSonarService.setSonarEmail(e),r.status&&__directInterface.Layers.IdentityLayer.invokeAllPartners(),r}var n,__directInterface,s,a={emitted:!1,args:{}},c={error:1,warning:2,rti_partner_request_complete:3};if(function(){try{n=window.configs,__directInterface=Loader(n).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;var r=Math.random().toString(36).slice(-5);EventsService.emit("hs_session_start",{sessionId:r}),e("rti_partner_request_complete",!0,function(e,t){a={emitted:!0,args:t},EventsService.emit("hs_session_end",{sessionId:r})}),ComplianceService.wait().then(function(){__directInterface.Layers.IdentityLayer.retrieve()}).catch(function(e){})}catch(e){s={subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),s)return s;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var o in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(o)&&(shellInterface[o]=window[SpaceCamp.NAMESPACE][o]);return shellInterface.subscribeEvent=e,shellInterface.unsubscribeEvent=r,shellInterface.getIdentityInfo=t,shellInterface.setSonarEmail=i,shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),ComplianceService,EventsService;module.exports=IdentityShell;
 },{"browser.js":"/wrapper/src/libs/browser.js","command-queue.js":"/wrapper/src/libs/command-queue.js","loader.js":"/wrapper/src/loader.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/shells/post-gpt-shell.js":[function(require,module,exports){
-"use strict";function PostGptShell(){function e(e){for(var t=e.parentElement.parentElement.getAttribute("id"),a=GptHelper.getGpt().pubads().getSlots(),r=0;r<a.length;r++)if(a[r].getSlotElementId()===t)return a[r]}function t(e){if(UserAgentMatcher.msie||UserAgentMatcher.msedge){var t=System.generateUniqueId(),a=document.createElement("div");a.id=t,document.body.appendChild(a);var r=GptHelper.loadGpt();r.cmd.push(function(){window.parent.googletag.pubads().getTargetingKeys().map(function(e){r.pubads().setTargeting(e,window.parent.googletag.pubads().getTargeting(e))});var a=e.getAdUnitPath(),i=[];e.getSizes().map(function(e){i.push([e.getWidth(),e.getHeight()])});var s=e.getTargetingMap(),c=r.defineSlot(a,i,t).addService(r.pubads());for(var p in s)s.hasOwnProperty(p)&&c.setTargeting(p,s[p]);c.setTargeting(n.key,n.value),r.enableServices(),r.display(t)})}else e.setTargeting(n.key,n.value),GptHelper.run(function(){window.parent.googletag.pubads().refresh([e])},window.parent.googletag)}function a(a){var r=e(a);try{var n=Browser.createHiddenIFrame(null,window),i=window.frameElement;__directInterface.Layers.PostGptLayer.display(r,n,i).catch(function(e){try{t(r)}catch(e){}})}catch(e){try{t(r)}catch(e){}}}var r,n,__directInterface,i;if(function(){try{r=window.configs,n=r.Layers[0].configs.lineItemDisablerTargeting,__directInterface=Loader(r).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService;try{__directInterface.Layers.IdentityLayer.retrieve()}catch(e){}}catch(a){i={display:function(a){t(e(a))}}}}(),i)return i;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var s in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(s)&&(shellInterface[s]=window[SpaceCamp.NAMESPACE][s]);shellInterface.__findGSlot=e,shellInterface.display=ComplianceService.delay(a),shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData;try{eval(window.adapter.exports)}catch(e){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),GptHelper=require("gpt-helper.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),UserAgentMatcher=require("user-agent-matcher.js"),ComplianceService;module.exports=PostGptShell;
+"use strict";function PostGptShell(){function e(e){for(var t=e.parentElement.parentElement.getAttribute("id"),a=GptHelper.getGpt().pubads().getSlots(),r=0;r<a.length;r++)if(a[r].getSlotElementId()===t)return a[r]}function t(e){if(UserAgentMatcher.msie||UserAgentMatcher.msedge){var t=System.generateUniqueId(),a=document.createElement("div");a.id=t,document.body.appendChild(a);var r=GptHelper.loadGpt();r.cmd.push(function(){window.parent.googletag.pubads().getTargetingKeys().map(function(e){r.pubads().setTargeting(e,window.parent.googletag.pubads().getTargeting(e))});var a=e.getAdUnitPath(),n=[];e.getSizes().map(function(e){n.push([e.getWidth(),e.getHeight()])});var s=e.getTargetingMap(),o=r.defineSlot(a,n,t).addService(r.pubads());for(var c in s)s.hasOwnProperty(c)&&o.setTargeting(c,s[c]);o.setTargeting(i.key,i.value),r.enableServices(),r.display(t)})}else e.setTargeting(i.key,i.value),GptHelper.run(function(){window.parent.googletag.pubads().refresh([e])},window.parent.googletag)}function a(a){var r=e(a);try{var n=Browser.createHiddenIFrame(null,window),i=window.frameElement;__directInterface.Layers.PostGptLayer.display(r,n,i).catch(function(e){try{t(r)}catch(e){}})}catch(e){try{t(r)}catch(e){}}}function r(e){var t={status:!1,message:"Identity feature not enabled"};return t=SpaceCamp.services.PublisherSonarService.setSonarEmail(e),t.status&&__directInterface.Layers.IdentityLayer.invokeAllPartners(),t}var n,i,__directInterface,s;if(function(){try{n=window.configs,i=n.Layers[0].configs.lineItemDisablerTargeting,__directInterface=Loader(n).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService;try{__directInterface.Layers.IdentityLayer.retrieve()}catch(e){}}catch(a){s={display:function(a){t(e(a))}}}}(),s)return s;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var o in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(o)&&(shellInterface[o]=window[SpaceCamp.NAMESPACE][o]);shellInterface.__findGSlot=e,shellInterface.display=ComplianceService.delay(a),shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData,shellInterface.setSonarEmail=r;try{eval(window.adapter.exports)}catch(e){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),GptHelper=require("gpt-helper.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),System=require("system.js"),UserAgentMatcher=require("user-agent-matcher.js"),ComplianceService;module.exports=PostGptShell;
 },{"browser.js":"/wrapper/src/libs/browser.js","command-queue.js":"/wrapper/src/libs/command-queue.js","gpt-helper.js":"/wrapper/src/libs/gpt-helper.js","loader.js":"/wrapper/src/loader.js","space-camp.js":"/wrapper/src/space-camp.js","system.js":"/wrapper/src/libs/system.js","user-agent-matcher.js":"/wrapper/src/libs/external/user-agent-matcher.js"}],"/wrapper/src/shells/pre-gpt-shell.js":[function(require,module,exports){
-"use strict";function PreGptShell(){function e(e){return SpaceCamp.LastLineGoogletag.display?SpaceCamp.LastLineGoogletag.display(e):window.googletag.display(e)}function r(e,r){return SpaceCamp.LastLineGoogletag.refresh?SpaceCamp.LastLineGoogletag.refresh(e,r):window.googletag.pubads().refresh(e,r)}function t(e){return SpaceCamp.LastLineGoogletag.destroySlots?SpaceCamp.LastLineGoogletag.destroySlots(e):window.googletag.destroySlots(e)}function i(){return SpaceCamp.LastLineGoogletag.enableSingleRequest?SpaceCamp.LastLineGoogletag.enableSingleRequest():window.googletag.pubads().enableSingleRequest()}function a(){return SpaceCamp.LastLineGoogletag.disableInitialLoad?SpaceCamp.LastLineGoogletag.disableInitialLoad():window.googletag.pubads().disableInitialLoad()}function n(r){try{if(!Utilities.isString(r)&&!GptHelper.isGSlot(r))return EventsService.emit("error","divOrSlot must be a string or valid gslot object"),e(r);__directInterface.Layers.GptLayer.display(r).catch(function(t){return EventsService.emit("error",t),e(r)})}catch(t){return EventsService.emit("error",t),e(r)}}function o(e,t){try{if(e&&!Utilities.isArray(e))return EventsService.emit("error","gSlots must be an array of g-slots."),r(e,t);__directInterface.Layers.GptLayer.refresh(e,t).catch(function(i){return EventsService.emit("error",i),r(e,t)})}catch(i){return EventsService.emit("error",i),r(e,t)}}function s(e,r){var i=!1;!r&&Utilities.isFunction(e)&&(r=e,e=void 0);try{if(e&&!Utilities.isArray(e)?(EventsService.emit("error","gSlots must be an array of g-slots."),i=t(e)):i=__directInterface.Layers.GptLayer.destroySlots(e),Utilities.isFunction(r))return r(i),i}catch(a){if(EventsService.emit("error",a),i=i||t(e),Utilities.isFunction(r))try{return r(i),i}catch(e){EventsService.emit("error",e)}}return i}function c(){try{return __directInterface.Layers.GptLayer.enableSingleRequest()}catch(e){return EventsService.emit("error",e),i()}}function l(){try{return __directInterface.Layers.GptLayer.disableInitialLoad()}catch(e){return EventsService.emit("error",e),a()}}function u(){return f}function d(e){if(!Utilities.isObject(e))return void EventsService.emit("error","invalid first-party data: `data` must be an object");if(e.hasOwnProperty("rubicon")){if(!Utilities.isObject(e.rubicon))return void EventsService.emit("error","invalid first-party data.rubicon");for(var r in e.rubicon)if(e.rubicon.hasOwnProperty(r)&&-1===["keywords","inventory","visitor"].indexOf(r))return void EventsService.emit("error","invalid first-party data: unrecognized property "+r+" of `data.rubicon`");if(e.rubicon.hasOwnProperty("keywords")&&!Utilities.isArray(e.rubicon.keywords,"string"))return void EventsService.emit("error","invalid first-party data: `data.rubicon.keywords` must be an array of strings");if(e.rubicon.hasOwnProperty("inventory")){if(!Utilities.isObject(e.rubicon.inventory))return void EventsService.emit("error","invalid first-party data: `data.rubicon.inventory` must be an object");for(var t in e.rubicon.inventory)if(e.rubicon.inventory.hasOwnProperty(t)&&!Utilities.isArray(e.rubicon.inventory[t],"string"))return void EventsService.emit("error","invalid first-party data: property "+t+" of `data.rubicon.inventory` must be an array of strings")}if(e.rubicon.hasOwnProperty("visitor")){if(!Utilities.isObject(e.rubicon.visitor))return void EventsService.emit("error","invalid first-party data: `data.rubicon.visitor` must be an object");for(var i in e.rubicon.visitor)if(e.rubicon.visitor.hasOwnProperty(i)&&!Utilities.isArray(e.rubicon.visitor[i],"string"))return void EventsService.emit("error","invalid first-party data: property "+i+" of `data.rubicon.visitor` must be an array of strings")}}try{__directInterface.Layers.PartnersLayer.setFirstPartyData(e)}catch(e){EventsService.emit("error",e)}}function v(e,r,t){var i="";try{if(!Utilities.isBoolean(r))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(t))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(e))return EventsService.emit("error","`eventName` must be a string"),i;if(!w.hasOwnProperty(e))return EventsService.emit("error","Unrecognized event "+e),i;var a=function(){var r=Array.prototype.slice.call(arguments);t(e,JSON.stringify(r))};i=r?EventsService.once(e,a):EventsService.on(e,a)}catch(e){EventsService.emit("error",e)}return i}function g(e){try{if(!Utilities.isString(e))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(e)}catch(e){EventsService.emit("error",e)}}function p(){return __directInterface.Layers.IdentityLayer.getIdentityResults()}function y(e,r,t){if(__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemandValidation(e,r,t))try{ComplianceService.delay(function(){__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemand(e,t).promise.then(function(e){r(e)}).catch(function(e){EventsService.emit("error",e),setTimeout(r.bind(null,{}),0)})})()}catch(e){EventsService.emit("error",e),setTimeout(r.bind(null,{}),0)}}function S(e,r){return __directInterface.Layers.VideoInterfaceLayer.buildGamMvt(e,r)}var m,__directInterface,b,f,w={error:1,warning:2,global_timeout_reached:3,partner_instantiated:4,partner_request_sent:5,partner_request_complete:6};if(function(){SpaceCamp.LastLineGoogletag={};try{m=window.configs,window.googletag=window.googletag||{},window.googletag.cmd=window.googletag.cmd||[],__directInterface=Loader(m).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;var u=m.Layers[0].configs.override;if(u){var d=function(){u.display&&(SpaceCamp.LastLineGoogletag.display=window.googletag.display,window.googletag.display=ComplianceService.delay(n)),u.refresh&&(SpaceCamp.LastLineGoogletag.refresh=window.googletag.pubads().refresh.bind(window.googletag.pubads()),window.googletag.pubads().refresh=ComplianceService.delay(o)),u.destroySlots&&(SpaceCamp.LastLineGoogletag.destroySlots=window.googletag.destroySlots,window.googletag.destroySlots=ComplianceService.delay(s)),u.enableSingleRequest&&(SpaceCamp.LastLineGoogletag.enableSingleRequest=window.googletag.pubads().enableSingleRequest.bind(window.googletag.pubads()),window.googletag.pubads().enableSingleRequest=c),u.disableInitialLoad&&(SpaceCamp.LastLineGoogletag.disableInitialLoad=window.googletag.pubads().disableInitialLoad.bind(window.googletag.pubads()),window.googletag.pubads().disableInitialLoad=l)};SpaceCamp.initQueue.unshift(d);var v=function(){SpaceCamp.initQueue=CommandQueue(SpaceCamp.initQueue)};Utilities.isArray(window.googletag.cmd)?window.googletag.cmd.unshift(v):window.googletag.cmd.push(v)}f={refresh:ComplianceService.delay(o),enableSingleRequest:c,disableInitialLoad:l};try{__directInterface.Layers.IdentityLayer.retrieve()}catch(e){}}catch(n){b={display:e,destroySlots:t,pubads:function(){return{refresh:r,enableSingleRequest:i,disableInitialLoad:a}},setFirstPartyData:function(){},subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),b)return b;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var L in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(L)&&(shellInterface[L]=window[SpaceCamp.NAMESPACE][L]);shellInterface.display=ComplianceService.delay(n),shellInterface.refresh=ComplianceService.delay(o),shellInterface.destroySlots=ComplianceService.delay(s),shellInterface.enableSingleRequest=c,shellInterface.disableInitialLoad=l,shellInterface.pubads=u,shellInterface.setFirstPartyData=d,shellInterface.subscribeEvent=v,shellInterface.unsubscribeEvent=g,shellInterface.apiReady=!0,shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData,shellInterface.getIdentityInfo=p,shellInterface.retrieveVideoDemand=y,shellInterface.buildGamMvt=S;try{eval(window.adapter.exports)}catch(e){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),GptHelper=require("gpt-helper.js"),ComplianceService,EventsService;module.exports=PreGptShell;
+"use strict";function PreGptShell(){function e(e){return SpaceCamp.LastLineGoogletag.display?SpaceCamp.LastLineGoogletag.display(e):window.googletag.display(e)}function t(e,t){return SpaceCamp.LastLineGoogletag.refresh?SpaceCamp.LastLineGoogletag.refresh(e,t):window.googletag.pubads().refresh(e,t)}function r(e){return SpaceCamp.LastLineGoogletag.destroySlots?SpaceCamp.LastLineGoogletag.destroySlots(e):window.googletag.destroySlots(e)}function i(){return SpaceCamp.LastLineGoogletag.enableSingleRequest?SpaceCamp.LastLineGoogletag.enableSingleRequest():window.googletag.pubads().enableSingleRequest()}function a(){return SpaceCamp.LastLineGoogletag.disableInitialLoad?SpaceCamp.LastLineGoogletag.disableInitialLoad():window.googletag.pubads().disableInitialLoad()}function n(t){try{if(!Utilities.isString(t)&&!GptHelper.isGSlot(t))return EventsService.emit("error","divOrSlot must be a string or valid gslot object"),e(t);__directInterface.Layers.GptLayer.display(t).catch(function(r){return EventsService.emit("error",r),e(t)})}catch(r){return EventsService.emit("error",r),e(t)}}function o(e,r){try{if(e&&!Utilities.isArray(e))return EventsService.emit("error","gSlots must be an array of g-slots."),t(e,r);__directInterface.Layers.GptLayer.refresh(e,r).catch(function(i){return EventsService.emit("error",i),t(e,r)})}catch(i){return EventsService.emit("error",i),t(e,r)}}function s(e,t){var i=!1;!t&&Utilities.isFunction(e)&&(t=e,e=void 0);try{if(e&&!Utilities.isArray(e)?(EventsService.emit("error","gSlots must be an array of g-slots."),i=r(e)):i=__directInterface.Layers.GptLayer.destroySlots(e),Utilities.isFunction(t))return t(i),i}catch(a){if(EventsService.emit("error",a),i=i||r(e),Utilities.isFunction(t))try{return t(i),i}catch(e){EventsService.emit("error",e)}}return i}function c(){try{return __directInterface.Layers.GptLayer.enableSingleRequest()}catch(e){return EventsService.emit("error",e),i()}}function l(){try{return __directInterface.Layers.GptLayer.disableInitialLoad()}catch(e){return EventsService.emit("error",e),a()}}function u(){return w}function d(e){if(!Utilities.isObject(e))return void EventsService.emit("error","invalid first-party data: `data` must be an object");if(e.hasOwnProperty("rubicon")){if(!Utilities.isObject(e.rubicon))return void EventsService.emit("error","invalid first-party data.rubicon");for(var t in e.rubicon)if(e.rubicon.hasOwnProperty(t)&&-1===["keywords","inventory","visitor"].indexOf(t))return void EventsService.emit("error","invalid first-party data: unrecognized property "+t+" of `data.rubicon`");if(e.rubicon.hasOwnProperty("keywords")&&!Utilities.isArray(e.rubicon.keywords,"string"))return void EventsService.emit("error","invalid first-party data: `data.rubicon.keywords` must be an array of strings");if(e.rubicon.hasOwnProperty("inventory")){if(!Utilities.isObject(e.rubicon.inventory))return void EventsService.emit("error","invalid first-party data: `data.rubicon.inventory` must be an object");for(var r in e.rubicon.inventory)if(e.rubicon.inventory.hasOwnProperty(r)&&!Utilities.isArray(e.rubicon.inventory[r],"string"))return void EventsService.emit("error","invalid first-party data: property "+r+" of `data.rubicon.inventory` must be an array of strings")}if(e.rubicon.hasOwnProperty("visitor")){if(!Utilities.isObject(e.rubicon.visitor))return void EventsService.emit("error","invalid first-party data: `data.rubicon.visitor` must be an object");for(var i in e.rubicon.visitor)if(e.rubicon.visitor.hasOwnProperty(i)&&!Utilities.isArray(e.rubicon.visitor[i],"string"))return void EventsService.emit("error","invalid first-party data: property "+i+" of `data.rubicon.visitor` must be an array of strings")}}try{__directInterface.Layers.PartnersLayer.setFirstPartyData(e)}catch(e){EventsService.emit("error",e)}}function v(e,t,r){var i="";try{if(!Utilities.isBoolean(t))return EventsService.emit("error","`once` must be a boolean"),i;if(!Utilities.isFunction(r))return EventsService.emit("error","`callback` must be a function"),i;if(!Utilities.isString(e))return EventsService.emit("error","`eventName` must be a string"),i;if(!L.hasOwnProperty(e))return EventsService.emit("error","Unrecognized event "+e),i;var a=function(){var t=Array.prototype.slice.call(arguments);r(e,JSON.stringify(t))};i=t?EventsService.once(e,a):EventsService.on(e,a)}catch(e){EventsService.emit("error",e)}return i}function g(e){try{if(!Utilities.isString(e))return void EventsService.emit("error","`subscriptionId` must be a string");EventsService.off(e)}catch(e){EventsService.emit("error",e)}}function p(){return __directInterface.Layers.IdentityLayer.getIdentityResults()}function y(e,t,r){if(__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemandValidation(e,t,r))try{ComplianceService.delay(function(){__directInterface.Layers.VideoInterfaceLayer.retrieveVideoDemand(e,r).promise.then(function(e){t(e)}).catch(function(e){EventsService.emit("error",e),setTimeout(t.bind(null,{}),0)})})()}catch(e){EventsService.emit("error",e),setTimeout(t.bind(null,{}),0)}}function S(e,t){return __directInterface.Layers.VideoInterfaceLayer.buildGamMvt(e,t)}function m(e){var t={status:!1,message:"Identity feature not enabled"};return t=SpaceCamp.services.PublisherSonarService.setSonarEmail(e),t.status&&__directInterface.Layers.IdentityLayer.invokeAllPartners(),t}var b,__directInterface,f,w,L={error:1,warning:2,global_timeout_reached:3,partner_instantiated:4,partner_request_sent:5,partner_request_complete:6};if(function(){SpaceCamp.LastLineGoogletag={};try{b=window.configs,window.googletag=window.googletag||{},window.googletag.cmd=window.googletag.cmd||[],__directInterface=Loader(b).getDirectInterface(),ComplianceService=SpaceCamp.services.ComplianceService,EventsService=SpaceCamp.services.EventsService;var u=b.Layers[0].configs.override;if(u){var d=function(){u.display&&(SpaceCamp.LastLineGoogletag.display=window.googletag.display,window.googletag.display=ComplianceService.delay(n)),u.refresh&&(SpaceCamp.LastLineGoogletag.refresh=window.googletag.pubads().refresh.bind(window.googletag.pubads()),window.googletag.pubads().refresh=ComplianceService.delay(o)),u.destroySlots&&(SpaceCamp.LastLineGoogletag.destroySlots=window.googletag.destroySlots,window.googletag.destroySlots=ComplianceService.delay(s)),u.enableSingleRequest&&(SpaceCamp.LastLineGoogletag.enableSingleRequest=window.googletag.pubads().enableSingleRequest.bind(window.googletag.pubads()),window.googletag.pubads().enableSingleRequest=c),u.disableInitialLoad&&(SpaceCamp.LastLineGoogletag.disableInitialLoad=window.googletag.pubads().disableInitialLoad.bind(window.googletag.pubads()),window.googletag.pubads().disableInitialLoad=l)};SpaceCamp.initQueue.unshift(d);var v=function(){SpaceCamp.initQueue=CommandQueue(SpaceCamp.initQueue)};Utilities.isArray(window.googletag.cmd)?window.googletag.cmd.unshift(v):window.googletag.cmd.push(v)}w={refresh:ComplianceService.delay(o),enableSingleRequest:c,disableInitialLoad:l};try{__directInterface.Layers.IdentityLayer.retrieve()}catch(e){}}catch(n){f={display:e,destroySlots:r,pubads:function(){return{refresh:t,enableSingleRequest:i,disableInitialLoad:a}},setFirstPartyData:function(){},subscribeEvent:function(){return""},unsubscribeEvent:function(){}}}}(),f)return f;var shellInterface={};if(window[SpaceCamp.NAMESPACE])for(var E in window[SpaceCamp.NAMESPACE])window[SpaceCamp.NAMESPACE].hasOwnProperty(E)&&(shellInterface[E]=window[SpaceCamp.NAMESPACE][E]);shellInterface.display=ComplianceService.delay(n),shellInterface.refresh=ComplianceService.delay(o),shellInterface.destroySlots=ComplianceService.delay(s),shellInterface.enableSingleRequest=c,shellInterface.disableInitialLoad=l,shellInterface.pubads=u,shellInterface.setFirstPartyData=d,shellInterface.subscribeEvent=v,shellInterface.unsubscribeEvent=g,shellInterface.apiReady=!0,shellInterface.setSiteKeyValueData=SpaceCamp.services.KeyValueService.setSiteKeyValueData,shellInterface.setUserKeyValueData=SpaceCamp.services.KeyValueService.setUserKeyValueData,shellInterface.getIdentityInfo=p,shellInterface.retrieveVideoDemand=y,shellInterface.buildGamMvt=S,shellInterface.setSonarEmail=m;try{eval(window.adapter.exports)}catch(e){}return shellInterface}var Browser=require("browser.js"),CommandQueue=require("command-queue.js"),Loader=require("loader.js"),SpaceCamp=require("space-camp.js"),Utilities=require("utilities.js"),GptHelper=require("gpt-helper.js"),ComplianceService,EventsService;module.exports=PreGptShell;
 },{"browser.js":"/wrapper/src/libs/browser.js","command-queue.js":"/wrapper/src/libs/command-queue.js","gpt-helper.js":"/wrapper/src/libs/gpt-helper.js","loader.js":"/wrapper/src/loader.js","space-camp.js":"/wrapper/src/space-camp.js","utilities.js":"/wrapper/src/libs/utilities.js"}],"/wrapper/src/space-camp.js":[function(require,module,exports){
-"use strict";var SpaceCamp={NAMESPACE:"headertag",PRODUCT:"DfpMode",services:{},htSlots:[],htSlotsMap:{},DeviceTypeChecker:{},initQueue:[],globalTimeout:null,instanceId:null,version:"2.27.0"};module.exports=SpaceCamp;
+"use strict";var SpaceCamp={NAMESPACE:"headertag",PRODUCT:"DfpMode",services:{},htSlots:[],htSlotsMap:{},DeviceTypeChecker:{},initQueue:[],globalTimeout:null,instanceId:null,version:"2.28.0"};module.exports=SpaceCamp;
 },{}]},{},[]);
