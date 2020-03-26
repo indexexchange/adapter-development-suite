@@ -5908,11 +5908,8 @@ describe('System Tests: Partner', function () {
                 || window.testCases.validateBidRequestWithGdpr,
             validateBidRequestWithUspapi: window.testCases.validateBidRequestWithUspapiMobile
                 || window.testCases.validateBidRequestWithUspapi,
-<<<<<<< HEAD
-=======
             validateBidRequestWithTcf2: window.testCases.validateBidRequestWithTcf2Mobile
             || window.testCases.validateBidRequestWithTcf2,
->>>>>>> origin/development
             validateBidRequestWithAdSrvrOrg: window.testCases.validateBidRequestWithAdSrvrOrgMobile
                 || window.testCases.validateBidRequestWithAdSrvrOrg
         };
