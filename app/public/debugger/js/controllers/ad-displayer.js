@@ -71,6 +71,14 @@
                         uspString: 'TEST_USPAPI_CONSENT_STRING'
                     }, true);
                 };
+
+                window.__tcfapi = function (cmd, ver, cb, params) {
+                    cb({
+                        tcfPolicyVersion: 2,
+                        tcString: 'TEST_TCF2_CONSENT_STRING',
+                        gdprApplies: true
+                    }, true);
+                };
             }
 
             var now = (new Date()).getTime();
