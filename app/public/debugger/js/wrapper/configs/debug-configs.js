@@ -103,6 +103,21 @@ window.wrapper.configs = {
                     "configs": {
                         "publisherId": 11111
                     }
+                },
+                "MerkleIp": {
+                    "enabled": false,
+                    "configs": {
+                        "pubid": "1111",
+                        "enable4CiteTag": 0
+                    }
+                },
+                "LiveRampIp": {
+                    "enabled": false,
+                    "configs": {}
+                },
+                "LiveIntentIp": {
+                    "enabled": false,
+                    "configs": {}
                 }
             }
         }
