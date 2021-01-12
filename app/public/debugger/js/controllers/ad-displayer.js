@@ -76,7 +76,8 @@
                     cb({
                         tcfPolicyVersion: 2,
                         tcString: 'TEST_TCF2_CONSENT_STRING',
-                        gdprApplies: true
+                        gdprApplies: true,
+                        addtlConsent: 'TEST_ADDTL_CONSENT'
                     }, true);
                 };
             }
